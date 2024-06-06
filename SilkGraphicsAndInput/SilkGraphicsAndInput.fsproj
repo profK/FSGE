@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RootNamespace>SwiftGraphicsAndInput</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Library.fs"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FSFramework" Version="1.0.0-preview-1" />
+      <PackageReference Include="Silk.NET.GLFW" Version="2.21.0" />
+      <PackageReference Include="Silk.NET.Input" Version="2.21.0" />
+      <PackageReference Include="Silk.NET.Maths" Version="2.21.0" />
+      <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />
+      <PackageReference Include="Silk.NET.Windowing" Version="2.21.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj" />
+      <ProjectReference Include="..\Input\Input.fsproj" />
+    </ItemGroup>
+
+</Project>
