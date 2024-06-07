@@ -15,11 +15,12 @@ open Silk.NET.GLFW
 open Graphics2D
 
 
-
 // Because Silk input is closely tied to Swift graphics, we need to define their plugins in the same project
 type SilkWindow(silkWindow:IWindow) =
     // What comes below is ugly because OpenGL is a big stateful mess and
     // things need to be done in the right order
+    
+          
     let defaultVertexShaderCode =
         @" #version 330 core
         layout (location = 0) in vec3 aPosition;
@@ -37,16 +38,28 @@ type SilkWindow(silkWindow:IWindow) =
     do
         silkWindow.Initialize()
     let _gl = silkWindow.CreateOpenGL()
-    let _defaultVertexShader = _gl.CreateShader(ShaderType.VertexShader)
-    let _defaultFragmentShader = _gl.CreateShader(ShaderType.FragmentShader)
-    do
-        _gl.ShaderSource(_defaultVertexShader, defaultVertexShaderCode)
-        _gl.ShaderSource(_defaultFragmentShader, defaultFragmentShaderCode);
+    let tryCompileShader code (stype:ShaderType) =
+        let shader = _gl.CreateShader(stype)
+        _gl.ShaderSource(shader, code)
+        let mutable fstatus = 0
+        _gl.GetShader(shader, ShaderParameterName.CompileStatus, &fstatus)
+        match enum<GLEnum> fstatus with
+        | GLEnum.True -> (Some shader,"OK")
+        | _ -> (None,_gl.GetShaderInfoLog(shader))
+    let compileShader code stype =
+        let result = tryCompileShader code stype
+        match fst result with
+        | Some shader -> Some shader
+        | None ->
+                  printfn $"Default shader failed to compile."
+                  printfn $"Reason: {snd result}"
+                  None
+            
     interface Window
     
     member val GL = _gl with get
-    member val DefaultVertexShader = _defaultVertexShader with get
-    member val DefaultFragmentShader = _defaultFragmentShader with get
+    member val DefaultVertexShader = compileShader defaultVertexShaderCode ShaderType.VertexShader with get
+    member val DefaultFragmentShader = compileShader defaultFragmentShaderCode ShaderType.FragmentShader with get 
     member this.SilkWindow = silkWindow
     member this.SetBackgroundColor color =
         _gl.ClearColor(color)
@@ -86,13 +99,15 @@ type SilkImage(silkWindow:SilkWindow) =
       
  
     member this.Draw() =
-        do //set vertex buffer
+        do
+            //set vertex buffer
             use ptr  = fixed vertices
             let ptr' = NativeInterop.NativePtr.toVoidPtr ptr
             silkWindow.GL.BufferData(BufferTargetARB.ArrayBuffer, unativeint(vertices.Length * sizeof<float>),
                                      ptr', BufferUsageARB.StaticDraw)
         // when we leave the block vertices becomes unpinned
-        do // set indices buffer
+        do
+            // set indices buffer
             use ptr = fixed indices
             let ptr' = NativeInterop.NativePtr.toVoidPtr ptr
             silkWindow.GL.BufferData(BufferTargetARB.ElementArrayBuffer, unativeint (indices.Length * sizeof<uint>),
