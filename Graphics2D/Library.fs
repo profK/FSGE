@@ -28,7 +28,7 @@ type IGraphicsManager =
     abstract member WindowSize : Window -> Size
     abstract member SetWindowSize : Window -> Size -> Window
     abstract member LoadImage : string-> Window -> Image
-    abstract member DrawImage : Image -> Matrix3x2 -> Window -> Window
+    abstract member DrawImage : Matrix3x2->Image-> Window
     abstract member Translate : Point -> Matrix3x2
     abstract member Rotate : float -> Matrix3x2
     abstract member Clear : Color ->  Window -> Window
@@ -114,7 +114,7 @@ module Window =
     let LoadImage path window : Image = 
         _graphicsManager.LoadImage path window
     let DrawImage image  matrix3x2 window : Window = 
-        _graphicsManager.DrawImage image matrix3x2 window
+        _graphicsManager.DrawImage matrix3x2 image 
     let Clear color window : Window =
         _graphicsManager.Clear color window
     let Translate pos : Matrix3x2 =

@@ -2,6 +2,7 @@ module Tests
 
 open System
 open System.Drawing
+open System.Numerics
 open System.Reflection
 open System.Threading
 open ManagerRegistry
@@ -27,7 +28,17 @@ type GraphicsManagerTests() =
         Graphics2D.Window.Display window
         Thread.Sleep(5000)
         Graphics2D.Window.close window
-        Assert.True(true)    
+        Assert.True(true)
+    [<Fact>]
+    member _.testImageDrawing() =
+        let window = Graphics2D.Window.create 800 600 "Test Window"
+        let image = Graphics2D.Window._graphicsManager.LoadImage "test.png" window
+        Graphics2D.Window.Clear(Color.Blue) window
+        Graphics2D.Window.DrawImage image (Matrix3x2.Identity) window
+        Graphics2D.Window.Display window
+        Thread.Sleep(5000)
+        Graphics2D.Window.close window
+        Assert.True(true)
     [<Fact>]
     member _.testWindowWidth() =
         let window = Graphics2D.Window.create 800 600 "Test Window"

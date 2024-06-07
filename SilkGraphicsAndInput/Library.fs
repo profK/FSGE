@@ -3,6 +3,7 @@
 
 open System
 open System.Drawing
+open System.Numerics
 open System.Runtime.InteropServices.Marshalling
 open ManagerRegistry
 open Microsoft.FSharp.NativeInterop
@@ -13,53 +14,32 @@ open Silk.NET.Input
 open Silk.NET.OpenGL
 open Silk.NET.GLFW
 open Graphics2D
+open ShadersGLSL
+open Xunit
 
+
+
+// This is for options where the is meaningful info to return with None
 
 // Because Silk input is closely tied to Swift graphics, we need to define their plugins in the same project
 type SilkWindow(silkWindow:IWindow) =
     // What comes below is ugly because OpenGL is a big stateful mess and
     // things need to be done in the right order
-    
-          
-    let defaultVertexShaderCode =
-        @" #version 330 core
-        layout (location = 0) in vec3 aPosition;
-        void main()
-        {
-            gl_Position = vec4(aPosition, 1.0);
-        }"
-    let defaultFragmentShaderCode =
-        @"#version 330 core
-        out vec4 out_color;
-        void main()
-        {
-            out_color = vec4(1.0, 0.5, 0.2, 1.0);
-        }"
+         
+
+    let _gl =
+        silkWindow.Initialize()
+        silkWindow.CreateOpenGL()
     do
         silkWindow.Initialize()
-    let _gl = silkWindow.CreateOpenGL()
-    let tryCompileShader code (stype:ShaderType) =
-        let shader = _gl.CreateShader(stype)
-        _gl.ShaderSource(shader, code)
-        let mutable fstatus = 0
-        _gl.GetShader(shader, ShaderParameterName.CompileStatus, &fstatus)
-        match enum<GLEnum> fstatus with
-        | GLEnum.True -> (Some shader,"OK")
-        | _ -> (None,_gl.GetShaderInfoLog(shader))
-    let compileShader code stype =
-        let result = tryCompileShader code stype
-        match fst result with
-        | Some shader -> Some shader
-        | None ->
-                  printfn $"Default shader failed to compile."
-                  printfn $"Reason: {snd result}"
-                  None
+  
+    let defaultShader =Shader.getDefaultShaderProgram _gl
             
     interface Window
     
     member val GL = _gl with get
-    member val DefaultVertexShader = compileShader defaultVertexShaderCode ShaderType.VertexShader with get
-    member val DefaultFragmentShader = compileShader defaultFragmentShaderCode ShaderType.FragmentShader with get 
+    member val DefaultShaderProgram = defaultShader with get
+    
     member this.SilkWindow = silkWindow
     member this.SetBackgroundColor color =
         _gl.ClearColor(color)
@@ -71,49 +51,87 @@ type SilkWindow(silkWindow:IWindow) =
 
 
 type SilkImage(silkWindow:SilkWindow) =
-   
+    let checkErrors = false
+    let  glCheckError() =
+        if checkErrors then
+            let error = silkWindow.GL.GetError()
+            if error <> GLEnum.NoError then
+                Assert.Fail $"OpenGL error : {error}"
+        else
+            ()
+    let positionLoc = 0u
+    
    
     let _vao = silkWindow.GL.GenVertexArray()
+    do
+        silkWindow.GL.BindVertexArray(_vao)
+        glCheckError()
     let _vbo = silkWindow.GL.GenBuffer()
+    let _ebo = silkWindow.GL.GenBuffer()
   
 
     let vertices =
-        [|
-            0.5f;  0.5f; 0.0f;
-            0.5f; -0.5f; 0.0f;
-            -0.5f; -0.5f; 0.0f; // notice we have to indent to make the - line up with the block
-            -0.5f
-        |]
+        if true then
+            [|
+                0.5f;  0.5f; 0.0f;
+                0.5f; -0.5f; 0.0f;
+                -0.5f; -0.5f; 0.0f; // notice we have to indent to make the - line up with the block
+                -0.5f;  0.5f; 0.0f
+            |]
+        else    
+            [|
+                1f;  1f; 0.0f;
+                1f; -1f; 0.0f;
+                -1f; -1f; 0.0f;
+                -1f;  1f; 0.0f
+            |]
+    
     let indices =
         [|
             0u; 1u; 3u;
             1u; 2u; 3u
         |]
-    do
-        silkWindow.GL.BindVertexArray(_vao)
-        silkWindow.GL.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo)
-        
-      
-        
-   
-      
- 
-    member this.Draw() =
-        do
-            //set vertex buffer
-            use ptr  = fixed vertices
-            let ptr' = NativeInterop.NativePtr.toVoidPtr ptr
-            silkWindow.GL.BufferData(BufferTargetARB.ArrayBuffer, unativeint(vertices.Length * sizeof<float>),
-                                     ptr', BufferUsageARB.StaticDraw)
-        // when we leave the block vertices becomes unpinned
-        do
-            // set indices buffer
-            use ptr = fixed indices
-            let ptr' = NativeInterop.NativePtr.toVoidPtr ptr
-            silkWindow.GL.BufferData(BufferTargetARB.ElementArrayBuffer, unativeint (indices.Length * sizeof<uint>),
-                                     ptr', BufferUsageARB.StaticDraw)
-        // unfix the indices
+
             
+    do
+        //set vertex buffer
+        use ptrv  = fixed vertices
+        let ptrv' = NativeInterop.NativePtr.toVoidPtr ptrv
+        silkWindow.GL.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo)
+        glCheckError()
+        silkWindow.GL.BufferData(BufferTargetARB.ArrayBuffer, unativeint(vertices.Length * sizeof<float>),
+                                     ptrv', BufferUsageARB.StaticDraw)
+        glCheckError()
+        use ptri = fixed indices
+        let ptri' = NativeInterop.NativePtr.toVoidPtr ptri
+        silkWindow.GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo)
+        glCheckError()
+        silkWindow.GL.BufferData(BufferTargetARB.ElementArrayBuffer, unativeint (indices.Length * sizeof<uint>),
+                                 ptri', BufferUsageARB.StaticDraw)
+        glCheckError()
+        silkWindow.GL.EnableVertexAttribArray(positionLoc)
+        glCheckError()
+        silkWindow.GL.VertexAttribPointer(positionLoc, 3, VertexAttribPointerType.Float, false,
+                                          uint32 (sizeof<float> * 3), nativeint 0)
+        glCheckError()
+        silkWindow.GL.EnableVertexAttribArray(0u);
+        silkWindow.GL.VertexAttribPointer(0u, 3, GLEnum.Float, false, 0u,
+                                          IntPtr.Zero.ToPointer());
+        (*
+        silkWindow.GL.BindVertexArray(0u)
+        silkWindow.GL.BindBuffer(BufferTargetARB.ArrayBuffer, 0u)
+        silkWindow.GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, 0u)
+        *)
+        // when we leave the do block vertices and indices becomes unpinned
+   
+    member val Window = silkWindow with get  
+ 
+    member this.Draw (matrix:Matrix3x2) =
+        silkWindow.GL.BindVertexArray(_vao)
+        silkWindow.GL.UseProgram(silkWindow.DefaultShaderProgram)
+        silkWindow.GL.DrawElements(PrimitiveType.Triangles, uint32 indices.Length, DrawElementsType.UnsignedInt,
+                                  IntPtr.Zero.ToPointer())
+
     interface Image 
     
     
@@ -165,7 +183,10 @@ type SilkGraphicsManager() =
                 window
         member this.LoadImage path window =
             SilkImage (window :?> SilkWindow)
-        member this.DrawImage image matrix window = failwith "Not implemented"
+        member this.DrawImage (matrix:Matrix3x2) (image:Image)  =
+            let silkImage = image :?> SilkImage
+            silkImage.Draw matrix
+            silkImage.Window
         member this.Translate point = failwith "Not implemented"
         member this.Rotate angle = failwith "Not implemented"
         member this.Clear color window =
