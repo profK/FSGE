@@ -13,6 +13,7 @@ open Silk.NET.Maths
 open Silk.NET.Windowing
 open Silk.NET.Input                       
 open Silk.NET.OpenGL
+open Silk.NET.Maths
 open Silk.NET.GLFW
 open Graphics2D
 open ShadersGLSL
@@ -35,7 +36,7 @@ type SilkWindow(silkWindow:IWindow) =
     do
         silkWindow.Initialize()
   
-    let defaultShader =Shader.getDefaultShaderProgram _gl
+    let defaultShader = (Shader.getDefaultShaderProgram _gl)
             
     interface Window
     
@@ -83,9 +84,16 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         glCheckError()
         silkWindow.GL.GenerateMipmap(GLEnum.Texture2D)
         silkWindow.GL.BindTexture(TextureTarget.Texture2D, 0u)
-        texture
+        (texture,image)
         
-    let _texture = loadTexture path
+  
+    
+        
+             
+    let (_texture,_image) = loadTexture path
+    let _scaleMatrix = Matrix3x2.CreateScale(
+        float32 _image.Width/(float32 silkWindow.SilkWindow.Size.X/2f), 
+        float32 _image.Height/ (float32 silkWindow.SilkWindow.Size.Y/2f))
     let _vao = silkWindow.GL.GenVertexArray()
     do
         silkWindow.GL.BindVertexArray(_vao)
@@ -158,14 +166,38 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
    
     member val Window = silkWindow with get  
  
+   
     member this.Draw (matrix:Matrix3x2) =
+        silkWindow.GL.UseProgram(silkWindow.DefaultShaderProgram)
+        glCheckError()
         silkWindow.GL.BindVertexArray(_vao)
         glCheckError()
         silkWindow.GL.ActiveTexture(TextureUnit.Texture0)
         glCheckError()
         silkWindow.GL.BindTexture(TextureTarget.Texture2D, _texture)
         glCheckError()
-        silkWindow.GL.UseProgram(silkWindow.DefaultShaderProgram)
+        let uniformLocation =
+            silkWindow.GL.GetUniformLocation(silkWindow.DefaultShaderProgram,"xformMatrix")
+        //if uniformLocation = -1 then
+        //    failwith "Could not find uniform location"    
+        glCheckError()
+        let matrix3x2 = Matrix3x2.Multiply(matrix, _scaleMatrix)
+        // Convert the 3x2 matrix to a 4x4 matrix
+        let matrix4x4 = Matrix4x4(
+            matrix3x2.M11, matrix3x2.M12, 0.0f, 0.0f,  // First row
+            matrix3x2.M21, matrix3x2.M22, 0.0f, 0.0f,  // Second row
+            0.0f,           0.0f,           1.0f, 0.0f,  // Third row
+            matrix3x2.M31, matrix3x2.M32, 0.0f, 1.0f   // Fourth row
+        )
+    // Convert to an OpenGL-compatible float array in column-major order
+        let openGLMatrix = [|
+            matrix4x4.M11; matrix4x4.M21; matrix4x4.M31; matrix4x4.M41;  // First column
+            matrix4x4.M12; matrix4x4.M22; matrix4x4.M32; matrix4x4.M42;  // Second column
+            matrix4x4.M13; matrix4x4.M23; matrix4x4.M33; matrix4x4.M43;  // Third column
+            matrix4x4.M14; matrix4x4.M24; matrix4x4.M34; matrix4x4.M44   // Fourth column
+        |]
+       
+        silkWindow.GL.UniformMatrix4(uniformLocation,false, ReadOnlySpan<float32>(openGLMatrix))
         glCheckError()
         silkWindow.GL.DrawElements(PrimitiveType.Triangles, uint32 indices.Length, DrawElementsType.UnsignedInt,
                                   IntPtr.Zero.ToPointer())
