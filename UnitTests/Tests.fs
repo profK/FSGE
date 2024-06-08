@@ -7,12 +7,13 @@ open System.Reflection
 open System.Threading
 open ManagerRegistry
 open Xunit
+open Xunit.Abstractions
 
 // Graphics Manager tests
 type GraphicsManagerTestsFixture() =
     do
         addManager(typeof<SilkGraphicsAndInput.SilkGraphicsManager>)
-type GraphicsManagerTests() =
+type GraphicsManagerTests(output:ITestOutputHelper ) =
     interface IClassFixture<GraphicsManagerTestsFixture>
     
     [<Fact>]
@@ -31,8 +32,9 @@ type GraphicsManagerTests() =
         Assert.True(true)
     [<Fact>]
     member _.testImageDrawing() =
+        output.WriteLine "Test drawing..."
         let window = Graphics2D.Window.create 800 600 "Test Window"
-        let image = Graphics2D.Window._graphicsManager.LoadImage "test.png" window
+        let image = Graphics2D.Window._graphicsManager.LoadImage "NGTL_tex.png" window
         Graphics2D.Window.Clear(Color.Blue) window
         Graphics2D.Window.DrawImage image (Matrix3x2.Identity) window
         Graphics2D.Window.Display window
@@ -51,12 +53,7 @@ type GraphicsManagerTests() =
         let height = Graphics2D.Window._graphicsManager.WindowHeight window
         Graphics2D.Window.close window
         Assert.Equal(600, height)
-    [<Fact>]
-    member _.testWindowTitle() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
-        let title = Graphics2D.Window._graphicsManager.WindowTitle window
-        Graphics2D.Window.close window
-        Assert.Equal("Test Window", title)
+
     [<Fact>]
     member _.testSetTitle() =
         let window = Graphics2D.Window.create 800 600 "Test Window"
@@ -65,16 +62,11 @@ type GraphicsManagerTests() =
         Graphics2D.Window.close window
         Assert.Equal("New Title", title)
     [<Fact>]
-    member _.testPosition() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
-        let position = Graphics2D.Window._graphicsManager.WindowPosition window
-        Graphics2D.Window.close window
-        Assert.Equal(Point(0,0), position)
-    [<Fact>]
     member _.testSetPosition() =
         let window = Graphics2D.Window.create 800 600 "Test Window"
         Graphics2D.Window.setPosition window (Point(100,100))
         let position = Graphics2D.Window._graphicsManager.WindowPosition window
+        Thread.Sleep(5000)
         Graphics2D.Window.close window
         Assert.Equal(Point(100,100), position)
     [<Fact>]

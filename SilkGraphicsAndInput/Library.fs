@@ -3,6 +3,7 @@
 
 open System
 open System.Drawing
+open System.IO
 open System.Numerics
 open System.Runtime.InteropServices.Marshalling
 open ManagerRegistry
@@ -16,6 +17,7 @@ open Silk.NET.GLFW
 open Graphics2D
 open ShadersGLSL
 open Xunit
+open StbImageSharp
 
 
 
@@ -50,7 +52,7 @@ type SilkWindow(silkWindow:IWindow) =
         ctxt.SwapBuffers()
 
 
-type SilkImage(silkWindow:SilkWindow) =
+type SilkImage(path:string, silkWindow:SilkWindow) =
     let checkErrors = false
     let  glCheckError() =
         if checkErrors then
@@ -61,7 +63,28 @@ type SilkImage(silkWindow:SilkWindow) =
             ()
     let positionLoc = 0u
     
-   
+    let loadTexture path =
+        let texture = silkWindow.GL.GenTexture()
+        glCheckError()
+        silkWindow.GL.ActiveTexture(TextureUnit.Texture0)
+        glCheckError()
+        silkWindow.GL.BindTexture(TextureTarget.Texture2D, texture)
+        glCheckError()
+        silkWindow.GL.PixelStore( PixelStoreParameter.UnpackAlignment, 1)
+        glCheckError()
+        //silkWindow.GL.TexParameterI(GLEnum.Texture2D,GLEnum.TextureMinFilter, GLEnum.Nearest);
+        //silkWindow.GL.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, GLEnum.Nearest);
+        let image = ImageResult.FromMemory(File.ReadAllBytes(path), ColorComponents.RedGreenBlueAlpha)
+        use ptrv  = fixed image.Data
+        let ptrv' = NativeInterop.NativePtr.toVoidPtr ptrv
+        silkWindow.GL.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, uint32 image.Width,
+                                    uint32 image.Height, 0,
+                                    PixelFormat.Rgba, PixelType.UnsignedByte, ptrv')
+        glCheckError()
+        silkWindow.GL.GenerateMipmap(GLEnum.Texture2D);
+        texture
+        
+    let _texture = loadTexture path
     let _vao = silkWindow.GL.GenVertexArray()
     do
         silkWindow.GL.BindVertexArray(_vao)
@@ -73,10 +96,11 @@ type SilkImage(silkWindow:SilkWindow) =
     let vertices =
         if true then
             [|
-                0.5f;  0.5f; 0.0f;
-                0.5f; -0.5f; 0.0f;
-                -0.5f; -0.5f; 0.0f; // notice we have to indent to make the - line up with the block
-                -0.5f;  0.5f; 0.0f
+                0.5f;  0.5f; 0.0f; 1.0f; 0.0f; 
+                0.5f; -0.5f; 0.0f; 1.0f; 1.0f
+                // notice we have to indent to make the - line up with the block
+                -0.5f; -0.5f; 0.0f; 0.0f; 1.0f; 
+                -0.5f;  0.5f; 0.0f; 0.0f; 0.0f
             |]
         else    
             [|
@@ -110,13 +134,18 @@ type SilkImage(silkWindow:SilkWindow) =
                                  ptri', BufferUsageARB.StaticDraw)
         glCheckError()
         silkWindow.GL.EnableVertexAttribArray(positionLoc)
-        glCheckError()
+        glCheckError()               
+     
         silkWindow.GL.VertexAttribPointer(positionLoc, 3, VertexAttribPointerType.Float, false,
-                                          uint32 (sizeof<float> * 3), nativeint 0)
+                                          uint32 (sizeof<float32>*5), nativeint 0)
         glCheckError()
-        silkWindow.GL.EnableVertexAttribArray(0u);
-        silkWindow.GL.VertexAttribPointer(0u, 3, GLEnum.Float, false, 0u,
-                                          IntPtr.Zero.ToPointer());
+        let texCoordLoc = 1u;
+        silkWindow.GL.EnableVertexAttribArray(texCoordLoc)
+        glCheckError()
+        silkWindow.GL.VertexAttribPointer(texCoordLoc, 2, VertexAttribPointerType.Float,
+                                         false, uint32(5 * sizeof<float32>), (3 * sizeof<float32>));
+        glCheckError()
+        //silkWindow.GL.VertexAttribPointer(0u, 3, GLEnum.Float, false,  0u,IntPtr.Zero.ToPointer());
         (*
         silkWindow.GL.BindVertexArray(0u)
         silkWindow.GL.BindBuffer(BufferTargetARB.ArrayBuffer, 0u)
@@ -128,7 +157,13 @@ type SilkImage(silkWindow:SilkWindow) =
  
     member this.Draw (matrix:Matrix3x2) =
         silkWindow.GL.BindVertexArray(_vao)
+        glCheckError()
+        silkWindow.GL.ActiveTexture(TextureUnit.Texture0)
+        glCheckError()
+        silkWindow.GL.BindTexture(TextureTarget.Texture2D, _texture)
+        glCheckError()
         silkWindow.GL.UseProgram(silkWindow.DefaultShaderProgram)
+        glCheckError()
         silkWindow.GL.DrawElements(PrimitiveType.Triangles, uint32 indices.Length, DrawElementsType.UnsignedInt,
                                   IntPtr.Zero.ToPointer())
 
@@ -182,7 +217,8 @@ type SilkGraphicsManager() =
                 sw.SilkWindow.Size <- Vector2D(size.Width,size.Height)
                 window
         member this.LoadImage path window =
-            SilkImage (window :?> SilkWindow)
+            let silkWindow = (window :?> SilkWindow)
+            SilkImage(path, silkWindow) 
         member this.DrawImage (matrix:Matrix3x2) (image:Image)  =
             let silkImage = image :?> SilkImage
             silkImage.Draw matrix
