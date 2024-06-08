@@ -81,7 +81,8 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
                                     uint32 image.Height, 0,
                                     PixelFormat.Rgba, PixelType.UnsignedByte, ptrv')
         glCheckError()
-        silkWindow.GL.GenerateMipmap(GLEnum.Texture2D);
+        silkWindow.GL.GenerateMipmap(GLEnum.Texture2D)
+        silkWindow.GL.BindTexture(TextureTarget.Texture2D, 0u)
         texture
         
     let _texture = loadTexture path
@@ -120,7 +121,7 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
     do
         //set vertex buffer
         use ptrv  = fixed vertices
-        let ptrv' = NativeInterop.NativePtr.toVoidPtr ptrv
+        let ptrv' = NativePtr.toVoidPtr ptrv
         silkWindow.GL.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo)
         glCheckError()
         silkWindow.GL.BufferData(BufferTargetARB.ArrayBuffer, unativeint(vertices.Length * sizeof<float>),
@@ -145,12 +146,14 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         silkWindow.GL.VertexAttribPointer(texCoordLoc, 2, VertexAttribPointerType.Float,
                                          false, uint32(5 * sizeof<float32>), (3 * sizeof<float32>));
         glCheckError()
-        //silkWindow.GL.VertexAttribPointer(0u, 3, GLEnum.Float, false,  0u,IntPtr.Zero.ToPointer());
-        (*
+     
         silkWindow.GL.BindVertexArray(0u)
+        glCheckError
         silkWindow.GL.BindBuffer(BufferTargetARB.ArrayBuffer, 0u)
+        glCheckError
         silkWindow.GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, 0u)
-        *)
+        glCheckError()
+        
         // when we leave the do block vertices and indices becomes unpinned
    
     member val Window = silkWindow with get  
