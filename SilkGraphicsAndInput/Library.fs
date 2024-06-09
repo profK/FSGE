@@ -73,6 +73,15 @@ type SilkWindow(silkWindow:IWindow) =
 
     
     member this.SilkWindow = silkWindow
+    member this.ScreenToNormalizedMatrix (matrix:Matrix4x4) =
+        let width = float32 silkWindow.Size.X
+        let height = float32 silkWindow.Size.Y
+        Matrix4x4.CreateTranslation(Vector3(-400f,-300f,0f))* matrix * Matrix4x4.CreateScale(
+                            2f/(float32 silkWindow.Size.X),
+                            -2f/(float32 silkWindow.Size.Y),
+                            1f) 
+        // Calculate scaling factors
+       
     member this.SetBackgroundColor color =
         _gl.ClearColor(color)
     member this.Clear() =
@@ -141,21 +150,16 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
   
 
     let vertices =
-        if true then
+            let h = (float32) _image.Height
+            let w = (float32) _image.Width
             [|
-                0.5f;  0.5f; 0.0f; 1.0f; 0.0f; 
-                0.5f; -0.5f; 0.0f; 1.0f; 1.0f
+                w;     0.0f; 0.0f; 1.0f; 0.0f;  // top right
+                w;     h;    0.0f; 1.0f; 1.0f; // bottom right
                 // notice we have to indent to make the - line up with the block
-                -0.5f; -0.5f; 0.0f; 0.0f; 1.0f; 
-                -0.5f;  0.5f; 0.0f; 0.0f; 0.0f
+                0f;    h;    0.0f; 0.0f; 1.0f; // bottom left
+                0.0f;  0.0f; 0.0f; 0.0f; 0.0f // top left
             |]
-        else    
-            [|
-                1f;  1f; 0.0f;
-                1f; -1f; 0.0f;
-                -1f; -1f; 0.0f;
-                -1f;  1f; 0.0f
-            |]
+        
     
     let indices =
         [|
@@ -219,10 +223,8 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         //if uniformLocation = -1 then
         //    failwith "Could not find uniform location"    
         glCheckError()
-        let xt = Matrix4x4.CreateTranslation(-400.0f, -300.0f,0f)
-        let matrix4x4=  _scaleMatrix * (silkWindow.ConvertToNormalizedMatrix xt) 
-        let testx= Matrix4x4.CreateTranslation(-0.5f, -0.5f,0f)
-        
+
+        let matrix4x4=  silkWindow.ScreenToNormalizedMatrix matrix
     // Convert to an OpenGL-compatible float array in column-major order
         let openGLMatrix = matrix4x4ToOpenGLArray matrix4x4
        

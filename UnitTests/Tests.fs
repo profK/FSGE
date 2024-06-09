@@ -36,7 +36,9 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         let window = Graphics2D.Window.create 800 600 "Test Window"
         let image = Graphics2D.Window._graphicsManager.LoadImage "NGTL_tex.png" window
         Graphics2D.Window.Clear(Color.Blue) window
-        Graphics2D.Window.DrawImage image (Matrix4x4.Identity) window
+        let xform = Matrix4x4.CreateTranslation(Vector3(100.0f,300.0f,0.0f))
+                    * Matrix4x4.CreateRotationZ((float32 Math.PI)/4.0f)
+        Graphics2D.Window.DrawImage image xform window
         Graphics2D.Window.Display window
         Thread.Sleep(5000)
         Graphics2D.Window.close window
