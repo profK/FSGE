@@ -9,7 +9,6 @@ open System.Runtime.InteropServices.Marshalling
 open ManagerRegistry
 open Microsoft.FSharp.NativeInterop
 open Silk.NET.GLFW
-open Silk.NET.Maths
 open Silk.NET.Windowing
 open Silk.NET.Input                       
 open Silk.NET.OpenGL
@@ -19,6 +18,7 @@ open Graphics2D
 open ShadersGLSL
 open Xunit
 open StbImageSharp
+open System.Numerics
 
 
 
@@ -28,8 +28,9 @@ open StbImageSharp
 type SilkWindow(silkWindow:IWindow) =
     // What comes below is ugly because OpenGL is a big stateful mess and
     // things need to be done in the right order
-         
-
+    // Function to convert a Matrix4x4from screen coordinates to normalized coordinates
+   
+        
     let _gl =
         silkWindow.Initialize()
         silkWindow.CreateOpenGL()
@@ -42,6 +43,34 @@ type SilkWindow(silkWindow:IWindow) =
     
     member val GL = _gl with get
     member val DefaultShaderProgram = defaultShader with get
+    
+    member this.ConvertToNormalizedMatrix (matrix:Matrix4x4) =
+        let width = float32 silkWindow.Size.X
+        let height = float32 silkWindow.Size.Y
+        // Calculate scaling factors
+        let scaleX = 2.0f / width
+        let scaleY = -2.0f / height
+        // Create the normalized matrix
+        let m11 = matrix.M11 
+        let m12 = matrix.M12
+        let m13 = matrix.M13
+        let m14 = matrix.M14 
+        let m21 = matrix.M21
+        let m22 = matrix.M22
+        let m23 = matrix.M23
+        let m24 = matrix.M24
+        let m31 = matrix.M31
+        let m32 = matrix.M32
+        let m33 = matrix.M33
+        let m34 = matrix.M34
+        let m41 = matrix.M41  * scaleX
+        let m42 = matrix.M42  * scaleY
+        let m43 = matrix.M43
+        let m44 = matrix.M44
+        Matrix4x4(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44)
+        
+// Calculate scaling factors
+
     
     member this.SilkWindow = silkWindow
     member this.SetBackgroundColor color =
@@ -91,9 +120,18 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         
              
     let (_texture,_image) = loadTexture path
-    let _scaleMatrix = Matrix3x2.CreateScale(
+    let _scaleMatrix = Matrix4x4.CreateScale(
         float32 _image.Width/(float32 silkWindow.SilkWindow.Size.X/2f), 
-        float32 _image.Height/ (float32 silkWindow.SilkWindow.Size.Y/2f))
+        float32 _image.Height/ (float32 silkWindow.SilkWindow.Size.Y/2f),
+        1f)
+    let matrix4x4ToOpenGLArray (matrix: Matrix4x4) : float32[] =
+        [|
+            matrix.M11; matrix.M12; matrix.M13; matrix.M14
+            matrix.M21; matrix.M22; matrix.M23; matrix.M24
+            matrix.M31; matrix.M23; matrix.M33; matrix.M34
+            matrix.M41; matrix.M42; matrix.M43; matrix.M44
+        |]
+  
     let _vao = silkWindow.GL.GenVertexArray()
     do
         silkWindow.GL.BindVertexArray(_vao)
@@ -156,9 +194,9 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         glCheckError()
      
         silkWindow.GL.BindVertexArray(0u)
-        glCheckError
+        glCheckError()
         silkWindow.GL.BindBuffer(BufferTargetARB.ArrayBuffer, 0u)
-        glCheckError
+        glCheckError()
         silkWindow.GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, 0u)
         glCheckError()
         
@@ -167,7 +205,7 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
     member val Window = silkWindow with get  
  
    
-    member this.Draw (matrix:Matrix3x2) =
+    member this.Draw (matrix:Matrix4x4) =
         silkWindow.GL.UseProgram(silkWindow.DefaultShaderProgram)
         glCheckError()
         silkWindow.GL.BindVertexArray(_vao)
@@ -181,21 +219,12 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         //if uniformLocation = -1 then
         //    failwith "Could not find uniform location"    
         glCheckError()
-        let matrix3x2 = Matrix3x2.Multiply(matrix, _scaleMatrix)
-        // Convert the 3x2 matrix to a 4x4 matrix
-        let matrix4x4 = Matrix4x4(
-            matrix3x2.M11, matrix3x2.M12, 0.0f, 0.0f,  // First row
-            matrix3x2.M21, matrix3x2.M22, 0.0f, 0.0f,  // Second row
-            0.0f,           0.0f,           1.0f, 0.0f,  // Third row
-            matrix3x2.M31, matrix3x2.M32, 0.0f, 1.0f   // Fourth row
-        )
+        let xt = Matrix4x4.CreateTranslation(-400.0f, -300.0f,0f)
+        let matrix4x4=  _scaleMatrix * (silkWindow.ConvertToNormalizedMatrix xt) 
+        let testx= Matrix4x4.CreateTranslation(-0.5f, -0.5f,0f)
+        
     // Convert to an OpenGL-compatible float array in column-major order
-        let openGLMatrix = [|
-            matrix4x4.M11; matrix4x4.M21; matrix4x4.M31; matrix4x4.M41;  // First column
-            matrix4x4.M12; matrix4x4.M22; matrix4x4.M32; matrix4x4.M42;  // Second column
-            matrix4x4.M13; matrix4x4.M23; matrix4x4.M33; matrix4x4.M43;  // Third column
-            matrix4x4.M14; matrix4x4.M24; matrix4x4.M34; matrix4x4.M44   // Fourth column
-        |]
+        let openGLMatrix = matrix4x4ToOpenGLArray matrix4x4
        
         silkWindow.GL.UniformMatrix4(uniformLocation,false, ReadOnlySpan<float32>(openGLMatrix))
         glCheckError()
@@ -254,7 +283,7 @@ type SilkGraphicsManager() =
         member this.LoadImage path window =
             let silkWindow = (window :?> SilkWindow)
             SilkImage(path, silkWindow) 
-        member this.DrawImage (matrix:Matrix3x2) (image:Image)  =
+        member this.DrawImage (matrix:Matrix4x4) (image:Image)  =
             let silkImage = image :?> SilkImage
             silkImage.Draw matrix
             silkImage.Window

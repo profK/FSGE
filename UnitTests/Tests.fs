@@ -36,7 +36,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         let window = Graphics2D.Window.create 800 600 "Test Window"
         let image = Graphics2D.Window._graphicsManager.LoadImage "NGTL_tex.png" window
         Graphics2D.Window.Clear(Color.Blue) window
-        Graphics2D.Window.DrawImage image (Matrix3x2.Identity) window
+        Graphics2D.Window.DrawImage image (Matrix4x4.Identity) window
         Graphics2D.Window.Display window
         Thread.Sleep(5000)
         Graphics2D.Window.close window
