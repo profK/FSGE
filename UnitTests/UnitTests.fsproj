@@ -40,7 +40,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj" />
-      <ProjectReference Include="..\SilkGraphicsAndInput\SilkGraphicsAndInput.fsproj" />
+      <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj" />
     </ItemGroup>
 
 </Project>

@@ -6,14 +6,18 @@ open System.Numerics
 open System.Reflection
 open System.Threading
 open ManagerRegistry
+open SilkGraphicsOGL
 open Xunit
 open Xunit.Abstractions
+open Devices
 
 // Graphics Manager tests
 type GraphicsManagerTestsFixture() =
     do
-        addManager(typeof<SilkGraphicsAndInput.SilkGraphicsManager>)
+        addManager(typeof<SilkGraphicsManager>)
+        addManager(typeof<SilkDevices.SilkInputManager>)
 type GraphicsManagerTests(output:ITestOutputHelper ) =
+    let ITestOutputHelper = output;
     interface IClassFixture<GraphicsManagerTestsFixture>
     
     [<Fact>]
@@ -84,5 +88,19 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         let size = Graphics2D.Window._graphicsManager.WindowSize window
         Graphics2D.Window.close window
         Assert.Equal(Size(400,400), size)
+        
+    member this.recursivePrintDevices indent deviceList =
+        deviceList |> List.iter (fun node -> output.WriteLine(indent+node.Name); 
+                                             match node.Children with
+                                             | Some children -> this.recursivePrintDevices (indent+"  ") children 
+                                             | None -> ())   
+    [<Fact>]
+    member this.testDeviceList() =
+        let window = Graphics2D.Window.create 800 600 "Test Window"
+        let deviceList = Devices.GetDeviceTree window
+        Assert.True(deviceList.Length > 0)
+        output.WriteLine "Devices:"
+        deviceList |>  this.recursivePrintDevices ""
+        Graphics2D.Window.close window    
   
 

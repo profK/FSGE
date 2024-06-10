@@ -4,11 +4,11 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Graphics2D", "Graphics2D\Gr
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{966A8F7B-0252-45A4-AD8A-8D9B15806208}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Input", "Input\Input.fsproj", "{77E18A87-7F1B-4271-86F7-5AF8D6EF8E80}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Devices", "Devices\Devices.fsproj", "{77E18A87-7F1B-4271-86F7-5AF8D6EF8E80}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{44DF9982-FC27-4DFA-B680-88C0D3D06148}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SilkGraphicsAndInput", "SilkGraphicsAndInput\SilkGraphicsAndInput.fsproj", "{1D702A64-41F4-44FA-8DF9-4262DDE58FDB}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SilkGraphicsOGL", "SilkGraphicsOGL\SilkGraphicsOGL.fsproj", "{1D702A64-41F4-44FA-8DF9-4262DDE58FDB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

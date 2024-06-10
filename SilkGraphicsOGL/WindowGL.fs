@@ -1,30 +1,16 @@
-﻿namespace SilkGraphicsAndInput
-#nowarn "9"    
+﻿module SilkGraphicsOGL.WindowGL
 
 open System
-open System.Drawing
 open System.IO
 open System.Numerics
-open System.Runtime.InteropServices.Marshalling
-open ManagerRegistry
 open Microsoft.FSharp.NativeInterop
-open Silk.NET.GLFW
-open Silk.NET.Windowing
-open Silk.NET.Input                       
-open Silk.NET.OpenGL
-open Silk.NET.Maths
-open Silk.NET.GLFW
-open Graphics2D
 open ShadersGLSL
-open Xunit
+open Silk.NET.OpenGL
+open Silk.NET.Windowing
+open Graphics2D
 open StbImageSharp
-open System.Numerics
+open Xunit
 
-
-
-// This is for options where the is meaningful info to return with None
-
-// Because Silk input is closely tied to Swift graphics, we need to define their plugins in the same project
 type SilkWindow(silkWindow:IWindow) =
     // What comes below is ugly because OpenGL is a big stateful mess and
     // things need to be done in the right order
@@ -209,72 +195,3 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
     interface Image 
     
     
-    
-    
-    
-
-[<Manager("Silk Graphics", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
-type SilkGraphicsManager() =
-   
-    interface Graphics2D.IGraphicsManager with
-        member this.CreateWindow width height title =
-            let mutable options = WindowOptions.Default
-            options.Title <- "Hello from F#"
-            options.Size <- Vector2D(800, 600)
-            let window = Silk.NET.Windowing.Window.Create(options)
-            SilkWindow(window)
-        member this.CloseWindow window =
-            window :?> SilkWindow |> _.SilkWindow.Close()
-        member this.WindowWidth window =
-            window :?> SilkWindow |> _.SilkWindow.Size.X
-        member this.WindowHeight window =
-             window :?> SilkWindow |> _.SilkWindow.Size.Y
-        member this.WindowTitle window =
-            window :?> SilkWindow |> _.SilkWindow.Title
-        member this.SetWindowTitle window title =
-            window :?> SilkWindow |> fun sw -> sw.SilkWindow.Title <- title
-            window
-        member this.WindowPosition window =
-            window :?> SilkWindow
-            |> fun sw ->
-                let spos =sw.SilkWindow.Position
-                Point(spos.X,spos.Y)
-        member this.SetWindowPosition window position =
-            window :?> SilkWindow
-            |> fun sw ->
-                sw.SilkWindow.Position <- Vector2D(position.X,position.Y)
-                window
-                
-        member this.WindowSize window =
-            window :?> SilkWindow
-            |> fun sw ->
-                let v2d = sw.SilkWindow.Size
-                Size(v2d.X,v2d.Y)
-        member this.SetWindowSize window size =
-            window :?> SilkWindow
-            |> fun sw ->
-                sw.SilkWindow.Size <- Vector2D(size.Width,size.Height)
-                window
-        member this.LoadImage path window =
-            let silkWindow = (window :?> SilkWindow)
-            SilkImage(path, silkWindow) 
-        member this.DrawImage (matrix:Matrix4x4) (image:Image)  =
-            let silkImage = image :?> SilkImage
-            silkImage.Draw matrix
-            silkImage.Window
-        member this.Clear color window =
-            window :?> SilkWindow
-            |> fun w ->
-                w.SetBackgroundColor color
-                w.Clear()
-            window
-        member this.Display window = 
-            window :?> SilkWindow
-            |> fun w -> w.Display()
-            window
-            
-[<Manager("Silk Input", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
-type SilkInputManager() =
-    interface Input.IInputManager with
-        member this.GetDeviceTree () = failwith "Not implemented"
-        member this.GetDeviceValue path = failwith "Not implemented"

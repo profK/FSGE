@@ -8,6 +8,8 @@
 
     <ItemGroup>
         <Compile Include="ShadersGLSL.fs" />
+        <Compile Include="WindowGL.fs" />
+        <Compile Include="DevicesSilk.fs" />
         <Compile Include="Library.fs"/>
     </ItemGroup>
 
@@ -23,7 +25,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj" />
-      <ProjectReference Include="..\Input\Input.fsproj" />
+      <ProjectReference Include="..\Devices\Devices.fsproj" />
     </ItemGroup>
 
 </Project>

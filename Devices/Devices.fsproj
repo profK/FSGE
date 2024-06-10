@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <RootNamespace>Input</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -11,6 +12,10 @@
 
     <ItemGroup>
       <PackageReference Include="FSFramework" Version="1.0.0-preview-1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj" />
     </ItemGroup>
 
 </Project>
