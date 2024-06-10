@@ -117,6 +117,9 @@ module Window =
         _graphicsManager.Clear color window
     let Display window : Window =
         _graphicsManager.Display window
+    let CreateRotation radians = Matrix4x4.CreateRotationZ(radians)
+    let CreateTranslation (vector:Vector2) =
+        Matrix4x4.CreateTranslation(vector.X,vector.Y,0.0f)
         
         
     
