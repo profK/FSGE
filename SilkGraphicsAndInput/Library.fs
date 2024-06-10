@@ -44,30 +44,7 @@ type SilkWindow(silkWindow:IWindow) =
     member val GL = _gl with get
     member val DefaultShaderProgram = defaultShader with get
     
-    member this.ConvertToNormalizedMatrix (matrix:Matrix4x4) =
-        let width = float32 silkWindow.Size.X
-        let height = float32 silkWindow.Size.Y
-        // Calculate scaling factors
-        let scaleX = 2.0f / width
-        let scaleY = -2.0f / height
-        // Create the normalized matrix
-        let m11 = matrix.M11 
-        let m12 = matrix.M12
-        let m13 = matrix.M13
-        let m14 = matrix.M14 
-        let m21 = matrix.M21
-        let m22 = matrix.M22
-        let m23 = matrix.M23
-        let m24 = matrix.M24
-        let m31 = matrix.M31
-        let m32 = matrix.M32
-        let m33 = matrix.M33
-        let m34 = matrix.M34
-        let m41 = matrix.M41  * scaleX
-        let m42 = matrix.M42  * scaleY
-        let m43 = matrix.M43
-        let m44 = matrix.M44
-        Matrix4x4(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44)
+   
         
 // Calculate scaling factors
 
@@ -123,10 +100,6 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         silkWindow.GL.GenerateMipmap(GLEnum.Texture2D)
         silkWindow.GL.BindTexture(TextureTarget.Texture2D, 0u)
         (texture,image)
-        
-  
-    
-        
              
     let (_texture,_image) = loadTexture path
     let _scaleMatrix = Matrix4x4.CreateScale(
@@ -289,8 +262,6 @@ type SilkGraphicsManager() =
             let silkImage = image :?> SilkImage
             silkImage.Draw matrix
             silkImage.Window
-        member this.Translate point = failwith "Not implemented"
-        member this.Rotate angle = failwith "Not implemented"
         member this.Clear color window =
             window :?> SilkWindow
             |> fun w ->
