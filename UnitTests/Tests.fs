@@ -103,4 +103,23 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         deviceList |>  this.recursivePrintDevices ""
         Graphics2D.Window.close window    
   
-
+    [<Fact>]
+    member this.testDeviceValues() =
+        let window = Graphics2D.Window.create 800 600 "Test Window"
+        let deviceList = Devices.GetDeviceTree window
+        deviceList |> List.filter (fun node -> node.Type = Keyboard)
+        |> List.iter (fun node ->
+            output.WriteLine($"Testing Keyboard: {node.Name}")
+            output.WriteLine("Press just ESC to exit")
+            let mutable finished=false
+            while not finished do
+                let deviceValue = Devices.GetDeviceValue window node
+                match deviceValue with
+                | KeyboardValue keys -> 
+                    keys |> Array.iter (fun key -> output.WriteLine(key.ToString()))
+                    if keys |> Array.exists (fun key -> key = 27u) then
+                        finished <- true
+                | _ -> ()
+                Thread.Sleep(100)
+            )
+        Graphics2D.Window.close window
