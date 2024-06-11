@@ -19,7 +19,7 @@ type DeviceValue =
     | ButtonValue of bool
     | AxisValue of float
     | NormalizedAxisValue of float
-    | KeyboardValue of char array
+    | KeyboardValue of uint32 array // ascii kb values
 
 type DeviceNode = {
     Name: string
@@ -30,7 +30,7 @@ type DeviceNode = {
 
 type IDeviceManager =
     abstract member GetDeviceTree : Window -> DeviceNode list
-    abstract member GetDeviceValue : Window->string -> DeviceValue
+    abstract member GetDeviceValue : Window->DeviceNode -> DeviceValue
     
 
 module Devices =
@@ -39,4 +39,4 @@ module Devices =
         | Some manager -> manager
         | None -> failwith "No input manager found"
     let GetDeviceTree window = _deviceManager.GetDeviceTree window
-    let GetDeviceValue window path = _deviceManager.GetDeviceValue window path
+    let GetDeviceValue window deviceNode  = _deviceManager.GetDeviceValue window deviceNode

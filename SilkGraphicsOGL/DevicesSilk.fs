@@ -1,10 +1,12 @@
 ﻿module SilkDevices
 
 open System
+open System.Text.RegularExpressions
 open Devices
 open ManagerRegistry
 open Silk.NET.Input
 open SilkGraphicsOGL.WindowGL
+open SwiftGraphicsAndInput.SilkDeviceStates
 
 module Seq =
     let foldi func state seq =
@@ -23,10 +25,7 @@ type SilkInputManager() =
         let name = $"Keyboard{i}"
         let newkb =
             {Name=name; Type= Keyboard; Children=None}
-        newkb::state
-        
-   
-        
+        newkb::state     
     let makeMouseButtonNodeList (mouseButtons:MouseButton seq) =
         mouseButtons
         |> Seq.fold (fun state mouseButton  ->
@@ -122,9 +121,24 @@ type SilkInputManager() =
             //could be wasteful, measure and buffer if necc
             (window :?> SilkWindow).SilkWindow.CreateInput()
             
+    let splitOrdinal id =
+        Regex.Split(id, @"(?<=[a-zA-Z])(?=\d)")
+     
+    member val private _Context = None with get,set
+    member val private _KBStates = None with get,set
+    
+    member this.Context window  = 
+        match this._Context with
+        | Some ctxt -> ctxt
+        | None -> 
+            let ctxt = getInputContext window
+            this._Context <- Some ctxt
+            this._KBStates <- Some (DeviceStates.GetKBStates ctxt)
+            ctxt
+            
     interface Devices.IDeviceManager with
         member this.GetDeviceTree window  =
-            let ctxt = getInputContext window
+            let ctxt = this.Context window
             let kbNodelist =
                 ctxt.Keyboards  
                 |> Seq.foldi makeKBNode List.Empty
@@ -141,4 +155,19 @@ type SilkInputManager() =
             [kbNodelist;mouseList;controllerList]
             |>List.concat
             
-        member this.GetDeviceValue window path = failwith "Not implemented"
+     
+        member this.GetDeviceValue window node =
+            match node.Type with
+            | Keyboard ->
+                let s = splitOrdinal node.Name
+                let ctxt = this.Context window
+                let kb = ctxt.Keyboards.[int s[1]]
+                this._KBStates.Value.GetKeyStates kb
+                |> Set.toArray
+                |> KeyboardValue
+                
+               
+            
+            
+            
+            
