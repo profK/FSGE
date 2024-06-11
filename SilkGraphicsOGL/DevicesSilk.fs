@@ -16,11 +16,7 @@ module Seq =
                          )
                          (state,0)
         fst result                 
-                         
-     
-        
-                    
-
+ 
 [<Manager("Silk Input", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
 type SilkInputManager() =
     let makeKBNode state kb i =
@@ -31,10 +27,10 @@ type SilkInputManager() =
         
    
         
-    let  makeButtonNodeList mouseButtons =
+    let  makeMouseButtonNodeList (mouseButtons:MouseButton seq) =
         mouseButtons
-        |> Seq.foldi (fun state mouseButton i ->
-                        {Name = $"button{i}"
+        |> Seq.fold (fun state mouseButton  ->
+                        {Name = mouseButton.ToString()
                          Type = DeviceType.Button
                          Children = None}::state) List.Empty
     let makeScrollWheelNodeList scrollWheels =
@@ -51,13 +47,69 @@ type SilkInputManager() =
         let name = $"Mouse{i}"
         let mouseButtons =
             mouse.SupportedButtons
-            |> makeButtonNodeList
+            |> makeMouseButtonNodeList
         let scrollWheels =
             mouse.ScrollWheels
             |> makeScrollWheelNodeList
-        let children = [mouseButtons;scrollWheels] |>List.concat
+        let position = [{Name="position";Type=Collection;Children=
+                             Some [
+                                {Name="x";Type=DeviceType.Axis;Children=None}
+                                {Name="y";Type=DeviceType.Axis;Children=None}
+                             ]}]  
+        let children = [mouseButtons;scrollWheels;position] |>List.concat
         {Name=name;Type=Collection;Children=Some children}::state
-   
+        
+    let makeThumbstickNodeList (thumbSticks:Thumbstick seq)=
+        thumbSticks
+        |> Seq.foldi (fun state thumbstick i ->
+                        {Name = $"thumbStick{thumbstick.Index}"
+                         Type = DeviceType.Collection
+                         Children = Some [
+                             {Name = "x"; Type = DeviceType.Axis; Children = None }
+                             {Name = "y"; Type = DeviceType.Axis; Children = None }
+                         ]}::state) List.Empty
+    let makeButtonNodeList (buttons:Button seq) =
+        buttons
+        |> Seq.fold (fun state button ->
+                         {
+                             Name=button.Name.ToString()
+                             Type=DeviceType.Button
+                             Children = None
+                         }::state) List.Empty
+    let makeTriggerNodeList (triggers:Trigger seq) =
+        triggers
+        |> Seq.fold (fun state (trigger:Trigger)  ->
+                        {Name = $"trigger{trigger.Index}"
+                         Type = DeviceType.Button
+                         Children = None}::state) List.Empty    
+            
+    let makeControllerNode state (ctlr:IGamepad) i =
+        let name = $"Gamepad{i}"
+        let ctlrButtons =
+            ctlr.Buttons
+            |> makeButtonNodeList
+        let ctlrThumbsticks =
+            ctlr.Thumbsticks
+            |> makeThumbstickNodeList
+        let ctlrTriggers = 
+            ctlr.Triggers
+            |> makeTriggerNodeList    
+      
+        let children = [ctlrButtons;ctlrThumbsticks] |>List.concat
+        {Name=name;Type=Collection;Children=Some children}::state    
+   (*let makeJoystick node (joystick:IJoystick) i =
+        let name = $"Joystick{i}"
+        let buttons =
+            joystick.Buttons
+            |> makeButtonIndeNodeList
+        let axes =
+            joystick.Axes
+            |> Seq.foldi (fun state axis i ->
+                            {Name = $"axis{i}"
+                             Type = DeviceType.Axis
+                             Children = None}::state) List.Empty
+        let children = [buttons;axes] |> List.concat
+        {Name=name;Type=Collection;Children=Some children}*)
    
     let getInputContext (window:Graphics2D.Window) =
             //could be wasteful, measure and buffer if necc
@@ -71,8 +123,14 @@ type SilkInputManager() =
             let mouseList =
                 ctxt.Mice
                 |> Seq.foldi makeMouseNode List.Empty
+            let controllerList =
+                ctxt.Gamepads
+                |> Seq.foldi makeControllerNode List.Empty
+            (*let joystickList =
+                ctxt.Joysticks
+                |> Seq.foldi makeJoystickNode List.Empty    *)
             
-            [kbNodelist;mouseList]
+            [kbNodelist;mouseList;controllerList]
             |>List.concat
             
         member this.GetDeviceValue window path = failwith "Not implemented"
