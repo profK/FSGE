@@ -90,7 +90,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Assert.Equal(Size(400,400), size)
         
     member this.recursivePrintDevices indent deviceList =
-        deviceList |> List.iter (fun node -> output.WriteLine(indent+node.Name); 
+        deviceList |> List.iter (fun node -> output.WriteLine(indent+node.Name+": "+node.Path); 
                                              match node.Children with
                                              | Some children -> this.recursivePrintDevices (indent+"  ") children 
                                              | None -> ())   

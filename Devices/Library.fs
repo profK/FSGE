@@ -25,6 +25,7 @@ type DeviceNode = {
     Name: string
     Type: DeviceType
     Children: (DeviceNode list) option
+    Path: string
 }
 
 

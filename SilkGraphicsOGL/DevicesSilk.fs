@@ -24,98 +24,121 @@ type SilkInputManager() =
     let makeKBNode state kb i =
         let name = $"Keyboard{i}"
         let newkb =
-            {Name=name; Type= Keyboard; Children=None}
+            {Name=name; Type= Keyboard; Children=None; Path=name}
         newkb::state     
-    let makeMouseButtonNodeList (mouseButtons:MouseButton seq) =
+    let makeMouseButtonNodeList parentPath (mouseButtons:MouseButton seq) =
         mouseButtons
         |> Seq.fold (fun state mouseButton  ->
-                        {Name = mouseButton.ToString()
+                        let name = mouseButton.ToString()
+                        let path = parentPath + $".{name}"
+                        {Name = name
                          Type = DeviceType.Button
-                         Children = None}::state) List.Empty
-    let makeButtonIndexNodeList (buttons:Button seq) =
+                         Children = None
+                         Path=path}::state) List.Empty
+    let makeButtonIndexNodeList parentPath (buttons:Button seq) =
         buttons
         |> Seq.fold (fun state button  ->
-                        {Name = $"Button{button.Index}"
-                         Type = DeviceType.Button
-                         Children = None}::state) List.Empty
-    let makeButtonNameNodeList (buttons:Button seq) =
+                        let name = $"Button{button.Index}"
+                        { Name = name
+                          Type = DeviceType.Button
+                          Children = None
+                          Path= parentPath + $".{name}"
+                        }::state) List.Empty
+          
+    let makeButtonNameNodeList parentPath (buttons:Button seq) =
         buttons
         |> Seq.fold (fun state button ->
+                         let name = button.Name.ToString()
                          {
-                             Name=button.Name.ToString()
+                             Name=name
                              Type=DeviceType.Button
                              Children = None
+                             Path = parentPath+ $".{name}"
                          }::state) List.Empty    
-    let makeScrollWheelNodeList scrollWheels =
+    let makeScrollWheelNodeList parentPath scrollWheels =
         scrollWheels
         |> Seq.foldi (fun state mouseButton i ->
-                        {Name = $"scrollwheel{i}"
+                        let name = $"scrollwheel{i}"
+                        {Name = name
                          Type = DeviceType.Collection
                          Children = Some [
-                             {Name = "x"; Type = DeviceType.Axis; Children = None }
-                             {Name = "y"; Type = DeviceType.Axis; Children = None }
-                         ]}::state) List.Empty
+                             {Name = "x"; Type = DeviceType.Axis; Children = None;Path=parentPath + $".{name}.x"}
+                             {Name = "y"; Type = DeviceType.Axis; Children = None;Path=parentPath + $".{name}.y"}
+                         ]
+                         Path=parentPath+name}::state) List.Empty
         
     let makeMouseNode state (mouse:IMouse) i =
         let name = $"Mouse{i}"
         let mouseButtons =
             mouse.SupportedButtons
-            |> makeMouseButtonNodeList
+            |> makeMouseButtonNodeList name
         let scrollWheels =
             mouse.ScrollWheels
-            |> makeScrollWheelNodeList
-        let position = [{Name="position";Type=Collection;Children=
+            |> makeScrollWheelNodeList name
+        let position = [{Name="position"
+                         Type=Collection
+                         Children=
                              Some [
-                                {Name="x";Type=DeviceType.Axis;Children=None}
-                                {Name="y";Type=DeviceType.Axis;Children=None}
-                             ]}]  
+                                {Name="x";Type=DeviceType.Axis;Children=None;Path=name+".position.x"}
+                                {Name="y";Type=DeviceType.Axis;Children=None;Path=name+".position.y"}
+                             ]
+                         Path=name+".position"
+                      }]  
         let children = [mouseButtons;scrollWheels;position] |>List.concat
-        {Name=name;Type=Collection;Children=Some children}::state
+        {Name=name;Type=Collection;Children=Some children;Path=name}::state
         
-    let makeThumbstickNodeList (thumbSticks:Thumbstick seq)=
+    let makeThumbstickNodeList parentPath (thumbSticks:Thumbstick seq)=
         thumbSticks
-        |> Seq.foldi (fun state thumbstick i ->
-                        {Name = $"thumbStick{thumbstick.Index}"
+        |> Seq.fold (fun state thumbstick ->
+                        let name = $"thumbStick{thumbstick.Index}"
+                        let path = parentPath + $".{name}"
+                        {Name = name
                          Type = DeviceType.Collection
                          Children = Some [
-                             {Name = "x"; Type = DeviceType.Axis; Children = None }
-                             {Name = "y"; Type = DeviceType.Axis; Children = None }
-                         ]}::state) List.Empty
-   
-    let makeTriggerNodeList (triggers:Trigger seq) =
+                             {Name = "x"; Type = DeviceType.Axis; Children = None; Path = path+".x"}
+                             {Name = "y"; Type = DeviceType.Axis; Children = None; Path = path+".y" }
+                         ]
+                         Path=path
+                         }::state) List.Empty    
+                  
+    let makeTriggerNodeList parentPath (triggers:Trigger seq) =
         triggers
         |> Seq.fold (fun state (trigger:Trigger)  ->
-                        {Name = $"trigger{trigger.Index}"
+                        let name = $"trigger{trigger.Index}"
+                        {Name =name
                          Type = DeviceType.Button
-                         Children = None}::state) List.Empty    
+                         Children = None
+                         Path = parentPath + $".{name}"
+                         }::state) List.Empty    
             
     let makeControllerNode state (ctlr:IGamepad) i =
         let name = $"Gamepad{i}"
         let ctlrButtons =
             ctlr.Buttons
-            |> makeButtonNameNodeList
+            |> makeButtonNameNodeList name
         let ctlrThumbsticks =
             ctlr.Thumbsticks
-            |> makeThumbstickNodeList
+            |> makeThumbstickNodeList name
         let ctlrTriggers = 
             ctlr.Triggers
-            |> makeTriggerNodeList    
+            |> makeTriggerNodeList name   
       
-        let children = [ctlrButtons;ctlrThumbsticks] |>List.concat
-        {Name=name;Type=Collection;Children=Some children}::state    
+        let children = [ctlrButtons;ctlrThumbsticks;ctlrTriggers] |>List.concat
+        {Name=name;Type=Collection;Children=Some children; Path=name}::state    
     let makeJoystickNode state (joystick:IJoystick) i =
         let name = $"Joystick{i}"
         let buttons =
             joystick.Buttons
-            |> makeButtonIndexNodeList
+            |> makeButtonIndexNodeList name
         let axes =
             joystick.Axes
             |> Seq.foldi (fun state axis i ->
                             {Name = $"axis{i}"
                              Type = DeviceType.Axis
-                             Children = None}::state) List.Empty
+                             Children = None
+                             Path=name}::state) List.Empty
         let children = [buttons;axes] |> List.concat
-        {Name=name;Type=Collection;Children=Some children}::state
+        {Name=name;Type=Collection;Children=Some children;Path=name}::state
    
     let getInputContext (window:Graphics2D.Window) =
             //could be wasteful, measure and buffer if necc
