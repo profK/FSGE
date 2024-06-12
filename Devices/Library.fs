@@ -28,10 +28,13 @@ type DeviceNode = {
     Path: string
 }
 
+type DeviceContext = interface end
+
 
 type IDeviceManager =
-    abstract member GetDeviceTree : Window -> DeviceNode list
-    abstract member GetDeviceValue : Window->DeviceNode -> DeviceValue
+    abstract member tryGetDeviceContext : Window -> DeviceContext option
+    abstract member GetDeviceTree : DeviceContext -> DeviceNode list
+    abstract member tryGetDeviceValue : DeviceContext->string -> DeviceValue option
     
 
 module Devices =
@@ -39,5 +42,6 @@ module Devices =
         match ManagerRegistry.getManager<IDeviceManager>() with
         | Some manager -> manager
         | None -> failwith "No input manager found"
-    let GetDeviceTree window = _deviceManager.GetDeviceTree window
-    let GetDeviceValue window deviceNode  = _deviceManager.GetDeviceValue window deviceNode
+    let tryGetDeviceContext window = _deviceManager.tryGetDeviceContext window    
+    let GetDeviceTree context = _deviceManager.GetDeviceTree context
+    let tryGetDeviceValue context deviceNode  = _deviceManager.tryGetDeviceValue context deviceNode

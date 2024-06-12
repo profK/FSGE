@@ -17,7 +17,11 @@ module Seq =
                             (snd stateTuple)+1
                          )
                          (state,0)
-        fst result                 
+        fst result
+        
+type SilkDeviceContext(silkInputContext:IInputContext) =
+    interface DeviceContext
+    member val Context = silkInputContext with get      
  
 [<Manager("Silk Input", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
 type SilkInputManager() =
@@ -147,21 +151,14 @@ type SilkInputManager() =
     let splitOrdinal id =
         Regex.Split(id, @"(?<=[a-zA-Z])(?=\d)")
      
-    member val private _Context = None with get,set
-    member val private _KBStates = None with get,set
-    
-    member this.Context window  = 
-        match this._Context with
-        | Some ctxt -> ctxt
-        | None -> 
-            let ctxt = getInputContext window
-            this._Context <- Some ctxt
-            this._KBStates <- Some (DeviceStates.GetKBStates ctxt)
-            ctxt
+
             
-    interface Devices.IDeviceManager with
-        member this.GetDeviceTree window  =
-            let ctxt = this.Context window
+    interface IDeviceManager with
+        member this.tryGetDeviceContext window =
+            let inputContext = getInputContext window
+            Some (SilkDeviceContext(inputContext))
+        member this.GetDeviceTree deviceContext  =
+            let ctxt = (deviceContext :?> SilkDeviceContext).Context
             let kbNodelist =
                 ctxt.Keyboards  
                 |> Seq.foldi makeKBNode List.Empty
@@ -179,18 +176,5 @@ type SilkInputManager() =
             |>List.concat
             
      
-        member this.GetDeviceValue window node =
-            match node.Type with
-            | Keyboard ->
-                let s = splitOrdinal node.Name
-                let ctxt = this.Context window
-                let kb = ctxt.Keyboards.[int s[1]]
-                this._KBStates.Value.GetKeyStates kb
-                |> Set.toArray
-                |> KeyboardValue
-                
-               
-            
-            
-            
-            
+        member this.tryGetDeviceValue deviceContext node =
+            None
