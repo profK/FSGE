@@ -9,9 +9,9 @@ open SilkGraphicsOGL.WindowGL
 open SwiftGraphicsAndInput.SilkDeviceStates
 
 module Seq =
-    let foldi func state seq =
+    let foldi func state inseq =
         let result =
-            seq
+            inseq
             |> Seq.fold (fun stateTuple mbr ->
                          (func (fst stateTuple) mbr (snd stateTuple)),
                             (snd stateTuple)+1
