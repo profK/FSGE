@@ -32,16 +32,19 @@ type DeviceContext = interface end
 
 
 type IDeviceManager =
-    abstract member tryGetDeviceContext : Window -> DeviceContext option
+    abstract member tryGetDeviceContext : Graphics2D.Window -> DeviceContext option
+    abstract member tryGetDeviceValue : DeviceContext->string-> DeviceValue option
     abstract member GetDeviceTree : DeviceContext -> DeviceNode list
-    abstract member tryGetDeviceValue : DeviceContext->string -> DeviceValue option
-    
+    abstract member MapPlatformScanCodeToHID : uint32 -> uint32    
 
 module Devices =
     let _deviceManager =
         match ManagerRegistry.getManager<IDeviceManager>() with
         | Some manager -> manager
         | None -> failwith "No input manager found"
-    let tryGetDeviceContext window = _deviceManager.tryGetDeviceContext window    
+    let TryGetDeviceContext window = _deviceManager.tryGetDeviceContext window    
     let GetDeviceTree context = _deviceManager.GetDeviceTree context
-    let tryGetDeviceValue context deviceNode  = _deviceManager.tryGetDeviceValue context deviceNode
+    let TryGetDeviceValue context path = _deviceManager.tryGetDeviceValue context path
+    let MapPlatformScanCodeToHID code = _deviceManager.MapPlatformScanCodeToHID code
+    
+  

@@ -6,8 +6,8 @@ open Devices
 open ManagerRegistry
 open Silk.NET.Input
 open SilkGraphicsOGL.WindowGL
-open SwiftGraphicsAndInput.SilkDeviceStates
-
+open FSharp.Collections
+open SilkScanCodeConversion
 module Seq =
     let foldi func state inseq =
         let result =
@@ -21,15 +21,13 @@ module Seq =
         
 type SilkDeviceContext(silkInputContext:IInputContext) =
     interface DeviceContext
-    member val Context = silkInputContext with get      
+    member val Context = silkInputContext with get
+    member val Values:Map<string,DeviceValue> = Map.empty with get,set
+   
  
 [<Manager("Silk Input", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
 type SilkInputManager() =
-    let makeKBNode state kb i =
-        let name = $"Keyboard{i}"
-        let newkb =
-            {Name=name; Type= Keyboard; Children=None; Path=name}
-        newkb::state     
+        
     let makeMouseButtonNodeList parentPath (mouseButtons:MouseButton seq) =
         mouseButtons
         |> Seq.fold (fun state mouseButton  ->
@@ -149,19 +147,53 @@ type SilkInputManager() =
             (window :?> SilkWindow).SilkWindow.CreateInput()
             
     let splitOrdinal id =
-        Regex.Split(id, @"(?<=[a-zA-Z])(?=\d)")
+        Regex.Match(id, @"([a-zA-Z]+)(\d+)")
      
-
             
     interface IDeviceManager with
         member this.tryGetDeviceContext window =
             let inputContext = getInputContext window
             Some (SilkDeviceContext(inputContext))
         member this.GetDeviceTree deviceContext  =
-            let ctxt = (deviceContext :?> SilkDeviceContext).Context
+            let silkCtxt = (deviceContext :?> SilkDeviceContext)
+            let ctxt = silkCtxt.Context
             let kbNodelist =
                 ctxt.Keyboards  
-                |> Seq.foldi makeKBNode List.Empty
+                |> Seq.foldi (fun state (kb:IKeyboard) i ->
+                                let name = $"Keyboard{i}"
+                                let newkb =
+                                    {Name=name; Type= Keyboard; Children=None; Path=name}
+                                kb.add_KeyDown(fun kb key  i ->
+                                    let kbValueOpt = Map.tryFind name silkCtxt.Values
+                                    silkCtxt.Values <-
+                                        match kbValueOpt with
+                                        | Some value ->
+                                            match value with
+                                            | KeyboardValue(keyArray) ->
+                                                let newArray = Array.append keyArray [| uint32 key|]
+                                                let newkbv = KeyboardValue(newArray)            
+                                                Map.add name newkbv silkCtxt.Values
+                                            | _ -> failwith "Value for keyboard not a keyboard value"    
+                                        | None ->
+                                            let newkbv = KeyboardValue ([| uint32 key|])
+                                            Map.add name newkbv silkCtxt.Values
+                                )
+                                kb.add_KeyUp(fun kb key i ->
+                                    let kbValueOpt = Map.tryFind name silkCtxt.Values
+                                    silkCtxt.Values <-
+                                        match kbValueOpt with
+                                        | Some value ->
+                                            match value with
+                                            | KeyboardValue(keyArray) ->
+                                                let newArray = Array.filter (fun k -> k <> uint32 key) keyArray
+                                                let newkbv = KeyboardValue(newArray)            
+                                                Map.remove name  silkCtxt.Values
+                                            | _ -> failwith "Value for keyboard not a keyboard value"    
+                                        | None ->
+                                            let newkbv = KeyboardValue ([||])
+                                            Map.remove name  silkCtxt.Values
+                                )
+                                newkb::state ) List.Empty
             let mouseList =
                 ctxt.Mice
                 |> Seq.foldi makeMouseNode List.Empty
@@ -175,6 +207,13 @@ type SilkInputManager() =
             [kbNodelist;mouseList;controllerList]
             |>List.concat
             
-     
-        member this.tryGetDeviceValue deviceContext node =
-            None
+        member this.tryGetDeviceValue deviceContext path =
+            let silkCtxt = (deviceContext :?> SilkDeviceContext)
+            let valueOpt = Map.tryFind path silkCtxt.Values
+            valueOpt
+
+        member this.MapPlatformScanCodeToHID var0 =
+            mapSilkToHID var0
+            
+       
+            

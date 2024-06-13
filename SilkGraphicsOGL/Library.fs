@@ -8,6 +8,7 @@ open Silk.NET.Windowing
 open Silk.NET.Maths
 open Graphics2D
 open SilkGraphicsOGL.WindowGL
+open SwiftGraphicsAndInput
 
 
 [<Manager("Silk Graphics", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
@@ -68,4 +69,8 @@ type SilkGraphicsManager() =
             window :?> SilkWindow
             |> fun w -> w.Display()
             window
+        member this.DoEvents window =
+            let silkWindow = (window :?> SilkWindow)
+            silkWindow.SilkWindow.DoEvents()
+        
             

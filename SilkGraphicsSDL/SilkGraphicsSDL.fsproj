@@ -3,16 +3,14 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <RootNamespace>Input</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="Library.fs"/>
-        <Compile Include="HIDScanCodes.fs" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FSFramework" Version="1.0.0-preview-1" />
+      <PackageReference Include="Silk.NET.SDL" Version="2.21.0" />
     </ItemGroup>
 
     <ItemGroup>

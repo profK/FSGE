@@ -31,6 +31,7 @@ type IGraphicsManager =
     abstract member DrawImage : Matrix4x4->Image-> Window
     abstract member Clear : Color ->  Window -> Window
     abstract member Display : Window -> Window
+    abstract member DoEvents : Window -> unit
 
 module Window =
     //This fetches the plugin graphics manager plugin
@@ -120,6 +121,7 @@ module Window =
     let CreateRotation radians = Matrix4x4.CreateRotationZ(radians)
     let CreateTranslation (vector:Vector2) =
         Matrix4x4.CreateTranslation(vector.X,vector.Y,0.0f)
+    let DoEvents window = _graphicsManager.DoEvents window    
         
         
     

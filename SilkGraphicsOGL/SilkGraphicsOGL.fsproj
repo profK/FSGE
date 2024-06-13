@@ -10,6 +10,7 @@
         <Compile Include="ShadersGLSL.fs" />
         <Compile Include="WindowGL.fs" />
         <Compile Include="SilkDeviceStates.fs" />
+        <Compile Include="ScanCodes.fs" />
         <Compile Include="DevicesSilk.fs" />
         <Compile Include="Library.fs"/>
     </ItemGroup>

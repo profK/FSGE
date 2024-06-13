@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{44DF
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SilkGraphicsOGL", "SilkGraphicsOGL\SilkGraphicsOGL.fsproj", "{1D702A64-41F4-44FA-8DF9-4262DDE58FDB}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SilkGraphicsSDL", "SilkGraphicsSDL\SilkGraphicsSDL.fsproj", "{2748423F-0730-4196-ADD9-1284AEDC9622}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,8 +34,13 @@ Global
 		{1D702A64-41F4-44FA-8DF9-4262DDE58FDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D702A64-41F4-44FA-8DF9-4262DDE58FDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D702A64-41F4-44FA-8DF9-4262DDE58FDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2748423F-0730-4196-ADD9-1284AEDC9622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2748423F-0730-4196-ADD9-1284AEDC9622}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2748423F-0730-4196-ADD9-1284AEDC9622}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2748423F-0730-4196-ADD9-1284AEDC9622}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1D702A64-41F4-44FA-8DF9-4262DDE58FDB} = {44DF9982-FC27-4DFA-B680-88C0D3D06148}
+		{2748423F-0730-4196-ADD9-1284AEDC9622} = {44DF9982-FC27-4DFA-B680-88C0D3D06148}
 	EndGlobalSection
 EndGlobal

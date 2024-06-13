@@ -5,6 +5,8 @@ open System.Drawing
 open System.Numerics
 open System.Reflection
 open System.Threading
+open Input
+open Input.HIDScanCodes
 open ManagerRegistry
 open SilkGraphicsOGL
 open Xunit
@@ -93,12 +95,20 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         deviceList |> List.iter (fun node -> output.WriteLine(indent+node.Name+": "+node.Path); 
                                              match node.Children with
                                              | Some children -> this.recursivePrintDevices (indent+"  ") children 
-                                             | None -> ())   
+                                             | None -> ())
+    member this.recursiveValueCheck deviceContext deviceList indent =
+        deviceList |> List.iter (fun node -> 
+            match Devices.TryGetDeviceValue deviceContext node.Path with
+            | Some value -> output.WriteLine(indent+node.Name+": "+value.ToString())
+            | None -> output.WriteLine(node.Name+": No value found")
+            match node.Children with
+            | Some children -> this.recursiveValueCheck deviceContext children (indent+"    ")
+            | None -> ())    
     [<Fact>]
     member this.testDeviceList() =
         let window = Graphics2D.Window.create 800 600 "Test Window"
         let deviceContext =
-            match  Devices.tryGetDeviceContext window with
+            match  Devices.TryGetDeviceContext window with
             | Some context -> context
             | None -> failwith "No device context found"
         let deviceList = Devices.GetDeviceTree deviceContext
@@ -111,27 +121,26 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
     member this.testDeviceValues() =
         let window = Graphics2D.Window.create 800 600 "Test Window"
         let deviceContext =
-            match  Devices.tryGetDeviceContext window with
+            match  Devices.TryGetDeviceContext window with
             | Some context -> context
             | None -> failwith "No device context found"
         let deviceList = Devices.GetDeviceTree deviceContext
-        deviceList |> List.filter (fun node -> node.Type = Keyboard)
-        |> List.iter (fun node ->
-            output.WriteLine($"Testing Keyboard: {node.Name}")
-            output.WriteLine("Press just ESC to exit")
-            let mutable finished=false
-            while not finished do
-                let deviceValue = Devices.tryGetDeviceValue deviceContext node.Path
-                match deviceValue with
-                | Some deviceValue  ->
-                    match deviceValue with
-                    | KeyboardValue keys -> 
-                        keys |> Array.iter (fun key -> output.WriteLine(key.ToString()))
-                        if keys |> Array.exists (fun key -> key = 27u) then
-                            finished <- true
-                
-                    | _ -> ()                
-                | None -> failwith "No device value found"
-                Thread.Sleep(100)
-            )
+        let mutable exit = false
+        while not exit do
+            Graphics2D.Window.DoEvents window
+            output.WriteLine "Begin Frame"
+            let value = Devices.TryGetDeviceValue deviceContext "Keyboard0"
+            match value with
+            |Some devValue ->
+                match devValue with
+                | Devices.KeyboardValue(value) ->
+                    let keyCodes:ScanCode array =
+                        value
+                        |> Array.map (fun v -> Devices.MapPlatformScanCodeToHID v)
+                        |> Array.map (fun v -> enum<ScanCode> (int32 v))
+                    output.WriteLine($"Keyboard0: %A{keyCodes}")
+                    exit <- Array.contains ScanCode.Escape keyCodes
+                | _ -> output.WriteLine($"Not a keyboard value {devValue.ToString()}")
+            | None -> output.WriteLine("No value found for Keyboard0")   
+            Thread.Sleep(1000)
         Graphics2D.Window.close window
