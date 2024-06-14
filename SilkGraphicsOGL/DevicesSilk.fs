@@ -197,6 +197,17 @@ type SilkInputManager() =
                 ctxt.Values <- ctxt.Values.Change (bname, fun devValue ->
                     Some (ButtonValue false)  )   
          )
+        ctlr.add_ThumbstickMoved(fun (pad:IGamepad)(thumbstick:Thumbstick ) ->
+            let xname = name +  $"thumbStick{thumbstick.Index}.x"
+            let yname = name + $"thumbStick{thumbstick.Index}.y"
+            ctxt.Values <- ctxt.Values.Change(xname,fun devValue -> Some (AxisValue (float thumbstick.X)))
+            ctxt.Values <- ctxt.Values.Change(yname,fun devValue -> Some (AxisValue (float thumbstick.Y)))
+        )
+        ctlr.add_TriggerMoved(fun (pad:IGamepad)(trigger:Trigger) ->
+            let tname = name + $"trigger{trigger.Index}"
+            ctxt.Values <- ctxt.Values.Change(tname,fun devValue -> Some (AxisValue (float trigger.Position)))
+        )
+     
     let addJoystickCallbacks (ctxt:SilkDeviceContext) (joystick:IJoystick) =
         joystick.add_ButtonDown ( fun joystick (button:Button) ->
             let bname = $"Joystick{joystick.Index}.Button{button.Index}"
@@ -206,6 +217,33 @@ type SilkInputManager() =
             let bname = $"Joystick{joystick.Index}.Button{button.Index}"
             ctxt.Values <- ctxt.Values.Change(bname,fun v -> Some (ButtonValue false))
         )
+        
+    let addMouseCallbacks (ctxt:SilkDeviceContext) (mouse:IMouse) name =
+        mouse.add_MouseDown(
+            fun mouse (button:MouseButton) ->
+                let bname = name + $"{button.ToString()}"
+                ctxt.Values <- ctxt.Values.Change(bname,fun v -> Some (ButtonValue true))
+        )
+        mouse.add_MouseUp(
+            fun mouse (button:MouseButton) ->
+                let bname = name + $"{button.ToString()}"
+                ctxt.Values <- ctxt.Values.Change(bname,fun v -> Some (ButtonValue false))
+        )
+        mouse.add_Scroll(
+            fun mouse (scroll:ScrollWheel) ->
+                // Note that the api sends  no identifying info for the scroll wheel
+                //So this code only supports 1 scroll wheel per mouse
+                let xname = name + $".scrollWheel0.x"
+                let yname = name + $".scrollwheel0.y"
+                ctxt.Values <- ctxt.Values.Change(xname,fun v -> Some (AxisValue (float scroll.X)))
+                ctxt.Values <- ctxt.Values.Change(yname,fun v -> Some (AxisValue (float scroll.Y)))
+        )
+        mouse.add_MouseMove(fun (mouse:IMouse) pos ->
+            let xname = name + ".position.x"
+            let yname = name + ".position.y"
+            ctxt.Values <- ctxt.Values.Change(xname,fun v -> Some (AxisValue (float pos.X)))
+            ctxt.Values <- ctxt.Values.Change(yname,fun v -> Some (AxisValue (float pos.Y)))
+        )                                          
             
     interface IDeviceManager with
         member this.tryGetDeviceContext window =
@@ -224,7 +262,26 @@ type SilkInputManager() =
                                 newkb::state ) List.Empty
             let mouseList =
                 ctxt.Mice
-                |> Seq.foldi makeMouseNode List.Empty
+                |> Seq.mapi (fun i (mouse:IMouse) ->
+                                let name = $"Mouse{i}"
+                                let mouseButtons =
+                                    mouse.SupportedButtons
+                                    |> makeMouseButtonNodeList name
+                                let scrollWheels =
+                                    mouse.ScrollWheels
+                                    |> makeScrollWheelNodeList name
+                                let position = [{Name="position"
+                                                 Type=Collection
+                                                 Children=
+                                                     Some [
+                                                        {Name="x";Type=DeviceType.Axis;Children=None;Path=name+".position.x"}
+                                                        {Name="y";Type=DeviceType.Axis;Children=None;Path=name+".position.y"}
+                                                     ]
+                                                 Path=name+".position"
+                                              }]  
+                                let children = [mouseButtons;scrollWheels;position] |>List.concat
+                                addMouseCallbacks silkCtxt mouse name
+                                {Name=name;Type=Collection;Children=Some children;Path=name}) |> List.ofSeq
             let controllerList =
                 ctxt.Gamepads
                 |> Seq.foldi (fun state (ctlr:IGamepad) i ->
