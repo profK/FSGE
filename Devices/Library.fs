@@ -35,7 +35,8 @@ type IDeviceManager =
     abstract member tryGetDeviceContext : Graphics2D.Window -> DeviceContext option
     abstract member tryGetDeviceValue : DeviceContext->string-> DeviceValue option
     abstract member GetDeviceTree : DeviceContext -> DeviceNode list
-    abstract member MapPlatformScanCodeToHID : uint32 -> uint32    
+    abstract member MapPlatformScanCodeToHID : uint32 -> uint32
+    abstract member GetDeviceValuesMap : DeviceContext -> Map<string,DeviceValue>
 
 module Devices =
     let _deviceManager =
@@ -45,6 +46,7 @@ module Devices =
     let TryGetDeviceContext window = _deviceManager.tryGetDeviceContext window    
     let GetDeviceTree context = _deviceManager.GetDeviceTree context
     let TryGetDeviceValue context path = _deviceManager.tryGetDeviceValue context path
+    let GetDeviceValuesMap context = _deviceManager.GetDeviceValuesMap context
     let MapPlatformScanCodeToHID code = _deviceManager.MapPlatformScanCodeToHID code
     
   
