@@ -266,8 +266,7 @@ type SilkInputManager() =
             
         member this.tryGetDeviceValue deviceContext path =
             let silkCtxt = (deviceContext :?> SilkDeviceContext)
-            let valueOpt = Map.tryFind path silkCtxt.Values
-            valueOpt
+            Map.tryFind path silkCtxt.Values
 
         member this.MapPlatformScanCodeToHID var0 =
             mapSilkToHID var0

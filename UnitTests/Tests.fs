@@ -152,17 +152,19 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
             match  Devices.TryGetDeviceContext window with
             | Some context -> context
             | None -> failwith "No device context found"
+        let deviceList = Devices.GetDeviceTree deviceContext //todo make this unecessary
         let mutable lastValueMap = Map.empty    
-        let deviceList = Devices.GetDeviceValuesMap deviceContext
         let mutable exit = false
         while not exit do
+            Graphics2D.Window.DoEvents window    
             let valueMap = Devices.GetDeviceValuesMap deviceContext
+            output.WriteLine("Value count: "+valueMap.Count.ToString())
             valueMap |> Map.toArray
             |> Array.filter (fun (k,v) ->
                 not (lastValueMap.ContainsKey k) || (lastValueMap.[k] = v))   
             |>Array.iter (fun kv -> output.WriteLine($"{fst kv}: {snd kv}"))
             lastValueMap <- valueMap
-            exit <- if valueMap.ContainsKey "Keybaord0" then
+            exit <- if valueMap.ContainsKey "Keyboard0" then
                         let value = valueMap.["Keyboard0"]
                         match value with
                         | Devices.KeyboardValue(value) ->
@@ -173,27 +175,8 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
                             Array.contains ScanCode.Escape keyCodes
                         | _ -> false
                     else
-                        output.WriteLine "Warning Keyboard0 not detected"
+                        //output.WriteLine "Warning Keyboard0 not detected"
                         false
             Thread.Sleep(1000)
-        
-        let mutable exit = false
-        output.WriteLine "Press keys to test, press esc to end test"
-        while not exit do
-            Graphics2D.Window.DoEvents window     
-            let value = Devices.TryGetDeviceValue deviceContext "Keyboard0"
-            match value with
-            |Some devValue ->
-                match devValue with
-                | Devices.KeyboardValue(value) ->
-                    let keyCodes:ScanCode array =
-                        value
-                        |> Array.map (fun v -> Devices.MapPlatformScanCodeToHID v)
-                        |> Array.map (fun v -> enum<ScanCode> (int32 v))
-                    output.WriteLine($"Keyboard0: %A{keyCodes}")
-                    exit <- Array.contains ScanCode.Escape keyCodes
-                | _ -> output.WriteLine($"Not a keyboard value {devValue.ToString()}")
-            | None -> output.WriteLine("No value found for Keyboard0")   
-            Thread.Sleep(100)
         Graphics2D.Window.close window
     
