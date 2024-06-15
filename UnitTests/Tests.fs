@@ -5,6 +5,7 @@ open System.Drawing
 open System.Numerics
 open System.Reflection
 open System.Threading
+open Devices
 open Input
 open Input.HIDScanCodes
 open ManagerRegistry
@@ -17,7 +18,7 @@ open SilkDevices
 type GraphicsManagerTestsFixture() =
     do
         addManager(typeof<SilkGraphicsManager>)
-        addManager(typeof<SilkDevices.SilkInputManager>)
+        addManager(typeof<SilkDevices.SilkDeviceManager>)
 type GraphicsManagerTests(output:ITestOutputHelper ) =
     let ITestOutputHelper = output;
     interface IClassFixture<GraphicsManagerTestsFixture>
@@ -91,7 +92,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Graphics2D.Window.close window
         Assert.Equal(Size(400,400), size)
         
-    member this.recursivePrintDevices indent deviceList =
+    member this.recursivePrintDevices indent (deviceList:DeviceNode seq) =
         deviceList |> Seq.iter (fun node -> output.WriteLine(indent+node.Name+": "+node.Path); 
                                              match node.Children with
                                              | Some children -> this.recursivePrintDevices (indent+"  ") children 
@@ -112,7 +113,8 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
             | Some context -> context
             | None -> failwith "No device context found"
         let deviceList = Devices.GetDeviceTree deviceContext
-        Assert.True(deviceList.Length > 0)
+        let devarray = deviceList |> Seq.toArray
+        Assert.True(devarray.Length > 0)
         output.WriteLine "Devices:"
         deviceList |>  this.recursivePrintDevices ""
         Graphics2D.Window.close window    

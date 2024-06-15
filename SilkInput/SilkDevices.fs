@@ -1,4 +1,4 @@
-﻿module SilkDevices
+﻿namespace SilkDevices
 
 open System
 open System.Text.RegularExpressions

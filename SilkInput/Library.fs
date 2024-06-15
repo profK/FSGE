@@ -1,4 +1,4 @@
-﻿namespace SilkInput
+﻿namespace SilkDevices
 
 open Devices
 open ManagerRegistry
