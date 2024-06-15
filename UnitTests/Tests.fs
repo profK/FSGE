@@ -11,7 +11,7 @@ open ManagerRegistry
 open SilkGraphicsOGL
 open Xunit
 open Xunit.Abstractions
-open Devices
+open SilkDevices
 
 // Graphics Manager tests
 type GraphicsManagerTestsFixture() =
@@ -92,12 +92,12 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Assert.Equal(Size(400,400), size)
         
     member this.recursivePrintDevices indent deviceList =
-        deviceList |> List.iter (fun node -> output.WriteLine(indent+node.Name+": "+node.Path); 
+        deviceList |> Seq.iter (fun node -> output.WriteLine(indent+node.Name+": "+node.Path); 
                                              match node.Children with
                                              | Some children -> this.recursivePrintDevices (indent+"  ") children 
                                              | None -> ())
     member this.recursiveValueCheck deviceContext deviceList indent =
-        deviceList |> List.iter (fun node -> 
+        deviceList |> Seq.iter (fun node -> 
             match Devices.TryGetDeviceValue deviceContext node.Path with
             | Some value -> output.WriteLine(indent+node.Name+": "+value.ToString())
             | None -> output.WriteLine(node.Name+": No value found")

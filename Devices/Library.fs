@@ -24,7 +24,7 @@ type DeviceValue =
 type DeviceNode = {
     Name: string
     Type: DeviceType
-    Children: (DeviceNode list) option
+    Children: (DeviceNode seq) option
     Path: string
 }
 
@@ -34,7 +34,7 @@ type DeviceContext = interface end
 type IDeviceManager =
     abstract member tryGetDeviceContext : Graphics2D.Window -> DeviceContext option
     abstract member tryGetDeviceValue : DeviceContext->string-> DeviceValue option
-    abstract member GetDeviceTree : DeviceContext -> DeviceNode list
+    abstract member GetDeviceTree : DeviceContext -> DeviceNode seq
     abstract member MapPlatformScanCodeToHID : uint32 -> uint32
     abstract member GetDeviceValuesMap : DeviceContext -> Map<string,DeviceValue>
 

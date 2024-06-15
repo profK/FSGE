@@ -12,6 +12,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SilkGraphicsOGL", "SilkGrap
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SilkGraphicsSDL", "SilkGraphicsSDL\SilkGraphicsSDL.fsproj", "{2748423F-0730-4196-ADD9-1284AEDC9622}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SilkInput", "SilkInput\SilkInput.fsproj", "{6BDD2DA6-2058-48EB-8374-0904A38930E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,9 +40,14 @@ Global
 		{2748423F-0730-4196-ADD9-1284AEDC9622}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2748423F-0730-4196-ADD9-1284AEDC9622}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2748423F-0730-4196-ADD9-1284AEDC9622}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BDD2DA6-2058-48EB-8374-0904A38930E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BDD2DA6-2058-48EB-8374-0904A38930E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BDD2DA6-2058-48EB-8374-0904A38930E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BDD2DA6-2058-48EB-8374-0904A38930E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1D702A64-41F4-44FA-8DF9-4262DDE58FDB} = {44DF9982-FC27-4DFA-B680-88C0D3D06148}
 		{2748423F-0730-4196-ADD9-1284AEDC9622} = {44DF9982-FC27-4DFA-B680-88C0D3D06148}
+		{6BDD2DA6-2058-48EB-8374-0904A38930E3} = {44DF9982-FC27-4DFA-B680-88C0D3D06148}
 	EndGlobalSection
 EndGlobal

@@ -8,7 +8,7 @@ open Silk.NET.Windowing
 open Silk.NET.Maths
 open Graphics2D
 open SilkGraphicsOGL.WindowGL
-open SwiftGraphicsAndInput
+
 
 
 [<Manager("Silk Graphics", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]

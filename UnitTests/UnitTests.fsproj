@@ -41,6 +41,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj" />
       <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj" />
+      <ProjectReference Include="..\SilkInput\SilkInput.fsproj" />
     </ItemGroup>
 
 </Project>

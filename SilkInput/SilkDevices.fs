@@ -8,58 +8,47 @@ open Silk.NET.Input
 open SilkGraphicsOGL.WindowGL
 open FSharp.Collections
 open SilkScanCodeConversion
-module Seq =
-    let foldi func state inseq =
-        let result =
-            inseq
-            |> Seq.fold (fun stateTuple mbr ->
-                         (func (fst stateTuple) mbr (snd stateTuple)),
-                            (snd stateTuple)+1
-                         )
-                         (state,0)
-        fst result
-        
+
 type SilkDeviceContext(silkInputContext:IInputContext) =
-    interface DeviceContext
-    member val Context = silkInputContext with get
-    member val Values:Map<string,DeviceValue> = Map.empty with get,set
-   
- 
-[<Manager("Silk Input", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
-type SilkInputManager() =
-        
+
+        interface DeviceContext
+        member val Context = silkInputContext with get
+        member val  Values:Map<string,DeviceValue> = Map.empty with get,set
+        member val  Devices:DeviceNode seq = []  with get,set  
+
+module SilkDevices =
     let makeMouseButtonNodeList parentPath (mouseButtons:MouseButton seq) =
         mouseButtons
-        |> Seq.fold (fun state mouseButton  ->
+        |> Seq.map (fun mouseButton  ->
                         let name = mouseButton.ToString()
                         let path = parentPath + $".{name}"
                         {Name = name
                          Type = DeviceType.Button
                          Children = None
-                         Path=path}::state) List.Empty
+                         Path=path})
     let makeButtonIndexNodeList parentPath (buttons:Button seq) =
         buttons
-        |> Seq.fold (fun state button  ->
+        |> Seq.map (fun (button:Button)  ->
                         let name = $"Button{button.Index}"
                         { Name = name
                           Type = DeviceType.Button
                           Children = None
                           Path= parentPath + $".{name}"
-                        }::state) List.Empty
+                        })
           
     let makeButtonNameNodeList parentPath (buttons:Button seq) =
         buttons
-        |> Seq.fold (fun state button ->
+        |> Seq.map (fun button ->
                          let name = button.Name.ToString()
                          {
                              Name=name
                              Type=DeviceType.Button
                              Children = None
                              Path = parentPath+ $".{name}"
-                         }::state) List.Empty    
+                         })  
     let makeScrollWheelNodeList parentPath scrollWheels =
         scrollWheels
-        |> Seq.foldi (fun state mouseButton i ->
+        |> Seq.mapi (fun mouseButton i ->
                         let name = $"scrollwheel{i}"
                         {Name = name
                          Type = DeviceType.Collection
@@ -67,31 +56,13 @@ type SilkInputManager() =
                              {Name = "x"; Type = DeviceType.Axis; Children = None;Path=parentPath + $".{name}.x"}
                              {Name = "y"; Type = DeviceType.Axis; Children = None;Path=parentPath + $".{name}.y"}
                          ]
-                         Path=parentPath+name}::state) List.Empty
+                         Path=parentPath+name})
         
-    let makeMouseNode state (mouse:IMouse) i =
-        let name = $"Mouse{i}"
-        let mouseButtons =
-            mouse.SupportedButtons
-            |> makeMouseButtonNodeList name
-        let scrollWheels =
-            mouse.ScrollWheels
-            |> makeScrollWheelNodeList name
-        let position = [{Name="position"
-                         Type=Collection
-                         Children=
-                             Some [
-                                {Name="x";Type=DeviceType.Axis;Children=None;Path=name+".position.x"}
-                                {Name="y";Type=DeviceType.Axis;Children=None;Path=name+".position.y"}
-                             ]
-                         Path=name+".position"
-                      }]  
-        let children = [mouseButtons;scrollWheels;position] |>List.concat
-        {Name=name;Type=Collection;Children=Some children;Path=name}::state
+    
         
     let makeThumbstickNodeList parentPath (thumbSticks:Thumbstick seq)=
         thumbSticks
-        |> Seq.fold (fun state thumbstick ->
+        |> Seq.map (fun thumbstick ->
                         let name = $"thumbStick{thumbstick.Index}"
                         let path = parentPath + $".{name}"
                         {Name = name
@@ -101,52 +72,35 @@ type SilkInputManager() =
                              {Name = "y"; Type = DeviceType.Axis; Children = None; Path = path+".y" }
                          ]
                          Path=path
-                         }::state) List.Empty    
+                         })
                   
     let makeTriggerNodeList parentPath (triggers:Trigger seq) =
         triggers
-        |> Seq.fold (fun state (trigger:Trigger)  ->
+        |> Seq.map (fun (trigger:Trigger)  ->
                         let name = $"trigger{trigger.Index}"
                         {Name =name
                          Type = DeviceType.Button
                          Children = None
                          Path = parentPath + $".{name}"
-                         }::state) List.Empty    
+                         })  
             
-    let makeControllerNode state (ctlr:IGamepad) i =
-        let name = $"Gamepad{i}"
-        let ctlrButtons =
-            ctlr.Buttons
-            |> makeButtonNameNodeList name
-        let ctlrThumbsticks =
-            ctlr.Thumbsticks
-            |> makeThumbstickNodeList name
-        let ctlrTriggers = 
-            ctlr.Triggers
-            |> makeTriggerNodeList name
-            
-      
-        let children = [ctlrButtons;ctlrThumbsticks;ctlrTriggers] |>List.concat
-        {Name=name;Type=Collection;Children=Some children; Path=name}::state    
-    let makeJoystickNode state (joystick:IJoystick) i =
+
+    let makeJoystickNode i (joystick:IJoystick)  =
         let name = $"Joystick{i}"
         let buttons =
             joystick.Buttons
             |> makeButtonIndexNodeList name
         let axes =
             joystick.Axes
-            |> Seq.foldi (fun state axis i ->
+            |> Seq.mapi (fun i axis ->
                             {Name = $"axis{i}"
                              Type = DeviceType.Axis
                              Children = None
-                             Path=name}::state) List.Empty
-        let children = [buttons;axes] |> List.concat
-        {Name=name;Type=Collection;Children=Some children;Path=name}::state
+                             Path=name})
+        let children = [buttons;axes] |> Seq.concat
+        {Name=name;Type=Collection;Children=Some children;Path=name}
    
-    let getInputContext (window:Graphics2D.Window) =
-            //could be wasteful, measure and buffer if necc
-            (window :?> SilkWindow).SilkWindow.CreateInput()
-            
+    
     let splitOrdinal id =
         Regex.Match(id, @"([a-zA-Z]+)(\d+)")
     let addKeyboardCallbacks (ctxt:SilkDeviceContext) (kb:IKeyboard) name=
@@ -243,93 +197,51 @@ type SilkInputManager() =
             let yname = name + ".position.y"
             ctxt.Values <- ctxt.Values.Change(xname,fun v -> Some (AxisValue (float pos.X)))
             ctxt.Values <- ctxt.Values.Change(yname,fun v -> Some (AxisValue (float pos.Y)))
-        )                                          
+        )
+    let scanDevices (context:SilkDeviceContext) =
+        let mouseNodes =
+            context.Context.Mice
+            |> Seq.map (fun (mouse:IMouse) ->
+                            let name = $"Mouse{mouse.Index}"
+                            addMouseCallbacks context mouse name
+                            let buttons = makeMouseButtonNodeList name mouse.SupportedButtons
+                            let scrollWheels = makeScrollWheelNodeList name mouse.ScrollWheels
+                            let position = [{Name="position";Type=DeviceType.Collection;Children=Some [
+                                {Name="x";Type=DeviceType.Axis;Children=None;Path=name+".position.x"}
+                                {Name="y";Type=DeviceType.Axis;Children=None;Path=name+".position.y"}
+                            ];Path=name+".position"}]
+                            let children = [buttons;scrollWheels;position]|>Seq.concat
+                            {Name=name;Type=DeviceType.Mouse;Children=
+                                Some children;Path=name})
+        let controllerNodes =
+            context.Context.Gamepads
+            |> Seq.mapi (fun i (ctlr:IGamepad)  ->
+                            let name = $"Gamepad{i}"
+                            let ctlrButtons =
+                                ctlr.Buttons
+                                |> makeButtonNameNodeList name
+                            let ctlrThumbsticks =
+                                ctlr.Thumbsticks
+                                |> makeThumbstickNodeList name
+                            let ctlrTriggers = 
+                                ctlr.Triggers
+                                |> makeTriggerNodeList name
             
-    interface IDeviceManager with
-        member this.tryGetDeviceContext window =
-            let inputContext = getInputContext window
-            Some (SilkDeviceContext(inputContext))
-        member this.GetDeviceTree deviceContext  =
-            let silkCtxt = (deviceContext :?> SilkDeviceContext)
-            let ctxt = silkCtxt.Context
-            let kbNodelist =
-                ctxt.Keyboards  
-                |> Seq.foldi (fun state (kb:IKeyboard) i ->
-                                let name = $"Keyboard{i}"
-                                addKeyboardCallbacks silkCtxt kb name
-                                let newkb =
-                                    {Name=name; Type= Keyboard; Children=None; Path=name}
-                                newkb::state ) List.Empty
-            let mouseList =
-                ctxt.Mice
-                |> Seq.mapi (fun i (mouse:IMouse) ->
-                                let name = $"Mouse{i}"
-                                let mouseButtons =
-                                    mouse.SupportedButtons
-                                    |> makeMouseButtonNodeList name
-                                let scrollWheels =
-                                    mouse.ScrollWheels
-                                    |> makeScrollWheelNodeList name
-                                let position = [{Name="position"
-                                                 Type=Collection
-                                                 Children=
-                                                     Some [
-                                                        {Name="x";Type=DeviceType.Axis;Children=None;Path=name+".position.x"}
-                                                        {Name="y";Type=DeviceType.Axis;Children=None;Path=name+".position.y"}
-                                                     ]
-                                                 Path=name+".position"
-                                              }]  
-                                let children = [mouseButtons;scrollWheels;position] |>List.concat
-                                addMouseCallbacks silkCtxt mouse name
-                                {Name=name;Type=Collection;Children=Some children;Path=name}) |> List.ofSeq
-            let controllerList =
-                ctxt.Gamepads
-                |> Seq.foldi (fun state (ctlr:IGamepad) i ->
-                                let name = $"Gamepad{i}"
-                                let ctlrButtons =
-                                    ctlr.Buttons
-                                    |> makeButtonNameNodeList name
-                                let ctlrThumbsticks =
-                                    ctlr.Thumbsticks
-                                    |> makeThumbstickNodeList name
-                                let ctlrTriggers = 
-                                    ctlr.Triggers
-                                    |> makeTriggerNodeList name
-                                let children = [ctlrButtons;ctlrThumbsticks;ctlrTriggers] |>List.concat
-                                addGamepadCallbacks silkCtxt ctlr name
-                                {Name=name;Type=Collection;Children=Some children; Path=name}::state) List.Empty
-                                
-            let joystickList =
-                ctxt.Joysticks
-                |> Seq.foldi (fun state (joystick:IJoystick) i ->
-                        let name = $"Joystick{i}"
-                        let buttons =
-                            joystick.Buttons
-                            |> makeButtonIndexNodeList name
-                        let axes =
-                            joystick.Axes
-                            |> Seq.foldi (fun state axis i ->
-                                            {Name = $"axis{i}"
-                                             Type = DeviceType.Axis
-                                             Children = None
-                                             Path=name}::state) List.Empty
-                        let children = [buttons;axes] |> List.concat
-                        addJoystickCallbacks silkCtxt joystick
-                        {Name=name;Type=Collection;Children=Some children;Path=name}::state
-                    )List.Empty    
+                            let children = [ctlrButtons;ctlrThumbsticks;ctlrTriggers] |>Seq.concat
+                            addGamepadCallbacks context ctlr name
+                            {Name=name;Type=Collection;Children=Some children; Path=name})
+        let joystickNodes =
+            context.Context.Joysticks
+            |> Seq.mapi makeJoystickNode
+        let keyboardNodes =
+            context.Context.Keyboards
+            |> Seq.mapi (fun i kb ->
+                            let name = $"Keyboard{i}"
+                            addKeyboardCallbacks context kb name
+                            {Name=name;Type=DeviceType.Keyboard;Children=None;Path=name})
+        [mouseNodes;controllerNodes;joystickNodes;keyboardNodes] |> Seq.concat
+        
             
-            [kbNodelist;mouseList;controllerList]
-            |>List.concat
-            
-        member this.tryGetDeviceValue deviceContext path =
-            let silkCtxt = (deviceContext :?> SilkDeviceContext)
-            Map.tryFind path silkCtxt.Values
-
-        member this.MapPlatformScanCodeToHID var0 =
-            mapSilkToHID var0
-            
-        member this.GetDeviceValuesMap deviceContext  =    
-            let silkCtxt = (deviceContext :?> SilkDeviceContext)
-            silkCtxt.Values
+    
        
             
