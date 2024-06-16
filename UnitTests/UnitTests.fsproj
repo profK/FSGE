@@ -9,23 +9,23 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
         <Compile Include="Tests.fs"/>
         <Compile Include="Program.fs"/>
         <Content Include="NGTL_tex.png">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="FSFramework" Version="1.0.0-preview-1" />
+        <PackageReference Include="FSFramework" Version="1.0.0-preview-1"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0"/>
         <PackageReference Include="xunit" Version="2.4.2"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
@@ -39,9 +39,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj" />
-      <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj" />
-      <ProjectReference Include="..\SilkInput\SilkInput.fsproj" />
+        <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj"/>
+        <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj"/>
+        <ProjectReference Include="..\SilkInput\SilkInput.fsproj"/>
     </ItemGroup>
 
 </Project>

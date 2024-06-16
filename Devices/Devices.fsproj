@@ -8,15 +8,15 @@
 
     <ItemGroup>
         <Compile Include="Library.fs"/>
-        <Compile Include="HIDScanCodes.fs" />
+        <Compile Include="HIDScanCodes.fs"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FSFramework" Version="1.0.0-preview-1" />
+        <PackageReference Include="FSFramework" Version="1.0.0-preview-1"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj" />
+        <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj"/>
     </ItemGroup>
 
 </Project>

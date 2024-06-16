@@ -6,18 +6,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="ScanCodes.fs" />
-        <Compile Include="SilkDevices.fs" />
-        <Compile Include="Library.fs" />
+        <Compile Include="ScanCodes.fs"/>
+        <Compile Include="SilkDeviceContext.fs" />
+        <Compile Include="Library.fs"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Devices\Devices.fsproj" />
-      <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj" />
+        <ProjectReference Include="..\Devices\Devices.fsproj"/>
+        <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Silk.NET.Input" Version="2.21.0" />
+        <PackageReference Include="Silk.NET.Input" Version="2.21.0"/>
     </ItemGroup>
 
 </Project>

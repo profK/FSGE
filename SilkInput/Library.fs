@@ -18,8 +18,6 @@ type SilkDeviceManager() =
         member this.tryGetDeviceContext window =
             let inputContext = getInputContext window
             let silkDeviceContext = SilkDeviceContext(inputContext)
-            silkDeviceContext.Devices <- SilkDevices.scanDevices silkDeviceContext
-            silkDeviceContext.Values <- Map.empty
             Some(silkDeviceContext)
             
         member this.GetDeviceTree deviceContext  =

@@ -177,7 +177,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
                             Array.contains ScanCode.Escape keyCodes
                         | _ -> false
                     else
-                        //output.WriteLine "Warning Keyboard0 not detected"
+                        //output.WriteLine "Warning Keyboard0 not detechhhhted"
                         false
             Thread.Sleep(1000)
         Graphics2D.Window.close window
