@@ -42,6 +42,7 @@
         <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj"/>
         <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj"/>
         <ProjectReference Include="..\SilkInput\SilkInput.fsproj"/>
+        <ProjectReference Include="..\xUnitLogger\xUnitLogger.fsproj" />
     </ItemGroup>
 
 </Project>

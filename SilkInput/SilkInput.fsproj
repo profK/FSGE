@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Devices\Devices.fsproj"/>
+        <ProjectReference Include="..\Logger\Logger.fsproj" />
         <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj"/>
     </ItemGroup>
 

@@ -8,19 +8,30 @@ open System.Threading
 open Devices
 open Input
 open Input.HIDScanCodes
+open Logger
 open ManagerRegistry
 open SilkGraphicsOGL
 open Xunit
 open Xunit.Abstractions
 open SilkDevices
+open xUnitLogger
 
 // Graphics Manager tests
+
+
 type GraphicsManagerTestsFixture() =
     do
         addManager(typeof<SilkGraphicsManager>)
         addManager(typeof<SilkDevices.SilkDeviceManager>)
+        addManager(typeof<xUnitLogger.xUnitLogger>)
+       
 type GraphicsManagerTests(output:ITestOutputHelper ) =
-    let ITestOutputHelper = output;
+    let ITestOutputHelper = output
+    let logger =
+        match getManager<ILogger>() with
+        | Some logger -> (logger :?> xUnitLogger).injectOutput output
+        | None -> failwith "No logger found"
+        
     interface IClassFixture<GraphicsManagerTestsFixture>
     
     [<Fact>]
@@ -144,7 +155,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
                     exit <- Array.contains ScanCode.Escape keyCodes
                 | _ -> output.WriteLine($"Not a keyboard value {devValue.ToString()}")
             | None -> output.WriteLine("No value found for Keyboard0")   
-            Thread.Sleep(100)
+            Thread.Sleep(1000)
         Graphics2D.Window.close window
 
     [<Fact>]

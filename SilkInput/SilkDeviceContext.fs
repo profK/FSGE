@@ -2,6 +2,7 @@
 
 open System.Text.RegularExpressions
 open Devices
+open Logger
 open Silk.NET.Input
 open FSharp.Collections
 
@@ -165,7 +166,8 @@ type SilkDeviceContext(silkInputContext:IInputContext) =
             _values <- _values.Change(xname,fun v -> Some (AxisValue (float pos.X)))
             _values <-_values.Change(yname,fun v -> Some (AxisValue (float pos.Y)))
         )
-    let rec scanDevices values =
+    let scanDevices() =
+        Logger.logMessage("Scanning devices")
         let mouseNodes =
             silkInputContext.Mice
             |> Seq.map (fun (mouse:IMouse) ->
@@ -214,20 +216,31 @@ type SilkDeviceContext(silkInputContext:IInputContext) =
                 let children = [buttons;axes] |> Seq.concat
                 addJoystickCallbacks joystick name
                 {Name=name;Type=Collection;Children=Some children;Path=name})
+        Logger.logMessage($"Scanning {silkInputContext.Keyboards.Count} keyboards")    
         let keyboardNodes =
             silkInputContext.Keyboards
-            |> Seq.mapi (fun i kb ->
-                let name = $"Keyboard{i}"
-                addKeyboardCallbacks kb name
-                {Name=name;Type=DeviceType.Keyboard;Children=None;Path=name})
+            |> Seq.mapi (fun i (kb:IKeyboard) ->
+                                let name = $"Keyboard{i}"
+                                Logger.logMessage($"found keyboard {name}")
+                                {Name=name;Type=DeviceType.Keyboard;Children=None;Path=name})
+        // This ugly thing is to force evaluation because Seq.mapi is a lazy evaluator
+        // but we need to force the side effects because we are dealing with a stateful input library           
+        keyboardNodes
+        |> Seq.iteri(fun i node ->
+            let name = node.Path
+            addKeyboardCallbacks (silkInputContext.Keyboards.[i]) name)
+                            
+                           
         [keyboardNodes;mouseNodes;controllerNodes;joystickNodes] |> Seq.concat 
         
-    let _devices = scanDevices _values  
+    let _devices = scanDevices()
             
     interface DeviceContext
         member val Context = silkInputContext with get
-        member val  Values = _values with get
-        member val  Devices:DeviceNode seq = _devices  with get 
+        member this.Values 
+            with get () = _values
+        member this.Devices
+            with get () = _devices   
 
     
                
