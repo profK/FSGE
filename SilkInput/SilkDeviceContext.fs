@@ -178,10 +178,14 @@ type SilkDeviceContext(silkInputContext:IInputContext) =
                                 {Name="x";Type=DeviceType.Axis;Children=None;Path=name+".position.x"}
                                 {Name="y";Type=DeviceType.Axis;Children=None;Path=name+".position.y"}]
                             }]
-                            addMouseCallbacks mouse name
+                           
                             let children = [buttons;scrollWheels;position]|>Seq.concat
                             {Name=name;Type=DeviceType.Mouse;Children=
                                 Some children;Path=name})
+        mouseNodes
+        |> Seq.iteri (fun i mouse ->
+                        let name = mouse.Path
+                        addMouseCallbacks (silkInputContext.Mice.[i]) name)
         let controllerNodes =
             silkInputContext.Gamepads
             |> Seq.mapi (fun i (ctlr:IGamepad)  ->
@@ -197,8 +201,12 @@ type SilkDeviceContext(silkInputContext:IInputContext) =
                                 |> makeTriggerNodeList name
             
                             let children = [ctlrButtons;ctlrThumbsticks;ctlrTriggers] |>Seq.concat
-                            addGamepadCallbacks ctlr name
+                           
                             {Name=name;Type=Collection;Children=Some children; Path=name})
+        controllerNodes
+        |> Seq.iteri (fun i ctlr ->
+                        let name = ctlr.Path
+                        addGamepadCallbacks (silkInputContext.Gamepads.[i]) name)
         let joystickNodes =
             silkInputContext.Joysticks
             |> Seq.mapi (fun i (joystick:IJoystick)  ->
@@ -214,8 +222,12 @@ type SilkDeviceContext(silkInputContext:IInputContext) =
                                      Children = None
                                      Path=name})
                 let children = [buttons;axes] |> Seq.concat
-                addJoystickCallbacks joystick name
                 {Name=name;Type=Collection;Children=Some children;Path=name})
+        joystickNodes
+        |> Seq.iteri (fun i joystick  ->
+                       let name = joystick.Path
+                       addJoystickCallbacks (silkInputContext.Joysticks[i]) name
+                    )    
         Logger.logMessage($"Scanning {silkInputContext.Keyboards.Count} keyboards")    
         let keyboardNodes =
             silkInputContext.Keyboards
