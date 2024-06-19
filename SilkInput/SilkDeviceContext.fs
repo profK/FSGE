@@ -5,10 +5,13 @@ open Devices
 open Logger
 open Silk.NET.Input
 open FSharp.Collections
+open Silk.NET.Windowing
 
-type SilkDeviceContext(silkInputContext:IInputContext) =
+type SilkDeviceContext(silkWindow:IWindow) =
     let mutable _values=Map.empty    // device node tree assmbly routines
+    let silkInputContext = silkWindow.CreateInput()
     
+   
     
     let makeMouseButtonNodeList parentPath (mouseButtons:MouseButton seq) =
         mouseButtons
@@ -246,9 +249,13 @@ type SilkDeviceContext(silkInputContext:IInputContext) =
         [keyboardNodes;mouseNodes;controllerNodes;joystickNodes] |> Seq.concat 
         
     let _devices = scanDevices()
+    
+    member this.PollEvents() =
+        silkWindow.DoEvents()
             
     interface DeviceContext
         member val Context = silkInputContext with get
+        
         member this.Values 
             with get () = _values
         member this.Devices

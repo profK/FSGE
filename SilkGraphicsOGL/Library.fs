@@ -1,7 +1,7 @@
 ﻿namespace SilkGraphicsOGL
 #nowarn "9"    
 
-open System.Drawing
+
 open System.Numerics
 open ManagerRegistry
 open Silk.NET.Windowing
@@ -35,7 +35,7 @@ type SilkGraphicsManager() =
             window :?> SilkWindow
             |> fun sw ->
                 let spos =sw.SilkWindow.Position
-                Point(spos.X,spos.Y)
+                {X=spos.X; Y=spos.Y}
         member this.SetWindowPosition window position =
             window :?> SilkWindow
             |> fun sw ->
@@ -46,7 +46,7 @@ type SilkGraphicsManager() =
             window :?> SilkWindow
             |> fun sw ->
                 let v2d = sw.SilkWindow.Size
-                Size(v2d.X,v2d.Y)
+                {Width=v2d.X;Height=v2d.Y}
         member this.SetWindowSize window size =
             window :?> SilkWindow
             |> fun sw ->
@@ -54,7 +54,10 @@ type SilkGraphicsManager() =
                 window
         member this.LoadImage path window =
             let silkWindow = (window :?> SilkWindow)
-            SilkImage(path, silkWindow) 
+            SilkImage(path, silkWindow)
+        member this.CreateSubImage image x y width height =
+            let silkImage = (image :?> SilkImage)
+            silkImage.CreateSubImage x y width height    
         member this.DrawImage (matrix:Matrix4x4) (image:Image)  =
             let silkImage = image :?> SilkImage
             silkImage.Draw matrix

@@ -1,9 +1,14 @@
 ﻿namespace Graphics2D
 
-open System.Drawing
 open System.Numerics
 
+// These are defined in here because they are used in the API
+// There are equivalents in the System.Drawing namesapce
+// but those have a checkered history of being available cross-platform
 
+type Color = { R: byte; G: byte; B: byte; A: byte }
+type Point = { X: int32; Y: int32 }
+type Size = { Width: int32; Height: int32 }
 
 // This is type that represents a window on the screen
 // It is an opaque type, meaning that you can't see the implementation details
@@ -28,6 +33,7 @@ type IGraphicsManager =
     abstract member WindowSize : Window -> Size
     abstract member SetWindowSize : Window -> Size -> Window
     abstract member LoadImage : string-> Window -> Image
+    abstract member CreateSubImage : Image->uint32->uint32->uint32->uint32 -> Image
     abstract member DrawImage : Matrix4x4->Image-> Window
     abstract member Clear : Color ->  Window -> Window
     abstract member Display : Window -> Window
@@ -106,22 +112,48 @@ module Window =
     let setSize window size = 
         _graphicsManager.SetWindowSize window size
 
-    // This is a function that gets the background color of a window
-    // It takes a window object as an argument
-    // It returns the background color of the window
-   
+
+    // This is a function that loads an image
+    // It takes a path to the image and a window object as arguments
+    // It returns an image object
     let LoadImage path window : Image = 
         _graphicsManager.LoadImage path window
+    // This is a function that creates a sub-image from an existing image
+    // It takes an image, x, y, width and height as arguments
+    // It returns a new image object
+    
+    // This is a function that draws an image on a window
+    // It takes a matrix, an image and a window object as arguments
+    // It returns the window object to support railroad style chaining
+    let CreateSubImage image x y width height  =
+        _graphicsManager.CreateSubImage image x y width height
+        
+    // This is a function that draws an image on a window
+    // It takes a matrix, an image and a window object as arguments
+    // It returns the window object to support railroad style chaining
+        
     let DrawImage image  Matrix4x4 window : Window = 
-        _graphicsManager.DrawImage Matrix4x4 image 
+        _graphicsManager.DrawImage Matrix4x4 image
+        
+    // This is a function that clears a window
+    // It takes a color and a window object as arguments
+    // It returns the window object to support railroad style chaining    
     let Clear color window : Window =
         _graphicsManager.Clear color window
+    // This is a function that displays the next frame on a window
+    // It takes a window object as an argument
+    // It returns the window object to support railroad style chaining
     let Display window : Window =
         _graphicsManager.Display window
-    let CreateRotation radians = Matrix4x4.CreateRotationZ(radians)
-    let CreateTranslation (vector:Vector2) =
-        Matrix4x4.CreateTranslation(vector.X,vector.Y,0.0f)
-    let DoEvents window = _graphicsManager.DoEvents window    
+    // This is a function that processes window events
+    // It takes a window object as an argument
+    // It returns unit
+    let DoEvents window = _graphicsManager.DoEvents window
+    
+    //this translates a 2D translation vector to a 4x4 3D matrix for compositing
+    let CreateTranslation (v:Vector2) = Matrix4x4.CreateTranslation(Vector3(v.X,v.Y,0.0f))
+    //this translates a 2D rotation angle to a 4x4 3D matrix for compositing
+    let CreateRotation angle = Matrix4x4.CreateRotationZ(angle)
         
         
     

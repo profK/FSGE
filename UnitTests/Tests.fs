@@ -15,6 +15,7 @@ open Xunit
 open Xunit.Abstractions
 open SilkDevices
 open xUnitLogger
+open Graphics2D
 
 // Graphics Manager tests
 
@@ -22,7 +23,7 @@ open xUnitLogger
 type GraphicsManagerTestsFixture() =
     do
         addManager(typeof<SilkGraphicsManager>)
-        addManager(typeof<SilkDevices.SilkDeviceManager>)
+        addManager(typeof<SilkDeviceManager>)
         addManager(typeof<xUnitLogger.xUnitLogger>)
        
 type GraphicsManagerTests(output:ITestOutputHelper ) =
@@ -36,72 +37,74 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
     
     [<Fact>]
     member _.testGraphicsManager() =
-        let graphicsManagerOpt = ManagerRegistry.getManager<Graphics2D.IGraphicsManager>()
+        let graphicsManagerOpt = getManager<IGraphicsManager>()
         match graphicsManagerOpt with
         | Some graphicsManager -> Assert.True(true)
         | None -> Assert.True(false)
     [<Fact>]
     member _.testWindowCreation() =
-        let window = Graphics2D.Window.create 800 600 "Purple Haze"
-        Graphics2D.Window.Clear(Color.Purple) window
-        Graphics2D.Window.Display window
+        let window = Window.create 800 600 "Purple Haze"
+        Window.Clear {A=0xFFuy;R=0x80uy;G=0uy;B=0x80uy} window
+        Window.Display window
         Thread.Sleep(5000)
-        Graphics2D.Window.close window
+        Window.close window
         Assert.True(true)
     [<Fact>]
     member _.testImageDrawing() =
         output.WriteLine "Test drawing..."
-        let window = Graphics2D.Window.create 800 600 "Test Window"
-        let image = Graphics2D.Window._graphicsManager.LoadImage "NGTL_tex.png" window
-        Graphics2D.Window.Clear(Color.Blue) window
-        let xform = Graphics2D.Window.CreateTranslation(Vector2(100.0f,300.0f))
-                    * Graphics2D.Window.CreateRotation((float32 Math.PI)/4.0f)
-        Graphics2D.Window.DrawImage image xform window
-        Graphics2D.Window.Display window
+        let window = Window.create 800 600 "Test Window"
+        let image = Window._graphicsManager.LoadImage "NGTL_tex.png" window
+        Window.Clear {A=0xFFuy;R=0uy;G=0uy;B=0xFFuy} window
+        let xform = Window.CreateTranslation (Vector2(100.0f,300.0f))
+                    * Window.CreateRotation((float32 Math.PI)/4.0f)
+        Window.DrawImage image xform window
+        Window.Display window
         Thread.Sleep(5000)
-        Graphics2D.Window.close window
+        Window.close window
         Assert.True(true)
     [<Fact>]
     member _.testWindowWidth() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
-        let width = Graphics2D.Window._graphicsManager.WindowWidth window
-        Graphics2D.Window.close window
+        let window = Window.create 800 600 "Test Window"
+        let width = Window._graphicsManager.WindowWidth window
+        Window.close window
         Assert.Equal(800, width)
     [<Fact>]
     member _.testWindowHeight() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
-        let height = Graphics2D.Window._graphicsManager.WindowHeight window
-        Graphics2D.Window.close window
+        let window = Window.create 800 600 "Test Window"
+        let height = Window._graphicsManager.WindowHeight window
+        Window.close window
         Assert.Equal(600, height)
 
     [<Fact>]
     member _.testSetTitle() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
-        Graphics2D.Window.setTitle window "New Title"
-        let title = Graphics2D.Window._graphicsManager.WindowTitle window
-        Graphics2D.Window.close window
+        let window = Window.create 800 600 "Test Window"
+        Window.setTitle window "New Title"
+        let title = Window._graphicsManager.WindowTitle window
+        Window.close window
         Assert.Equal("New Title", title)
     [<Fact>]
     member _.testSetPosition() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
-        Graphics2D.Window.setPosition window (Point(100,100))
-        let position = Graphics2D.Window._graphicsManager.WindowPosition window
+        let pos = {X=100; Y=100} 
+        let window = Window.create 800 600 "Test Window"
+        Window.setPosition window 
+        let position = Window._graphicsManager.WindowPosition window
         Thread.Sleep(5000)
-        Graphics2D.Window.close window
-        Assert.Equal(Point(100,100), position)
+        Window.close window
+        
+        Assert.Equal ({X=100; Y=100},  position)
     [<Fact>]
     member _.testSize() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
-        let size = Graphics2D.Window._graphicsManager.WindowSize window
-        Graphics2D.Window.close window
-        Assert.Equal(Size(800,600), size)
+        let window = Window.create 800 600 "Test Window"
+        let size = Window._graphicsManager.WindowSize window
+        Window.close window
+        Assert.Equal( {Width=800;Height=600}, size)
     [<Fact>]
     member _.testSetSize() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
-        Graphics2D.Window.setSize window (Size(400,400))
-        let size = Graphics2D.Window._graphicsManager.WindowSize window
-        Graphics2D.Window.close window
-        Assert.Equal(Size(400,400), size)
+        let window = Window.create 800 600 "Test Window"
+        Window.setSize window {Width=400;Height=400}
+        let size = Window._graphicsManager.WindowSize window
+        Window.close window
+        Assert.Equal({Width=400;Height=400},size)
         
     member this.recursivePrintDevices indent (deviceList:DeviceNode seq) =
         deviceList |> Seq.iter (fun node -> output.WriteLine(indent+node.Name+": "+node.Path); 
@@ -118,7 +121,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
             | None -> ())    
     [<Fact>]
     member this.testDeviceList() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
+        let window = Window.create 800 600 "Test Window"
         let deviceContext =
             match  Devices.TryGetDeviceContext window with
             | Some context -> context
@@ -128,11 +131,11 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Assert.True(devarray.Length > 0)
         output.WriteLine "Devices:"
         deviceList |>  this.recursivePrintDevices ""
-        Graphics2D.Window.close window    
+        Window.close window    
   
     [<Fact>]
     member this.testKbValues() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
+        let window = Window.create 800 600 "Test Window"
         let deviceContext =
             match  Devices.TryGetDeviceContext window with
             | Some context -> context
@@ -141,12 +144,12 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         let mutable exit = false
         output.WriteLine "Press keys to test, press esc to end test"
         while not exit do
-            Graphics2D.Window.DoEvents window     
+            Window.DoEvents window     
             let value = Devices.TryGetDeviceValue deviceContext "Keyboard0"
             match value with
             |Some devValue ->
                 match devValue with
-                | Devices.KeyboardValue(value) ->
+                | KeyboardValue(value) ->
                     let keyCodes:ScanCode array =
                         value
                         |> Array.map (fun v -> Devices.MapPlatformScanCodeToHID v)
@@ -156,11 +159,11 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
                 | _ -> output.WriteLine($"Not a keyboard value {devValue.ToString()}")
             | None -> output.WriteLine("No value found for Keyboard0")   
             Thread.Sleep(1000)
-        Graphics2D.Window.close window
+        Window.close window
 
     [<Fact>]
     member this.testAllValues() =
-        let window = Graphics2D.Window.create 800 600 "Test Window"
+        let window = Window.create 800 600 "Test Window"
         let deviceContext =
             match  Devices.TryGetDeviceContext window with
             | Some context -> context
@@ -169,7 +172,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         let mutable lastValueMap = Map.empty    
         let mutable exit = false
         while not exit do
-            Graphics2D.Window.DoEvents window    
+            Window.DoEvents window    
             let valueMap = Devices.GetDeviceValuesMap deviceContext
             output.WriteLine("Value count: "+valueMap.Count.ToString())
             valueMap |> Map.toArray
@@ -180,7 +183,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
             exit <- if valueMap.ContainsKey "Keyboard0" then
                         let value = valueMap.["Keyboard0"]
                         match value with
-                        | Devices.KeyboardValue(value) ->
+                        | KeyboardValue(value) ->
                             let keyCodes:ScanCode array =
                                 value
                                 |> Array.map (fun v -> Devices.MapPlatformScanCodeToHID v)
@@ -191,5 +194,5 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
                         //output.WriteLine "Warning Keyboard0 not detechhhhted"
                         false
             Thread.Sleep(1000)
-        Graphics2D.Window.close window
+        Window.close window
     

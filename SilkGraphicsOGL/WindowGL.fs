@@ -45,8 +45,9 @@ type SilkWindow(silkWindow:IWindow) =
                             1f) 
         // Calculate scaling factors
        
-    member this.SetBackgroundColor color =
-        _gl.ClearColor(color)
+    member this.SetBackgroundColor (color:Graphics2D.Color) =
+        let syscolor = System.Drawing.Color.FromArgb(int color.A,int color.R,int color.G,int color.B)
+        _gl.ClearColor(syscolor)
     member this.Clear() =
         _gl.Clear(ClearBufferMask.ColorBufferBit)
      member this.Display() =
@@ -191,6 +192,9 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         glCheckError()
         silkWindow.GL.DrawElements(PrimitiveType.Triangles, uint32 indices.Length, DrawElementsType.UnsignedInt,
                                   IntPtr.Zero.ToPointer())
+        
+    member this.CreateSubImage x y width height =
+        failwith "Method unimplemented"   
 
     interface Image 
     

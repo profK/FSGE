@@ -33,6 +33,7 @@ type DeviceContext = interface end
 
 type IDeviceManager =
     abstract member tryGetDeviceContext : Graphics2D.Window -> DeviceContext option
+    abstract member PollDevices : DeviceContext -> unit
     abstract member tryGetDeviceValue : DeviceContext->string-> DeviceValue option
     abstract member GetDeviceTree : DeviceContext -> DeviceNode seq
     abstract member MapPlatformScanCodeToHID : uint32 -> uint32

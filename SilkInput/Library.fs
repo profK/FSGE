@@ -3,6 +3,7 @@
 open Devices
 open ManagerRegistry
 open Silk.NET.Input
+open Silk.NET.Windowing
 open SilkDevices
 open SilkGraphicsOGL.WindowGL
 open SilkScanCodeConversion
@@ -11,14 +12,13 @@ open SilkScanCodeConversion
             
 [<Manager("Silk Input", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]            
 type SilkDeviceManager() =
-    let getInputContext (window:Graphics2D.Window) =
-            //could be wasteful, measure and buffer if necc
-            (window :?> SilkWindow).SilkWindow.CreateInput()
     interface Devices.IDeviceManager with
-        member this.tryGetDeviceContext window =
-            let inputContext = getInputContext window
-            let silkDeviceContext = SilkDeviceContext(inputContext)
+        member this.tryGetDeviceContext (window:Graphics2D.Window) =
+            let silkWindow = (window :?> SilkWindow).SilkWindow
+            let silkDeviceContext = SilkDeviceContext(silkWindow)
             Some(silkDeviceContext)
+        member this.PollDevices context =
+            (context :?> SilkDeviceContext).PollEvents()
             
         member this.GetDeviceTree deviceContext  =
             (deviceContext :?> SilkDeviceContext).Devices
