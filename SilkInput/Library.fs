@@ -7,6 +7,7 @@ open Silk.NET.Windowing
 open SilkDevices
 open SilkGraphicsOGL.WindowGL
 open SilkScanCodeConversion
+open Xunit.Sdk
 
 
             
@@ -14,9 +15,11 @@ open SilkScanCodeConversion
 type SilkDeviceManager() =
     interface Devices.IDeviceManager with
         member this.tryGetDeviceContext (window:Graphics2D.Window) =
-            let silkWindow = (window :?> SilkWindow).SilkWindow
-            let silkDeviceContext = SilkDeviceContext(silkWindow)
-            Some(silkDeviceContext)
+            if (typeof<SilkWindow>.IsAssignableFrom(window.GetType())) then
+                let silkWindow = (window :?> SilkWindow).SilkWindow
+                let silkDeviceContext = SilkDeviceContext(silkWindow)
+                Some(silkDeviceContext)
+            else None    
         member this.PollDevices context =
             (context :?> SilkDeviceContext).PollEvents()
             
