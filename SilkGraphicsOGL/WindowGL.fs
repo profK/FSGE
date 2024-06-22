@@ -55,7 +55,7 @@ type SilkWindow(silkWindow:IWindow) =
         ctxt.SwapBuffers()
 
 
-type SilkImage(path:string, silkWindow:SilkWindow) =
+type SilkImage(stream:Stream, silkWindow:SilkWindow) =
     let checkErrors = false
     let  glCheckError() =
         if checkErrors then
@@ -66,7 +66,7 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
             ()
     let positionLoc = 0u
     
-    let loadTexture path =
+    let loadTexture stream =
         let texture = silkWindow.GL.GenTexture()
         glCheckError()
         silkWindow.GL.ActiveTexture(TextureUnit.Texture0)
@@ -77,7 +77,7 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         glCheckError()
         //silkWindow.GL.TexParameterI(GLEnum.Texture2D,GLEnum.TextureMinFilter, GLEnum.Nearest);
         //silkWindow.GL.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, GLEnum.Nearest);
-        let image = ImageResult.FromMemory(File.ReadAllBytes(path), ColorComponents.RedGreenBlueAlpha)
+        let image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha)
         use ptrv  = fixed image.Data
         let ptrv' = NativeInterop.NativePtr.toVoidPtr ptrv
         silkWindow.GL.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, uint32 image.Width,
@@ -88,7 +88,7 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
         silkWindow.GL.BindTexture(TextureTarget.Texture2D, 0u)
         (texture,image)
              
-    let (_texture,_image) = loadTexture path
+    let (_texture,_image) = loadTexture stream
     let _scaleMatrix = Matrix4x4.CreateScale(
         float32 _image.Width/(float32 silkWindow.SilkWindow.Size.X/2f), 
         float32 _image.Height/ (float32 silkWindow.SilkWindow.Size.Y/2f),
@@ -168,6 +168,10 @@ type SilkImage(path:string, silkWindow:SilkWindow) =
    
     member val Window = silkWindow with get  
  
+    //Secondary constructor to create a new SilkImage from a file path
+    new(path:String, silkWindow:SilkWindow) =
+        let stream = new FileStream(path, FileMode.Open, FileAccess.Read)
+        SilkImage(stream, silkWindow)
    
     member this.Draw (matrix:Matrix4x4) =
         silkWindow.GL.UseProgram(silkWindow.DefaultShaderProgram)

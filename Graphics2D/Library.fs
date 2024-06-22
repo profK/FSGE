@@ -1,5 +1,6 @@
 ﻿namespace Graphics2D
 
+open System.IO
 open System.Numerics
 
 // These are defined in here because they are used in the API
@@ -32,7 +33,8 @@ type IGraphicsManager =
     abstract member SetWindowPosition : Window -> Point -> Window
     abstract member WindowSize : Window -> Size
     abstract member SetWindowSize : Window -> Size -> Window
-    abstract member LoadImage : string-> Window -> Image
+    abstract member LoadImageFromStream : Stream-> Window -> Image
+    abstract member LoadImageFromPath : string -> Window -> Image
     abstract member CreateSubImage : Image->uint32->uint32->uint32->uint32 -> Image
     abstract member DrawImage : Matrix4x4->Image-> Window
     abstract member Clear : Color ->  Window -> Window
@@ -116,11 +118,11 @@ module Window =
     // This is a function that loads an image
     // It takes a path to the image and a window object as arguments
     // It returns an image object
-    let LoadImage path window : Image = 
-        _graphicsManager.LoadImage path window
-    // This is a function that creates a sub-image from an existing image
-    // It takes an image, x, y, width and height as arguments
-    // It returns a new image object
+    let LoadImageFromPath (path:string) window : Image = 
+        _graphicsManager.LoadImageFromPath path window
+    
+    let LoadImageFromStream (stream:Stream) window : Image = 
+        _graphicsManager.LoadImageFromStream stream window
     
     // This is a function that draws an image on a window
     // It takes a matrix, an image and a window object as arguments

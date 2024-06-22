@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Library.fs"/>
+        <Content Include="AngelcodeFonts\Latin_0.tga" />
+        <Content Include="AngelcodeFonts\Latin_0.png" />
+        <Content Include="AngelcodeFonts\Latin.fnt" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Cyotek.Drawing.BitmapFont" Version="2.0.4" />
+      <PackageReference Include="FSFramework" Version="1.0.0-preview-1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Text\Text.fsproj" />
+    </ItemGroup>
+
+</Project>

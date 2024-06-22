@@ -53,7 +53,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
     member _.testImageDrawing() =
         output.WriteLine "Test drawing..."
         let window = Window.create 800 600 "Test Window"
-        let image = Window._graphicsManager.LoadImage "NGTL_tex.png" window
+        let image = Window.LoadImageFromPath "NGTL_tex.png" window
         Window.Clear {A=0xFFuy;R=0uy;G=0uy;B=0xFFuy} window
         let xform = Window.CreateTranslation (Vector2(100.0f,300.0f))
                     * Window.CreateRotation((float32 Math.PI)/4.0f)

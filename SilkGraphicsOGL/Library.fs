@@ -52,9 +52,12 @@ type SilkGraphicsManager() =
             |> fun sw ->
                 sw.SilkWindow.Size <- Vector2D(size.Width,size.Height)
                 window
-        member this.LoadImage path window =
+        member this.LoadImageFromStream stream window =
             let silkWindow = (window :?> SilkWindow)
-            SilkImage(path, silkWindow)
+            SilkImage(stream, silkWindow)
+        member this.LoadImageFromPath path window =
+            let silkWindow = (window :?> SilkWindow)
+            SilkImage(path, silkWindow)    
         member this.CreateSubImage image x y width height =
             let silkImage = (image :?> SilkImage)
             silkImage.CreateSubImage x y width height    
