@@ -9,10 +9,69 @@ open Silk.NET.Maths
 open Graphics2D
 open SilkGraphicsOGL.WindowGL
 
+//// JW: Consider something like the following:
+module Helpers =
+    let inline silkWindow (f : SilkWindow -> 'a) (window : Window) : 'a = f (window :?> SilkWindow)
+    
+    let inline silkWindowPassthrough (f : SilkWindow -> unit) (window : Window) : Window = f (window :?> SilkWindow) ; window
+    
+    let inline silkWindowW (f : IWindow -> 'a) (window : Window) : 'a = f (window :?> SilkWindow).SilkWindow
+    
+    let inline silkWindowWPassthrough (f : IWindow -> unit) (window : Window) : Window = f (window :?> SilkWindow).SilkWindow ; window
+     
+     
+//// JW: Needed because we're in a namespace for some reason
+open Helpers
+
+
+[<Manager("Silk Graphics", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
+type SilkGraphicsManagerJW() =
+
+    interface Graphics2D.IGraphicsManager with
+        member this.CreateWindow width height title =
+            let mutable options = WindowOptions.Default
+            options.Title <- "Hello from F#"
+            options.Size <- Vector2D(800, 600)
+            let window = Silk.NET.Windowing.Window.Create(options)
+            SilkWindow(window)
+        member this.CloseWindow window = window |> silkWindowW (_.Close())
+        member this.WindowWidth window = window |> silkWindowW _.Size.X
+        member this.WindowHeight window = window |> silkWindowW _.Size.Y
+        member this.WindowTitle window = window |> silkWindowW _.Title
+        member this.SetWindowTitle window title = window |> silkWindowWPassthrough (fun w -> w.Title <- title)
+        member this.WindowPosition window = window |> silkWindowW (fun w -> Point(w.Position.X, w.Position.Y))
+        member this.SetWindowPosition window position = window |> silkWindowWPassthrough (fun w -> w.Position <- Vector2D(position.X, position.Y))
+        member this.WindowSize window = window |> silkWindowW (fun w -> Size(w.Size.X, w.Size.Y))
+        member this.SetWindowSize window size = window |> silkWindowWPassthrough (fun w -> w.Size <- Vector2D(size.Width, size.Height))
+        member this.LoadImage path window = window |> silkWindow (fun w -> SilkImage(path, w))
+        member this.DrawImage (matrix:Matrix4x4) (image:Image)  =
+            let silkImage = image :?> SilkImage
+            silkImage.Draw matrix
+            silkImage.Window
+        member this.Clear color window =
+            window :?> SilkWindow
+            |> fun w ->
+                w.SetBackgroundColor color
+                w.Clear()
+            window
+        member this.Display window = window |> silkWindowPassthrough (_.Display())
+        member this.DoEvents window = window |> silkWindowW (_.DoEvents())
+            
+
+//// End JW Suggestions
+
+
+
+
+
+
+
+
 
 
 [<Manager("Silk Graphics", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
 type SilkGraphicsManager() =   
+
     interface Graphics2D.IGraphicsManager with
         member this.CreateWindow width height title =
             let mutable options = WindowOptions.Default

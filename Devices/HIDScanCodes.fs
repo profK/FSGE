@@ -1,5 +1,7 @@
-﻿module Input
+﻿//// JW: You should really use a qualified module name like FSGE.Devices.Input
+module Input
 
+//// JW: This nesting is odd, maybe document why it's necessary?
 module HIDScanCodes =
     type ScanCode =
         | Undefined = 0x00

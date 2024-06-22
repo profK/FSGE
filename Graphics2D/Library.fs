@@ -1,4 +1,5 @@
-﻿namespace Graphics2D
+﻿//// JW: You should really use a qualified namespace like FSGE.Graphics2D
+namespace Graphics2D
 
 open System.IO
 open System.Numerics
@@ -22,6 +23,9 @@ type Window = interface end
 type Image = interface end
 
 // THis interface defines the functionality a graphics plugin implementation must implement
+//// JW: Given that you're loading things dynamically, you migth want to use tupled inputs for methods because the
+////     non-F# tooling will understand those types better.
+//// JW: arrows (`->`) should have exactly one space on each side of them.
 type IGraphicsManager =
     abstract member CreateWindow : int -> int -> string -> Window
     abstract member CloseWindow : Window -> unit
@@ -114,7 +118,8 @@ module Window =
     let setSize window size = 
         _graphicsManager.SetWindowSize window size
 
-
+    //// JW: these names should be camelCase as they are not methods, types, or modules
+    
     // This is a function that loads an image
     // It takes a path to the image and a window object as arguments
     // It returns an image object

@@ -21,10 +21,13 @@ type SilkWindow(silkWindow:IWindow) =
         silkWindow.Initialize()
         silkWindow.CreateOpenGL()
     do
+        //// JW: Why are you calling this twice? If this is intentional, it should be documented because WTF
         silkWindow.Initialize()
-  
+    
+    //// JW: Unnecessary parens
     let defaultShader = (Shader.getDefaultShaderProgram _gl)
             
+    //// JW: This should be qualified
     interface Window
     
     member val GL = _gl with get
@@ -34,7 +37,7 @@ type SilkWindow(silkWindow:IWindow) =
         
 // Calculate scaling factors
 
-    
+    //// JW: Make `val SilkWindow = silkWindow with get`
     member this.SilkWindow = silkWindow
     member this.ScreenToNormalizedMatrix (matrix:Matrix4x4) =
         let width = float32 silkWindow.Size.X
@@ -44,7 +47,7 @@ type SilkWindow(silkWindow:IWindow) =
                             -2f/(float32 silkWindow.Size.Y),
                             1f) 
         // Calculate scaling factors
-       
+    
     member this.SetBackgroundColor (color:Graphics2D.Color) =
         let syscolor = System.Drawing.Color.FromArgb(int color.A,int color.R,int color.G,int color.B)
         _gl.ClearColor(syscolor)

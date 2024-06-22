@@ -1,3 +1,7 @@
+//// JW: _Strongly_ recommend FSUnit.XUnit for idiomatic testing
+//// JW: Tests that interfere with each other should be serialized
+//// JW: Tests that require user action should make that action clear on the window in which they come up, no console output reading required
+///     E.g. "Press A" and then "Press X" and then "Press Q" to guarantee those keys are pressed
 module Tests
 
 open System

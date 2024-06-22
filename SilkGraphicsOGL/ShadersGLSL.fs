@@ -38,7 +38,26 @@ void main()
     //out_color = vec4(frag_texCoords.x, frag_texCoords.y, 0.0, 1.0);
     out_color = texture(uTexture, frag_texCoords);
 }"
+    let tryCompileShaderJW (gl:GL) code (stype:ShaderType)  =
+        let shader = gl.CreateShader(stype)
+        gl.ShaderSource(shader, code)
+        gl.CompileShader(shader);
+        let mutable fstatus = 0
+        gl.GetShader(shader, ShaderParameterName.CompileStatus, &fstatus)
+        match enum<GLEnum> fstatus with
+        | GLEnum.True -> shader |> Choice1Of2
+        | _ -> gl.GetShaderInfoLog(shader) |> Choice2Of2
+        
+    let compileShaderJW (gl:GL) code stype =
+        match tryCompileShaderJW gl code stype with
+        | Choice1Of2 shader -> shader
+        | Choice2Of2 failReason -> failwith $"Shader failed to compile: {failReason}"
+    //// And obviously elsewhere...
+    //// Note that you could make your own module `Choice2` with a function `resultOrFailwith` that takes in a `fmtString` and a `Choice2<'T, string>` and returns `result` if it's a `Choice1Of2 result` and fails with 'printf fmtString failString` if it's a `Choice2Of2 failString`... Better railway oriented programming that way.
+    //// End of JW suggestion
     
+
+    /// JW: Why `_gl` and not `gl`? (and for all below)
     let tryCompileShader (_gl:GL) code (stype:ShaderType)  =
         let shader = _gl.CreateShader(stype)
         _gl.ShaderSource(shader, code)
