@@ -4,6 +4,7 @@
 
 open System.Numerics
 open ManagerRegistry
+open Silk.NET.OpenGL
 open Silk.NET.Windowing
 open Silk.NET.Maths
 open Graphics2D
@@ -12,7 +13,12 @@ open SilkGraphicsOGL.WindowGL
 
 
 [<Manager("Silk Graphics", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
-type SilkGraphicsManager() =   
+type SilkGraphicsManager() =
+    let MessageCallback (source,cbtype:DebugType,id, severity, length,message,userParam ) =
+        printfn "GL CALLBACK: %s type = %s, severity = 0x%x, message = %s\n" 
+            (if cbtype = DebugType.DebugTypeError then "** GL ERROR **" else "")
+            (cbtype.ToString()) severity message
+    
     interface Graphics2D.IGraphicsManager with
         member this.CreateWindow width height title =
             let mutable options = WindowOptions.Default
