@@ -33,7 +33,9 @@ type SilkWindow(silkWindow:IWindow) =
         silkWindow.Initialize()
 
         _gl.Enable GLEnum.DebugOutput
-        _gl.DebugMessageCallback( MessageCallback, IntPtr.Zero.ToPointer() );
+        _gl.DebugMessageCallback( MessageCallback, IntPtr.Zero.ToPointer() )
+        _gl.Enable(GLEnum.Blend)
+        _gl.BlendFunc(GLEnum.SrcAlpha , GLEnum.OneMinusSrcAlpha);
   
     let defaultShader = (Shader.getDefaultShaderProgram _gl)
             
