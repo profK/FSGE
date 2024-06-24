@@ -112,12 +112,12 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
 
     //drawing information
     let vertices =
+            let w = float32 subTexSize.Width
+            let h = float32 subTexSize.Height
             let texTopLeft = Vector2(subTexPos.X/float32 textureInfo.Width,subTexPos.Y/float32 textureInfo.Height)
-            let texSizeN = Vector2(float32 subTexSize.Width/float32 textureInfo.Width,
-                                   float32 subTexSize.Height/float32 textureInfo.Height)
+            let texSizeN = Vector2(w/float32 textureInfo.Width,
+                                   h/float32 textureInfo.Height)
             let texBottomRight = texTopLeft + texSizeN
-            let w = texSizeN.X
-            let h = texSizeN.Y
             [|
                 w;     0.0f; 0.0f; texBottomRight.X; texTopLeft.Y;  // top right
                 w;     h;    0.0f; texBottomRight.X; texBottomRight.Y; // bottom right
