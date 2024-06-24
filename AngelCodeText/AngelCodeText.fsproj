@@ -7,9 +7,6 @@
 
     <ItemGroup>
         <Compile Include="Library.fs"/>
-        <Content Include="AngelcodeFonts\Latin_0.tga">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
         <Content Include="AngelcodeFonts\Latin_0.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

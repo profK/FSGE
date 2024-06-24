@@ -67,9 +67,9 @@ type SilkGraphicsManager() =
         member this.CreateSubImage image x y width height =
             let silkImage = (image :?> SilkImage)
             silkImage.CreateSubImage (int x) (int y) (int width) (int height)    
-        member this.DrawImage (matrix:Matrix4x4) (image:Image)  =
+        member this.DrawImage matrix image tint  =
             let silkImage = image :?> SilkImage
-            silkImage.Draw matrix
+            silkImage.Draw matrix tint
             silkImage.Window
         member this.Clear color window =
             window :?> SilkWindow

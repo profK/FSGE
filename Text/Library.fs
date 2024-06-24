@@ -19,7 +19,7 @@ type ITextManager =
     abstract member FontList : string list
     abstract member LoadFont : Window -> string -> Font
     abstract member CreateText : string -> Font -> Text
-    abstract member DrawText : Text -> Matrix4x4 -> unit
+    abstract member DrawText : Text -> Matrix4x4 -> Color -> unit
    
 module Text =
     //This fetches the plugin text manager
@@ -36,6 +36,6 @@ module Text =
     let CreateText text font : Text =
         _textManager.CreateText text font    
  
-    let DrawText text (xform:Matrix4x4) = 
-        _textManager.DrawText text xform
+    let DrawText text xform color = 
+        _textManager.DrawText text xform color
    

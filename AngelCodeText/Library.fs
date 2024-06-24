@@ -23,9 +23,9 @@ type AngelCodeTextRenderer() =
         member this.CreateText text font =
             let acFont = (font :?> AngelCodeFont)
             AngelCodeText(text, acFont) :> Text    
-        member this.DrawText (text:Text) (xform:Matrix4x4) = 
+        member this.DrawText text xform color = 
             let acText = (text :?> AngelCodeText)
-            acText.Draw xform
+            acText.Draw xform color
             ()     
 
 and AngelCodeFont(window:Window, bmFont:BitmapFont) =
@@ -54,7 +54,7 @@ and AngelCodeText(text: string, font: AngelCodeFont) =
             text
         override this.GetFont ()=
             font
-    member this.Draw (xform:Matrix4x4) =
+    member this.Draw xform color =
         //let graphics = window.graphics
         text
         |> Seq.fold
@@ -71,7 +71,7 @@ and AngelCodeText(text: string, font: AngelCodeFont) =
                 let newX = pos.X + (float32 acChar.Width) + kern
                 let xlateXform = Window.CreateTranslation (Vector2(pos.X,  pos.Y+float32 acChar.YOffset))
                 let totalXform = xlateXform * xform
-                Window.DrawImage charImage totalXform
+                Window.DrawTintedImage charImage totalXform color
                 (Vector2(newX, pos.Y), char)
             ) (Vector2(0f,0f),'\n')
         |> ignore

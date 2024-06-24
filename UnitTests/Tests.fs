@@ -77,7 +77,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         let xform2 = Window.CreateTranslation (Vector2(400.0f,300.0f))
         let font = Text.LoadFont window "AngelcodeFonts/Latin.fnt"
         let text = Text.CreateText "Hello 818" font
-        Text.DrawText text xform2
+        Text.DrawText text xform2 {A=255uy;R=255uy;G=0uy;B=0uy}
         Window.Display window
         Thread.Sleep(5000)
         Window.close window

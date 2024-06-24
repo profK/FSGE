@@ -165,18 +165,22 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
         let stream = new FileStream(path, FileMode.Open, FileAccess.Read)
         SilkImage(stream, silkWindow)
    
-    member this.Draw (matrix:Matrix4x4) =
+    member this.Draw matrix tint =
         silkWindow.GL.UseProgram(silkWindow.DefaultShaderProgram)
         silkWindow.GL.BindVertexArray(_vao)
         silkWindow.GL.ActiveTexture(TextureUnit.Texture0)
         silkWindow.GL.BindTexture(TextureTarget.Texture2D, image)
-        let uniformLocation =
+        let xformLocation =
             silkWindow.GL.GetUniformLocation(silkWindow.DefaultShaderProgram,"xformMatrix")
+        let tintLocation =
+            silkWindow.GL.GetUniformLocation(silkWindow.DefaultShaderProgram,"tint")    
 
         let matrix4x4=  silkWindow.ScreenToNormalizedMatrix matrix
     // Convert to an OpenGL-compatible float array in column-major order
         let openGLMatrix = matrix4x4ToOpenGLArray matrix4x4
-        silkWindow.GL.UniformMatrix4(uniformLocation,false, ReadOnlySpan<float32>(openGLMatrix))
+        silkWindow.GL.UniformMatrix4(xformLocation,false, ReadOnlySpan<float32>(openGLMatrix))
+        silkWindow.GL.Uniform4(tintLocation, (float32 tint.R)/255f, (float32 tint.G)/255f,
+                               (float32 tint.B)/255f, (float32 tint.A)/255f)
         silkWindow.GL.DrawElements(PrimitiveType.Triangles, uint32 indices.Length, DrawElementsType.UnsignedInt,
                                   IntPtr.Zero.ToPointer())
         

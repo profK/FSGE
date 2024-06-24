@@ -36,7 +36,7 @@ type IGraphicsManager =
     abstract member LoadImageFromStream : Stream-> Window -> Image
     abstract member LoadImageFromPath : string -> Window -> Image
     abstract member CreateSubImage : Image->uint32->uint32->uint32->uint32 -> Image
-    abstract member DrawImage : Matrix4x4->Image-> Window
+    abstract member DrawImage : Matrix4x4->Image-> Color-> Window
     abstract member Clear : Color ->  Window -> Window
     abstract member Display : Window -> Window
     abstract member DoEvents : Window -> unit
@@ -134,9 +134,11 @@ module Window =
     // It takes a matrix, an image and a window object as arguments
     // It returns the window object to support railroad style chaining
         
-    let DrawImage image  Matrix4x4  = 
-        _graphicsManager.DrawImage Matrix4x4 image
+    let DrawTintedImage image  Matrix4x4 tint = 
+        _graphicsManager.DrawImage Matrix4x4 image tint
         
+    let DrawImage image  Matrix4x4  = 
+        _graphicsManager.DrawImage Matrix4x4 image {R=255uy;G=255uy;B=255uy;A=255uy}
     // This is a function that clears a window
     // It takes a color and a window object as arguments
     // It returns the window object to support railroad style chaining    

@@ -29,6 +29,7 @@ void main()
 // Receive the input from the vertex shader in an attribute
 in vec2 frag_texCoords;
 uniform sampler2D uTexture;
+uniform vec4 tint;
 
 out vec4 out_color;
 
@@ -36,7 +37,7 @@ void main()
 {
     // This will allow us to see the texture coordinates in action!
     //out_color = vec4(frag_texCoords.x, frag_texCoords.y, 0.0, 1.0);
-    out_color = texture(uTexture, frag_texCoords);
+    out_color = texture(uTexture, frag_texCoords)*tint;
 }"
     
     let tryCompileShader (_gl:GL) code (stype:ShaderType)  =
