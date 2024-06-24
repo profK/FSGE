@@ -32,6 +32,9 @@ module Text =
     let FontList = _textManager.FontList
     let  LoadFont Window string : Font =
         _textManager.LoadFont Window string
+        
+    let CreateText text font : Text =
+        _textManager.CreateText text font    
  
     let DrawText text (xform:Matrix4x4) = 
         _textManager.DrawText text xform

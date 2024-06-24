@@ -22,6 +22,15 @@
         <Content Include="NGTL_tex.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <Content Include="AngelcodeFonts\Latin_0.tga">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="AngelcodeFonts\Latin_0.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="AngelcodeFonts\Latin.fnt">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -39,9 +48,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\AngelCodeText\AngelCodeText.fsproj" />
         <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj"/>
         <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj"/>
         <ProjectReference Include="..\SilkInput\SilkInput.fsproj"/>
+        <ProjectReference Include="..\Text\Text.fsproj" />
         <ProjectReference Include="..\xUnitLogger\xUnitLogger.fsproj" />
     </ItemGroup>
 

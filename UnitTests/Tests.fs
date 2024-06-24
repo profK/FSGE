@@ -5,6 +5,7 @@ open System.Drawing
 open System.Numerics
 open System.Reflection
 open System.Threading
+open AngelCodeText
 open Devices
 open Input
 open Input.HIDScanCodes
@@ -16,6 +17,7 @@ open Xunit.Abstractions
 open SilkDevices
 open xUnitLogger
 open Graphics2D
+open FSGEText
 
 // Graphics Manager tests
 
@@ -25,6 +27,7 @@ type GraphicsManagerTestsFixture() =
         addManager(typeof<SilkGraphicsManager>)
         addManager(typeof<SilkDeviceManager>)
         addManager(typeof<xUnitLogger.xUnitLogger>)
+        addManager(typeof<AngelCodeTextRenderer>)
        
 type GraphicsManagerTests(output:ITestOutputHelper ) =
     let ITestOutputHelper = output
@@ -66,6 +69,18 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Thread.Sleep(5000)
         Window.close window
         Assert.True(true)
+    [<Fact>]
+    member _.testTextDrawing() =
+        output.WriteLine "Test text drawing..."
+        let window = Window.create 800 600 "Test Window"
+        let xform2 = Window.CreateTranslation (Vector2(400.0f,300.0f))
+        let font = Text.LoadFont window "AngelcodeFonts/Latin.fnt"
+        let text = Text.CreateText "Hello World" font
+        Text.DrawText text xform2
+        Window.Display window
+        Thread.Sleep(5000)
+        Window.close window
+        Assert.True(true)    
     [<Fact>]
     member _.testWindowWidth() =
         let window = Window.create 800 600 "Test Window"
