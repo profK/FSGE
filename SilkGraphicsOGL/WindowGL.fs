@@ -99,10 +99,6 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
         match subTexSizeOpt with
         | Some size -> size
         | None -> {Width =textureInfo.Width; Height =textureInfo.Height}
-    let _scaleMatrix = Matrix4x4.CreateScale(
-        float32 subTexSize.Width/(float32 silkWindow.SilkWindow.Size.X/2f), 
-        float32 subTexSize.Height/ (float32 silkWindow.SilkWindow.Size.Y/2f),
-        1f)
     // open gl information
     let positionLoc = 0u
     //open gl buffers

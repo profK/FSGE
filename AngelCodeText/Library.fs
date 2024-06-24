@@ -69,7 +69,7 @@ and AngelCodeText(text: string, font: AngelCodeFont) =
                                     (uint32 rectSz.Width) (uint32 rectSz.Height)
                 let kern = font.GetKern(lastChar, char)
                 let newX = pos.X + (float32 acChar.Width) + kern
-                let xlateXform = Window.CreateTranslation (Vector2(newX,  pos.Y))
+                let xlateXform = Window.CreateTranslation (Vector2(pos.X,  pos.Y+float32 acChar.YOffset))
                 let totalXform = xlateXform * xform
                 Window.DrawImage charImage totalXform
                 (Vector2(newX, pos.Y), char)
