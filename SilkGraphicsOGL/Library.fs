@@ -66,7 +66,7 @@ type SilkGraphicsManager() =
             SilkImage(path, silkWindow)    
         member this.CreateSubImage image x y width height =
             let silkImage = (image :?> SilkImage)
-            silkImage.CreateSubImage x y width height    
+            silkImage.CreateSubImage (int x) (int y) (int width) (int height)    
         member this.DrawImage (matrix:Matrix4x4) (image:Image)  =
             let silkImage = image :?> SilkImage
             silkImage.Draw matrix

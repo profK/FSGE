@@ -58,6 +58,10 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         let xform = Window.CreateTranslation (Vector2(100.0f,300.0f))
                     * Window.CreateRotation((float32 Math.PI)/4.0f)
         Window.DrawImage image xform window
+
+        let xform2 = Window.CreateTranslation (Vector2(400.0f,300.0f))
+        let subImage = Window.CreateSubImage image 50u 50u 100u 100u
+        Window.DrawImage subImage xform2 window
         Window.Display window
         Thread.Sleep(5000)
         Window.close window
