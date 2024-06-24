@@ -70,8 +70,8 @@ and AngelCodeText(text: string, font: AngelCodeFont) =
                 let kern = font.GetKern(lastChar, char)
                 let newX = pos.X + (float32 acChar.Width) + kern
                 let xlateXform = Window.CreateTranslation (Vector2(newX,  pos.Y))
-                let xform = xlateXform * xform
-                Window.DrawImage charImage xform
+                let totalXform = xlateXform * xform
+                Window.DrawImage charImage totalXform
                 (Vector2(newX, pos.Y), char)
             ) (Vector2(0f,0f),'\n')
         |> ignore

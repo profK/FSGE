@@ -60,11 +60,11 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Window.Clear {A=0xFFuy;R=0uy;G=0uy;B=0xFFuy} window
         let xform = Window.CreateTranslation (Vector2(100.0f,300.0f))
                     * Window.CreateRotation((float32 Math.PI)/4.0f)
-        Window.DrawImage image xform window
+        Window.DrawImage image xform
 
         let xform2 = Window.CreateTranslation (Vector2(400.0f,300.0f))
         let subImage = Window.CreateSubImage image 50u 50u 100u 100u
-        Window.DrawImage subImage xform2 window
+        Window.DrawImage subImage xform2
         Window.Display window
         Thread.Sleep(5000)
         Window.close window
@@ -73,6 +73,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
     member _.testTextDrawing() =
         output.WriteLine "Test text drawing..."
         let window = Window.create 800 600 "Test Window"
+        Window.Clear {A=0xFFuy;R=0uy;G=0xFFuy;B=0uy} window
         let xform2 = Window.CreateTranslation (Vector2(400.0f,300.0f))
         let font = Text.LoadFont window "AngelcodeFonts/Latin.fnt"
         let text = Text.CreateText "Hello World" font

@@ -134,7 +134,7 @@ module Window =
     // It takes a matrix, an image and a window object as arguments
     // It returns the window object to support railroad style chaining
         
-    let DrawImage image  Matrix4x4 window : Window = 
+    let DrawImage image  Matrix4x4  = 
         _graphicsManager.DrawImage Matrix4x4 image
         
     // This is a function that clears a window
