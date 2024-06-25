@@ -22,6 +22,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Text", "Text\Text.fsproj", 
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AngelCodeText", "AngelCodeText\AngelCodeText.fsproj", "{497CE8CE-DF32-4199-90E8-097638B8C450}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Audio", "Audio\Audio.fsproj", "{E1225236-450B-4B85-B166-B37DA802760D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,10 @@ Global
 		{497CE8CE-DF32-4199-90E8-097638B8C450}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{497CE8CE-DF32-4199-90E8-097638B8C450}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{497CE8CE-DF32-4199-90E8-097638B8C450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1225236-450B-4B85-B166-B37DA802760D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1225236-450B-4B85-B166-B37DA802760D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1225236-450B-4B85-B166-B37DA802760D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1225236-450B-4B85-B166-B37DA802760D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1D702A64-41F4-44FA-8DF9-4262DDE58FDB} = {44DF9982-FC27-4DFA-B680-88C0D3D06148}
