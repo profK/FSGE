@@ -43,17 +43,9 @@ and AngelCodeFont(window:Window, bmFont:BitmapFont) =
     member this.GetCharacter char = bitmapFont.Characters.[char]
     member this.GetKern(last, curr) =
         float32 (bitmapFont.GetKerning(last, curr))
-    interface Font with
-        member this.MakeText(text) = AngelCodeText(text, this) :> Text
-        member val Name = bmFont.FamilyName
-        member val Size = bmFont.FontSize
+    interface Font 
 
 and AngelCodeText(text: string, font: AngelCodeFont) =
-    inherit Text(text, font) 
-        override this.GetText () =
-            text
-        override this.GetFont ()=
-            font
     member this.Draw xform color =
         //let graphics = window.graphics
         text
@@ -75,4 +67,5 @@ and AngelCodeText(text: string, font: AngelCodeFont) =
                 (Vector2(newX, pos.Y), char)
             ) (Vector2(0f,0f),'\n')
         |> ignore
+    interface Text    
  

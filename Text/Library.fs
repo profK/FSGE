@@ -5,14 +5,9 @@ open System.Numerics
 open Graphics2D
 
 
-type Font =
-    abstract member Name : string
-    abstract member Size : int
-    abstract member MakeText : string -> Text
+type Font = interface end
 
-and [<AbstractClass>] Text(text,font) =
-    abstract member GetText : unit -> string
-    abstract member GetFont : unit->Font
+type  Text  = interface end
 
 
 type ITextManager =
