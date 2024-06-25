@@ -3,7 +3,10 @@
 type Sound = interface end
 type SoundStream = interface end
 
+
+
 type IAudioManager =
+ 
     abstract member LoadSound: System.IO.Stream -> Sound
     abstract member OpenSoundStream: System.IO.Stream -> SoundStream
     abstract member PlaySound : Sound -> Sound
