@@ -7,6 +7,7 @@ open System.Reflection
 open System.Threading
 open AngelCodeText
 open Devices
+open FSGEAudio
 open Input
 open Input.HIDScanCodes
 open Logger
@@ -18,6 +19,7 @@ open SilkDevices
 open xUnitLogger
 open Graphics2D
 open FSGEText
+open CSCoreAudio
 
 // Graphics Manager tests
 
@@ -28,6 +30,7 @@ type GraphicsManagerTestsFixture() =
         addManager(typeof<SilkDeviceManager>)
         addManager(typeof<xUnitLogger.xUnitLogger>)
         addManager(typeof<AngelCodeTextRenderer>)
+        addManager(typeof<CSCorePlugin>)
        
 type GraphicsManagerTests(output:ITestOutputHelper ) =
     let ITestOutputHelper = output
@@ -215,4 +218,18 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
                         false
             Thread.Sleep(1000)
         Window.close window
-    
+
+    [<Fact>]
+    member this.testSound() =
+        //Audio.EnumerateOuputDevices
+        //|> Seq.iter (fun (i, dev) -> output.WriteLine($"{i}: {dev}"))
+        let sound = Audio.LoadSound "AudioAssets/racecar.mp3"
+        Audio.SetVolume 1.0f sound
+        //Audio.SetOutputDevice 0
+        Audio.Play sound
+        while Audio.IsPlaying sound do
+            Thread.Sleep(5000)
+        //Audio.StopSound sound
+        //Audio.CloseSound sound
+        //Audio.CloseStream stream
+        Assert.True(true)     

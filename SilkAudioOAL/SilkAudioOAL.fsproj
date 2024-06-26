@@ -11,7 +11,9 @@
 
     <ItemGroup>
       <PackageReference Include="FSFramework" Version="1.0.0-preview-1" />
+      <PackageReference Include="NAudio.Core" Version="2.2.1" />
       <PackageReference Include="Silk.NET.OpenAL" Version="2.21.0" />
+      <PackageReference Include="Silk.NET.OpenAL.Extensions.Enumeration" Version="2.21.0" />
     </ItemGroup>
 
     <ItemGroup>

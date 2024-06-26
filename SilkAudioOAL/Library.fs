@@ -5,6 +5,7 @@ open FSGEAudio
 open ManagerRegistry
 open Microsoft.FSharp.NativeInterop
 open Silk.NET.OpenAL
+open Silk.NET.OpenAL.Extensions
 
 type OALSound(oalApi:AL, source:uint32) =
     member this.Play() = oalApi.SourcePlay(source)
@@ -18,8 +19,18 @@ type OALSound(oalApi:AL, source:uint32) =
 [<Manager("Silk Audio OAL", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
 
 type SilkOalManager() =
-    let oalContext = AL.CreateDefaultContext("") // get default context
     let oalApi = AL.GetApi()
+    let ctxtApi = ALContext.GetApi() // get default context
+    let device = ctxtApi.OpenDevice("")
+    
+    let oalCtxt = ctxtApi.CreateContext(device,NativePtr.nullPtr)
+    do
+        ctxtApi.MakeContextCurrent oalCtxt
+        |> function
+            | true -> ()
+            | false -> failwith "Failed to make context current"
+    
+   
     
     let loadStream (stream:Stream) =
         use memoryStream = new MemoryStream()
@@ -29,7 +40,7 @@ type SilkOalManager() =
     interface IAudioManager with
         member this.CloseSound(var0) = failwith "todo"
         member this.CloseStream(var0) = failwith "todo"
-        member this.LoadSound stream =
+        override this.LoadSound stream =
             let buffer = oalApi.GenBuffer()
             let source = oalApi.GenSource()
             let data = loadStream stream

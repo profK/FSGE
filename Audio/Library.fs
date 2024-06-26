@@ -1,53 +1,67 @@
 ﻿namespace FSGEAudio
 
 type Sound = interface end
-type SoundStream = interface end
 
+type AudioFileFormat =
+    | MP3
+    | WAV
+    | OGG
+    | FLAC
+    | AIFF
+    | WMA
+    | AAC
+    | ALAC
+    | OPUS
+    | UNKNOWN
 
 
 type IAudioManager =
  
-    abstract member LoadSound: System.IO.Stream -> Sound
-    abstract member OpenSoundStream: System.IO.Stream -> SoundStream
-    abstract member PlaySound : Sound -> Sound
-    abstract member StopSound : Sound -> Sound
-    abstract member PauseSound : Sound -> Sound
-    abstract member SetSoundVolume : float32 -> Sound -> Sound
-    abstract member RewindSound : Sound -> Sound
-    abstract member PlayStream : SoundStream -> SoundStream
-    abstract member StopStream : SoundStream -> SoundStream
-    abstract member PauseStream : SoundStream -> SoundStream
-    abstract member SetStreamVolume : float32 -> SoundStream -> SoundStream
-    abstract member RewindStream : SoundStream -> SoundStream
-    abstract member CloseSound : Sound -> unit
-    abstract member CloseStream : SoundStream -> unit
+    abstract member EnumerateOutputDevices : unit -> (int * string) seq
+    abstract member SetOutputDevice : int -> unit
+    abstract member LoadSound: string -> Sound
+    abstract member OpenSoundStream: string -> Sound
+    abstract member Play : Sound -> Sound
+    abstract member Stop : Sound -> Sound
+    abstract member Pause : Sound -> Sound
+    abstract member SetVolume : float32 -> Sound -> Sound
+    abstract member Rewind : Sound -> Sound
+    abstract member Close : Sound -> unit
+    abstract member IsPlaying : Sound -> bool
     
 module Audio =
     let _audioManager =
         match ManagerRegistry.getManager<IAudioManager>() with
         | Some manager -> manager
         | None -> failwith "No audio manager found"
-    let LoadSoundFromIOStream stream : Sound =
-        _audioManager.LoadSound stream
-    let LoadSoundFromPath path : Sound =
-        use stream = System.IO.File.OpenRead path
-        LoadSoundFromIOStream stream
         
-    let OpenSoundStreamFromIOStream stream : SoundStream =
-        _audioManager.OpenSoundStream stream
-    let OpenSoundStreamFromPath path : SoundStream =
-        use stream = System.IO.File.OpenRead path
-        OpenSoundStreamFromIOStream stream
-    let PlaySound sound = _audioManager.PlaySound sound
-    let StopSound sound = _audioManager.StopSound sound
-    let PauseSound sound = _audioManager.PauseSound sound
-    let SetSoundVolume volume sound = _audioManager.SetSoundVolume volume sound
-    let RewindSound sound = _audioManager.RewindSound sound
-    let PlayStream stream = _audioManager.PlayStream stream
-    let StopStream stream = _audioManager.StopStream stream
-    let PauseStream stream = _audioManager.PauseStream stream
-    let SetStreamVolume volume stream = _audioManager.SetStreamVolume volume stream
-    let RewindStream stream = _audioManager.RewindStream stream
-    let CloseSound sound = _audioManager.CloseSound sound
-    let CloseStream stream = _audioManager.CloseStream stream
+    let extensionToAudioFileFormat (extension:string) =
+        match extension.ToLower() with
+        | ".mp3" -> MP3
+        | ".wav" -> WAV
+        | ".ogg" -> OGG
+        | ".flac" -> FLAC
+        | ".aiff" -> AIFF
+        | ".wma" -> WMA
+        | ".aac" -> AAC
+        | ".alac" -> ALAC
+        | ".opus" -> OPUS
+        | _ -> UNKNOWN
+    let EnumerateOuputDevices() =
+        _audioManager.EnumerateOutputDevices()
+    let SetOutputDevice deviceIndex = _audioManager.SetOutputDevice deviceIndex    
+
+    let LoadSound path : Sound =
+        _audioManager.LoadSound path
+        
+    let OpenSoundStream path =
+        _audioManager.OpenSoundStream path
+   
+    let Play sound = _audioManager.Play sound
+    let Stop sound = _audioManager.Stop sound
+    let Pause sound = _audioManager.Pause sound
+    let SetVolume volume sound = _audioManager.SetVolume volume sound
+    let Rewind sound = _audioManager.Rewind sound
+    let IsPlaying sound = 
+        _audioManager.IsPlaying sound
     
