@@ -11,6 +11,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Audio\Audio.fsproj" />
+      <ProjectReference Include="..\CSCoreExtensions\CSCoreExtensions.csproj" />
     </ItemGroup>
 
     <ItemGroup>

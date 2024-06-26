@@ -1,6 +1,8 @@
 ﻿namespace FSGEAudio
 
-type Sound = interface end
+open System.IO
+
+type SoundStream = interface end
 
 type AudioFileFormat =
     | MP3
@@ -19,15 +21,14 @@ type IAudioManager =
  
     abstract member EnumerateOutputDevices : unit -> (int * string) seq
     abstract member SetOutputDevice : int -> unit
-    abstract member LoadSound: string -> Sound
-    abstract member OpenSoundStream: string -> Sound
-    abstract member Play : Sound -> Sound
-    abstract member Stop : Sound -> Sound
-    abstract member Pause : Sound -> Sound
-    abstract member SetVolume : float32 -> Sound -> Sound
-    abstract member Rewind : Sound -> Sound
-    abstract member Close : Sound -> unit
-    abstract member IsPlaying : Sound -> bool
+    abstract member OpenSoundStream: Stream->AudioFileFormat -> SoundStream
+    abstract member Play : SoundStream -> SoundStream
+    abstract member Stop : SoundStream -> SoundStream
+    abstract member Pause : SoundStream -> SoundStream
+    abstract member SetVolume : float32 -> SoundStream -> SoundStream
+    abstract member Rewind : SoundStream -> SoundStream
+    abstract member Close : SoundStream -> unit
+    abstract member IsPlaying : SoundStream -> bool
     
 module Audio =
     let _audioManager =
@@ -51,12 +52,9 @@ module Audio =
         _audioManager.EnumerateOutputDevices()
     let SetOutputDevice deviceIndex = _audioManager.SetOutputDevice deviceIndex    
 
-    let LoadSound path : Sound =
-        _audioManager.LoadSound path
-        
-    let OpenSoundStream path =
-        _audioManager.OpenSoundStream path
-   
+
+    let OpenSoundStream stream format =
+        _audioManager.OpenSoundStream stream format
     let Play sound = _audioManager.Play sound
     let Stop sound = _audioManager.Stop sound
     let Pause sound = _audioManager.Pause sound

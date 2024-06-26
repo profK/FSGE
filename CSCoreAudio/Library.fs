@@ -1,5 +1,6 @@
 ﻿namespace CSCoreAudio
 
+open CSCore.Code.Extensions
 open FSGEAudio
 open ManagerRegistry
 open CSCore
@@ -7,14 +8,13 @@ open CSCore.Codecs;
 open CSCore.CoreAudioAPI;
 open CSCore.SoundOut;
 
-type SoundBuffer(path:string) =
+type SoundBuffer(stream,extension) =
    
-    let _soundOut = new CSCore.SoundOut.WasapiOut()
+    let _soundOut = new CSCore.SoundOut.WasapiOut() //TODO look into adapting OpenaL as a SoundOut
     let _waveSource =
-        CodecFactory.Instance.GetCodec(path)
+        StreamCodecFactory.Instance.GetCodec(stream,extension)
         |> fun codec -> codec.ToSampleSource().ToMono().ToWaveSource()
     do _soundOut.Initialize(_waveSource)
-    
     member this.Play() =
         _soundOut.Play()
     member this.SetVolume(vol:float32) =
@@ -24,7 +24,7 @@ type SoundBuffer(path:string) =
     member this.IsPlaying() =
         _soundOut.PlaybackState = CSCore.SoundOut.PlaybackState.Playing    
     
-    interface Sound 
+    interface SoundStream 
 
 [<Manager("Silk Audio OAL", supportedSystems.Windows )>]
 type CSCorePlugin()=
@@ -35,9 +35,8 @@ type CSCorePlugin()=
             match sound with
             | :? SoundBuffer as sound -> sound.IsPlaying()
             | _ -> failwith "Invalid sound type"
-        member this.LoadSound path=
-            new SoundBuffer(path) :> Sound
-        member this.OpenSoundStream path = failwith "todo"
+        member this.OpenSoundStream stream format =
+            SoundBuffer(stream,format.ToString()) :> SoundStream
         member this.Pause(var0) = failwith "todo"
         member this.Play sound =
             match sound with

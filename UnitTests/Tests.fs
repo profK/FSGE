@@ -2,6 +2,7 @@ module Tests
 
 open System
 open System.Drawing
+open System.IO
 open System.Numerics
 open System.Reflection
 open System.Threading
@@ -223,11 +224,23 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
     member this.testSound() =
         //Audio.EnumerateOuputDevices
         //|> Seq.iter (fun (i, dev) -> output.WriteLine($"{i}: {dev}"))
-        let sound = Audio.LoadSound "AudioAssets/racecar.mp3"
+        let audioStream = new FileStream("AudioAssets/racecar.wav", FileMode.Open, FileAccess.Read)
+        // buffer sfx in memory
+        let memoryStream = new MemoryStream()
+        audioStream.CopyTo(memoryStream)
+        memoryStream.Position <- 0L // Reset the position to the beginning of the stream
+        audioStream.Close()
+        let sound = Audio.OpenSoundStream memoryStream AudioFileFormat.WAV
         Audio.SetVolume 1.0f sound
         //Audio.SetOutputDevice 0
         Audio.Play sound
         while Audio.IsPlaying sound do
+            Thread.Sleep(5000)
+        //stream music from a file
+        let musicStream = new FileStream("AudioAssets/TakeOnMe.mp3", FileMode.Open, FileAccess.Read)
+        let music = Audio.OpenSoundStream musicStream AudioFileFormat.MP3
+        Audio.Play music
+        while Audio.IsPlaying music do
             Thread.Sleep(5000)
         //Audio.StopSound sound
         //Audio.CloseSound sound
