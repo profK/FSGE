@@ -11,12 +11,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Audio\Audio.fsproj" />
-      <ProjectReference Include="..\CSCoreExtensions\CSCoreExtensions.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="CSCore" Version="1.2.1.2" />
-      <PackageReference Include="CSCore.Ffmpeg" Version="1.2.0-beta1" />
+      <PackageReference Include="CSCore-Core" Version="1.0.1-beta" />
     </ItemGroup>
 
 </Project>

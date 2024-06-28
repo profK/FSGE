@@ -1,6 +1,6 @@
 ﻿namespace CSCoreAudio
 
-open CSCore.Code.Extensions
+open CSCore.Codecs
 open FSGEAudio
 open ManagerRegistry
 open CSCore
@@ -12,7 +12,7 @@ type SoundBuffer(stream,extension) =
    
     let _soundOut = new CSCore.SoundOut.WasapiOut() //TODO look into adapting OpenaL as a SoundOut
     let _waveSource =
-        StreamCodecFactory.Instance.GetCodec(stream,extension)
+        CodecFactory.Instance.GetCodec(stream,extension)
         |> fun codec -> codec.ToSampleSource().ToMono().ToWaveSource()
     do _soundOut.Initialize(_waveSource)
     member this.Play() =
