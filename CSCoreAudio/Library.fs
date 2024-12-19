@@ -61,7 +61,8 @@ type CSCorePlugin()=
             sound
         member this.Stop(var0) =
             match var0 with
-            | :? SoundBuffer as sound -> sound.
+            | :? SoundBuffer as sound -> sound.stop()
             | _ -> failwith "Invalid sound type"
-            sound
+            var0
             
+       
