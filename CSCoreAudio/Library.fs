@@ -25,6 +25,9 @@ type SoundBuffer(stream,extension) =
         _soundOut.PlaybackState = CSCore.SoundOut.PlaybackState.Playing
     member this.Close() =
         _soundOut.Dispose()
+        
+    member this.stop() =
+        _soundOut.Stop()  
     
     interface SoundStream 
 
@@ -56,4 +59,9 @@ type CSCorePlugin()=
             | :? SoundBuffer as sound -> sound.SetVolume(vol)
             | _ -> failwith "Invalid sound type"
             sound
-        member this.Stop(var0) = failwith "todo"
+        member this.Stop(var0) =
+            match var0 with
+            | :? SoundBuffer as sound -> sound.
+            | _ -> failwith "Invalid sound type"
+            sound
+            
