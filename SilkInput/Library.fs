@@ -1,5 +1,6 @@
 ﻿namespace SilkDevices
 
+open System
 open Devices
 open ManagerRegistry
 open Silk.NET.Input
@@ -36,3 +37,7 @@ type SilkDeviceManager() =
         member this.GetDeviceValuesMap deviceContext  =    
             let silkCtxt = (deviceContext :?> SilkDeviceContext)
             silkCtxt.Values
+        member this.CloseDeviceContext deviceContext  =    
+            let silkCtxt = (deviceContext :?> IDisposable)
+            silkCtxt.Dispose()
+            ()

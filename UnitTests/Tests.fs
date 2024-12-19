@@ -184,7 +184,10 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
                 | _ -> output.WriteLine($"Not a keyboard value {devValue.ToString()}")
             | None ->  
             Thread.Sleep(1000)
+     
+        Devices.CloseDeviceContext deviceContext
         Window.close window
+   
 
     [<Fact>]
     member this.testAllValues() =
@@ -219,7 +222,9 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
                         //output.WriteLine "Warning Keyboard0 not detechhhhted"
                         false
             Thread.Sleep(1000)
+        Devices.CloseDeviceContext deviceContext
         Window.close window
+   
 
     [<Fact>]
     member this.testSound() =
@@ -244,6 +249,6 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Audio.Play music
         while Audio.IsPlaying music do
             Thread.Sleep(5000)
-        Audio.Stop sound
+        
         Audio.Close sound
         Assert.True(true)     

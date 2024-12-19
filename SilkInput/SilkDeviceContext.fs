@@ -1,5 +1,6 @@
 ﻿namespace SilkDevices
 
+open System
 open System.Text.RegularExpressions
 open Devices
 open Logger
@@ -9,12 +10,13 @@ open Silk.NET.Windowing
 open SilkGraphicsOGL.WindowGL
 
 type SilkDeviceContext(silkWindow:IWindow) =
+    
     let mutable _values=Map.empty    // device node tree assmbly routines
     
    
-    let silkInputContext = silkWindow.CreateInput()
+    let silkInputContext:IInputContext = silkWindow.CreateInput()
     
-   
+    
     
     let makeMouseButtonNodeList parentPath (mouseButtons:MouseButton seq) =
         mouseButtons
@@ -262,7 +264,11 @@ type SilkDeviceContext(silkWindow:IWindow) =
         member this.Values 
             with get () = _values
         member this.Devices
-            with get () = _devices   
+            with get () = _devices
+    interface IDisposable with
+        member this.Dispose() =
+            silkInputContext.Dispose()
+            ()
 
     
                
