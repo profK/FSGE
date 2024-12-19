@@ -6,9 +6,12 @@ open Logger
 open Silk.NET.Input
 open FSharp.Collections
 open Silk.NET.Windowing
+open SilkGraphicsOGL.WindowGL
 
 type SilkDeviceContext(silkWindow:IWindow) =
     let mutable _values=Map.empty    // device node tree assmbly routines
+    
+   
     let silkInputContext = silkWindow.CreateInput()
     
    

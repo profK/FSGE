@@ -60,6 +60,7 @@ module Audio =
     let Pause sound = _audioManager.Pause sound
     let SetVolume volume sound = _audioManager.SetVolume volume sound
     let Rewind sound = _audioManager.Rewind sound
+    let Close sound = _audioManager.Close sound
     let IsPlaying sound = 
         _audioManager.IsPlaying sound
     

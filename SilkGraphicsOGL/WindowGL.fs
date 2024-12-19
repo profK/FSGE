@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Numerics
 open System.Runtime.InteropServices
+open System.Threading
 open Microsoft.FSharp.NativeInterop
 open ShadersGLSL
 open Silk.NET.OpenGL
@@ -25,12 +26,12 @@ type SilkWindow(silkWindow:IWindow) =
     // things need to be done in the right order
     // Function to convert a Matrix4x4from screen coordinates to normalized coordinates
    
-        
+  
     let _gl =
         silkWindow.Initialize()
         silkWindow.CreateOpenGL()
     do
-        silkWindow.Initialize()
+       // silkWindow.Initialize()
 
         _gl.Enable GLEnum.DebugOutput
         _gl.DebugMessageCallback( MessageCallback, IntPtr.Zero.ToPointer() )

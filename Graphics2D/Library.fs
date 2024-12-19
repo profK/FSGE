@@ -61,6 +61,7 @@ module Window =
     // It returns unit
     let close window =
         _graphicsManager.CloseWindow window
+       
 
     // This is a function that gets the width of a window
     // It takes a window object as an argument

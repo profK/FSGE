@@ -72,6 +72,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Window.Display window
         Thread.Sleep(5000)
         Window.close window
+       
         Assert.True(true)
     [<Fact>]
     member _.testTextDrawing() =
@@ -110,7 +111,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
     member _.testSetPosition() =
         let pos = {X=100; Y=100} 
         let window = Window.create 800 600 "Test Window"
-        Window.setPosition window 
+        Window.setPosition window pos
         let position = Window._graphicsManager.WindowPosition window
         Thread.Sleep(5000)
         Window.close window
@@ -178,10 +179,10 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
                         value
                         |> Array.map (fun v -> Devices.MapPlatformScanCodeToHID v)
                         |> Array.map (fun v -> enum<ScanCode> (int32 v))
-                    output.WriteLine($"Keyboard0: %A{keyCodes}")
+                    if (keyCodes.Length>0) then output.WriteLine($"Keyboard0: %A{keyCodes}")
                     exit <- Array.contains ScanCode.Escape keyCodes
                 | _ -> output.WriteLine($"Not a keyboard value {devValue.ToString()}")
-            | None -> output.WriteLine("No value found for Keyboard0")   
+            | None ->  
             Thread.Sleep(1000)
         Window.close window
 
@@ -236,13 +237,13 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Audio.Play sound
         while Audio.IsPlaying sound do
             Thread.Sleep(5000)
+        Audio.Close sound   
         //stream music from a file
         let musicStream = new FileStream("AudioAssets/TakeOnMe.mp3", FileMode.Open, FileAccess.Read)
         let music = Audio.OpenSoundStream musicStream AudioFileFormat.MP3
         Audio.Play music
         while Audio.IsPlaying music do
             Thread.Sleep(5000)
-        //Audio.StopSound sound
-        //Audio.CloseSound sound
-        //Audio.CloseStream stream
+        Audio.Stop sound
+        Audio.Close sound
         Assert.True(true)     

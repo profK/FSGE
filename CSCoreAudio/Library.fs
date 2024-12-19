@@ -22,14 +22,19 @@ type SoundBuffer(stream,extension) =
         ()
         
     member this.IsPlaying() =
-        _soundOut.PlaybackState = CSCore.SoundOut.PlaybackState.Playing    
+        _soundOut.PlaybackState = CSCore.SoundOut.PlaybackState.Playing
+    member this.Close() =
+        _soundOut.Dispose()
     
     interface SoundStream 
 
 [<Manager("Silk Audio OAL", supportedSystems.Windows )>]
 type CSCorePlugin()=
     interface IAudioManager with
-        member this.Close(var0) = failwith "todo"
+        member this.Close(var0) =
+            match var0 with
+            | :? SoundBuffer as sound -> sound.Close()
+            | _ -> failwith "Invalid sound type"
         member this.EnumerateOutputDevices() = failwith "todo"
         member this.IsPlaying sound =
             match sound with
