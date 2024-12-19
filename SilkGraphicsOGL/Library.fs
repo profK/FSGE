@@ -25,7 +25,7 @@ type SilkGraphicsManager() =
     interface Graphics2D.IGraphicsManager with
         member this.CreateWindow width height title =
             let mutable options = WindowOptions.Default
-            options.Title <- "Hello from F#"
+            options.Title <- title
             options.Size <- Vector2D(800, 600)
             let window = Silk.NET.Windowing.Window.Create(options)
 
