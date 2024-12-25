@@ -7,6 +7,16 @@
 
     <ItemGroup>
         <Compile Include="Program.fs"/>
+        <Content Include="images\rock2.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="images\rock1.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="images\rock0.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="images\desktop.ini" />
     </ItemGroup>
 
     <ItemGroup>

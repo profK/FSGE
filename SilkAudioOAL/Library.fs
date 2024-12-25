@@ -14,7 +14,7 @@ type OALSound(oalApi:AL, source:uint32) =
     member this.Rewind() = oalApi.SourceRewind(source)
     member this.SetVolume(volume:float32) = oalApi.SetSourceProperty(source, SourceFloat.Gain, volume)
     
-    interface Sound 
+    interface SoundStream
 
 [<Manager("Silk Audio OAL", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
 
