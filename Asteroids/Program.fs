@@ -85,7 +85,7 @@ let main argv =
         if currentMS>10 then
             lastTime <- DateTime.Now
             Window.Clear {R=0uy;G=0uy;B=0uy;A=1uy} window |> ignore
-            // asteroidsList <- asteroidsList |> List.map UpdateRoc-Position
+            asteroidsList <- asteroidsList |> List.map UpdateRockPosition
             asteroidsList |> List.map (fun rock -> DrawRock (window,rockImages,rock)) |> ignore
             Window.Display window |> ignore
             ()
