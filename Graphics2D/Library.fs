@@ -19,7 +19,10 @@ type Window = interface end
 // This is a type that represents an image
 // It is an opaque type, meaning that you can't see the implementation details
 
-type Image = interface end
+type Image =
+    interface
+        abstract member Size : Size    
+    end
 
 // THis interface defines the functionality a graphics plugin implementation must implement
 type IGraphicsManager =

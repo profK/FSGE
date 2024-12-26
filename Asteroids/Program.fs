@@ -30,7 +30,7 @@ type RockRec = {
 }
 
 let MAX_VELOCITY = 2.0
-let MAX_ROT_VELOCITY = 0.1
+let MAX_ROT_VELOCITY = 3.14
 let mutable asteroidsList =List<RockRec>.Empty
         
 let random = System.Random()
@@ -38,29 +38,43 @@ let random = System.Random()
 let MakeRandomRock() =
     {
         size=RockSize.large;
-        pos=Vector2D(random.NextDouble() * 800.0, random.NextDouble() * 600.0)
-        rotation=random.NextDouble()*6.28
+        //pos=Vector2D(random.NextDouble() * 800.0, random.NextDouble() * 600.0)
+        pos = Vector2D(400.0,300.0)
+        rotation=random.NextDouble()*Math.PI*2.0
         velocity =Vector2D((random.NextDouble() * 2.0 - 1.0)*MAX_VELOCITY,
                            (random.NextDouble() * 2.0 - 1.0)*MAX_VELOCITY)
         rotVelocity=(random.NextDouble()*2.0-1.0)*MAX_ROT_VELOCITY
     }
 let UpdateRockPosition (rock:RockRec) =
-    let newPos = rock.pos + rock.velocity
+    let newPos = rock.pos // + rock.velocity
     let newRot = rock.rotation + rock.rotVelocity
     let newRock = {rock with pos=newPos; rotation=newRot}
     newRock
+    
 let DrawRock (window:Window,images:Image list, rock:RockRec) =
     let rockImage = images.[(0)] //t)rock.size]
-    let matrix = (Window.CreateTranslation(Vector2((float32)rock.pos.X, (float32) rock.pos.Y )) *
-          Window.CreateRotation((float32)rock.rotation))
+    let imageSize = rockImage.Size
+    let matrix =
+       Window.CreateTranslation(
+                Vector2(float32 rock.pos.X,float32 rock.pos.Y))*
+       Window.CreateRotation((float32 rock.rotation))*
+       Window.CreateTranslation(
+            Vector2(-(float32 imageSize.Width/2.0f),
+                    -(float32 imageSize.Height/2.0f)))
+      
+       
+       
+        
+        
+        
     Window.DrawImage rockImage matrix |> ignore
-    Window.Display window |> ignore
+    
 
   
 //execution starts here
 [<EntryPoint>]
 let main argv =
-    asteroidsList <- [0..1] |> List.map (fun _ -> MakeRandomRock())
+    asteroidsList <- [0] |> List.map (fun _ -> MakeRandomRock())
  
     // Loading the PLugins
     // We are doing it manually here, but in a real application
@@ -80,13 +94,13 @@ let main argv =
     let mutable running = true
     let mutable lastTime = DateTime.Now
     while running do
-        let currentTime = DateTime.Now - lastTime
-        let currentMS = currentTime.TotalMilliseconds
-        if currentMS>10 then
+        let deltaTime = DateTime.Now - lastTime
+        let deltaMS = deltaTime.TotalMilliseconds
+        if deltaMS>100 then
             lastTime <- DateTime.Now
-            Window.Clear {R=0uy;G=0uy;B=0uy;A=1uy} window |> ignore
-            asteroidsList <- asteroidsList |> List.map UpdateRockPosition
-            asteroidsList |> List.map (fun rock -> DrawRock (window,rockImages,rock)) |> ignore
+            //Window.Clear {R=0uy;G=0uy;B=0uy;A=255uy} window |> ignore
+            //asteroidsList <- asteroidsList |> List.map UpdateRockPosition
+            asteroidsList |> List.iter (fun rock -> DrawRock (window,rockImages,rock)) |> ignore
             Window.Display window |> ignore
-            ()
+            
     0

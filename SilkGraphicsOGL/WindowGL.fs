@@ -189,7 +189,8 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
         SilkImage(image, textureInfo, Some(Vector2(float32 x, float32 y)),
               Some({Width=width;Height=height}), silkWindow)
 
-    interface Image 
+    interface Image with
+        member this.Size =  {Width=textureInfo.Width; Height=textureInfo.Height}
 
 
     
