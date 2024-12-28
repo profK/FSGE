@@ -16,8 +16,8 @@ type RockSize =
     | medium = 1
     | large = 2
 type ShipRec = {
-    pos: Vector2D
-    velocity: Vector2D
+    pos: Vector2D<float>
+    velocity: Vector2D<float>
     rotation: float 
 }
 
@@ -29,8 +29,8 @@ type RockRec = {
     rotVelocity: float
 }
 
-let MAX_VELOCITY = 2.0
-let MAX_ROT_VELOCITY = 3.14
+let MAX_VELOCITY = 0.5
+let MAX_ROT_VELOCITY = 0.005
 let mutable asteroidsList =List<RockRec>.Empty
         
 let random = System.Random()
@@ -45,32 +45,29 @@ let MakeRandomRock() =
                            (random.NextDouble() * 2.0 - 1.0)*MAX_VELOCITY)
         rotVelocity=(random.NextDouble()*2.0-1.0)*MAX_ROT_VELOCITY
     }
-let UpdateRockPosition (rock:RockRec) =
-    let newPos = rock.pos // + rock.velocity
-    let newRot = rock.rotation + rock.rotVelocity
-    let newRock = {rock with pos=newPos; rotation=newRot}
-    newRock
+let UpdateRockPosition ( elapsedMS: float, rock:RockRec) =
+    //let newPos = rock.pos + Vector2D(
+    //                                rock.velocity.X*(float elapsedMS),
+    //                                rock.velocity.Y*(float elapsedMS))
+                   
+    let newRot = rock.rotation + (rock.rotVelocity*(float elapsedMS))
+    {rock with  rotation=newRot}
+    
     
 let DrawRock (window:Window,images:Image list, rock:RockRec) =
     let rockImage = images.[(0)] //t)rock.size]
     let imageSize = rockImage.Size
     let matrix =
-       Window.CreateTranslation(
-                Vector2(float32 rock.pos.X,float32 rock.pos.Y))*
-       Window.CreateRotation((float32 rock.rotation))*
-       Window.CreateTranslation(
-            Vector2(-(float32 imageSize.Width/2.0f),
-                    -(float32 imageSize.Height/2.0f)))
-      
-       
-       
-        
-        
-        
+       //Window.CreateTranslation(
+       //         Vector2(float32 rock.pos.X,float32 rock.pos.Y))*
+        Window.CreateTranslation(
+                Vector2(400f,300f))
+                //Vector2(400.0f-(float32 imageSize.Width/2.0f),
+                //        300.0f-(float32 imageSize.Height/2.0f))) *                                                                                  Window.CreateRotation(float32 rock.rotation)
+        //Window.CreateRotation(float32 rock.rotation)
     Window.DrawImage rockImage matrix |> ignore
     
 
-  
 //execution starts here
 [<EntryPoint>]
 let main argv =
@@ -98,8 +95,11 @@ let main argv =
         let deltaMS = deltaTime.TotalMilliseconds
         if deltaMS>100 then
             lastTime <- DateTime.Now
-            //Window.Clear {R=0uy;G=0uy;B=0uy;A=255uy} window |> ignore
-            //asteroidsList <- asteroidsList |> List.map UpdateRockPosition
+            Window.Clear {R=0uy;G=0uy;B=0uy;A=255uy} window |> ignore
+            asteroidsList <-
+                asteroidsList 
+                |> List.map (fun rock ->
+                    UpdateRockPosition (deltaMS, rock) )
             asteroidsList |> List.iter (fun rock -> DrawRock (window,rockImages,rock)) |> ignore
             Window.Display window |> ignore
             

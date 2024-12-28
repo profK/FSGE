@@ -54,10 +54,15 @@ type SilkWindow(silkWindow:IWindow) =
     member this.ScreenToNormalizedMatrix (matrix:Matrix4x4) =
         let width = float32 silkWindow.Size.X
         let height = float32 silkWindow.Size.Y
-        Matrix4x4.CreateTranslation(Vector3(-400f,-300f,0f))* matrix * Matrix4x4.CreateScale(
-                            2f/(float32 silkWindow.Size.X),
-                            -2f/(float32 silkWindow.Size.Y),
-                            1f) 
+       //Matrix4x4.CreateTranslation(Vector3(-400f,-300f,0f)
+        matrix*  
+        Matrix4x4.CreateScale(2f/width,
+                             -2f/height, 1f) *
+        Matrix4x4.CreateTranslation(-1f,1f,0f)
+        
+        
+        
+           
         // Calculate scaling factors
        
     member this.SetBackgroundColor (color:Graphics2D.Color) =
@@ -166,7 +171,7 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
         let stream = new FileStream(path, FileMode.Open, FileAccess.Read)
         SilkImage(stream, silkWindow)
    
-    member this.Draw matrix tint =
+    member this.Draw (matrix:Matrix4x4) tint =
         silkWindow.GL.UseProgram(silkWindow.DefaultShaderProgram)
         silkWindow.GL.BindVertexArray(_vao)
         silkWindow.GL.ActiveTexture(TextureUnit.Texture0)
@@ -175,8 +180,12 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
             silkWindow.GL.GetUniformLocation(silkWindow.DefaultShaderProgram,"xformMatrix")
         let tintLocation =
             silkWindow.GL.GetUniformLocation(silkWindow.DefaultShaderProgram,"tint")    
-
-        let matrix4x4=  silkWindow.ScreenToNormalizedMatrix matrix
+        let centeredMatrix =             
+                Window.CreateTranslation(
+                    Vector2((float32 -subTexSize.Width)/2f,
+                            (float32 -subTexSize.Height)/2f)) *
+                matrix
+        let matrix4x4=  silkWindow.ScreenToNormalizedMatrix centeredMatrix
     // Convert to an OpenGL-compatible float array in column-major order
         let openGLMatrix = matrix4x4ToOpenGLArray matrix4x4
         silkWindow.GL.UniformMatrix4(xformLocation,false, ReadOnlySpan<float32>(openGLMatrix))

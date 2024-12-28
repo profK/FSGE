@@ -62,13 +62,13 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         let window = Window.create 800 600 "Test Window"
         let image = Window.LoadImageFromPath "NGTL_tex.png" window
         Window.Clear {A=0xFFuy;R=0uy;G=0uy;B=0xFFuy} window
-        let xform = Window.CreateTranslation (Vector2(100.0f,300.0f))
-                    * Window.CreateRotation((float32 Math.PI)/4.0f)
+        let xform = Window.CreateRotation(float32 Math.PI/4f) *
+                    Window.CreateTranslation(Vector2(400f,300f) )           
         Window.DrawImage image xform
 
         let xform2 = Window.CreateTranslation (Vector2(400.0f,300.0f))
         let subImage = Window.CreateSubImage image 50u 50u 100u 100u
-        Window.DrawImage subImage xform2
+        //Window.DrawImage subImage xform2
         Window.Display window
         Thread.Sleep(5000)
         Window.close window
