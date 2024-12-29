@@ -27,7 +27,6 @@ type RockRec = {
     rotation: float
     rotVelocity: float
     size: RockSize
-    
 }
 
 let ROCK_PPS = 20.0
@@ -55,7 +54,15 @@ let UpdateRockPosition ( elapsedMS: float, rock:RockRec) =
     let newRot = rock.rotation + (rock.rotVelocity*(float elapsedMS))
     {rock with  rotation=newRot ; pos=newPos}
     
-    
+let WrapRock (window:Window, rock:RockRec) =
+    if rock.pos.X > 800.0 then {rock with pos= Vector2D(0.0,rock.pos.Y)}  
+    elif rock.pos.X < 0.0 then
+        { rock with pos=Vector2D(Window.width window,rock.pos.Y)}
+    elif rock.pos.Y > 600.0 then
+        {rock with pos=Vector2D(rock.pos.X, Y=0.0)}
+    elif rock.pos.Y < 0.0 then
+        {rock with pos=Vector2D(rock.pos.X, Y=600.0)}
+    else rock
 let DrawRock (window:Window,images:Image list, rock:RockRec) =
     let rockImage = images.[(0)] //t)rock.size]
     let imageSize = rockImage.Size
@@ -97,6 +104,9 @@ let main argv =
                 asteroidsList 
                 |> List.map (fun rock ->
                     UpdateRockPosition (deltaMS, rock) )
+                |> List.map (fun rock ->
+                    WrapRock (window, rock))
+                    
             asteroidsList |> List.iter (fun rock -> DrawRock (window,rockImages,rock)) |> ignore
             Window.Display window |> ignore
             
