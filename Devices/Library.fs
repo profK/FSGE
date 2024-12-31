@@ -37,6 +37,7 @@ type IDeviceManager =
     abstract member tryGetDeviceValue : DeviceContext->string-> DeviceValue option
     abstract member GetDeviceTree : DeviceContext -> DeviceNode seq
     abstract member MapPlatformScanCodeToHID : uint32 -> uint32
+    abstract member MapHIDToPlatformScanCode: uint32 -> uint32
     abstract member GetDeviceValuesMap : DeviceContext -> Map<string,DeviceValue>
     abstract member CloseDeviceContext : DeviceContext -> unit
 
@@ -50,6 +51,7 @@ module Devices =
     let TryGetDeviceValue context path = _deviceManager.tryGetDeviceValue context path
     let GetDeviceValuesMap context = _deviceManager.GetDeviceValuesMap context
     let MapPlatformScanCodeToHID code = _deviceManager.MapPlatformScanCodeToHID code
+    let MapHIDToPlatformScanCode code = _deviceManager.MapHIDToPlatformScanCode code
     let CloseDeviceContext context = _deviceManager.CloseDeviceContext context
     
   

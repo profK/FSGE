@@ -2,6 +2,7 @@
 
 open Input
 open Silk.NET.Input
+open Silk.NET.SDL
 
 
 
@@ -60,6 +61,10 @@ let scanCodeMapping =
         (Key.F10, HIDScanCodes.ScanCode.F10)
         (Key.F11, HIDScanCodes.ScanCode.F11)
         (Key.F12, HIDScanCodes.ScanCode.F12)
+        (Key.Right , HIDScanCodes.ScanCode.RightArrow)
+        (Key.Left , HIDScanCodes.ScanCode.LeftArrow)
+        (Key.Up , HIDScanCodes.ScanCode.UpArrow)
+        (Key.Down , HIDScanCodes.ScanCode.DownArrow)
         // Add more mappings as needed
     ] |> Map.ofList
 
@@ -68,6 +73,7 @@ let intToSilkScanCode (value: int) : Key option =
         Some (enum<Key> value)
     else
         None
+      
 let mapSilkToHID (openGLScanCode: uint32) : uint32 =
     match intToSilkScanCode (int openGLScanCode) with
     |Some oglScanCode -> 
@@ -75,4 +81,12 @@ let mapSilkToHID (openGLScanCode: uint32) : uint32 =
         | Some hidScanCode -> uint32 hidScanCode
         | None -> 0u
     | None -> 0u
+    
+let mapHIDToSilk (hidScanCode: uint32) : uint32 =
+   let codeEnum = enum<HIDScanCodes.ScanCode> (int32 hidScanCode)
+   scanCodeMapping
+   |> Map.tryPick (fun key value -> if value = codeEnum then Some key else None)
+   |> function
+       | Some key -> uint32 key
+       | None -> 0u
    

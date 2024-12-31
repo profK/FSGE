@@ -14,5 +14,5 @@ type xUnitLogger( ) =
             match _output with
             | Some output ->
                 output.WriteLine message
-            | None -> failwith "No xunit output injected"
+            | None -> ()
        

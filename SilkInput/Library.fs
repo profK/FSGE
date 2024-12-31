@@ -34,6 +34,8 @@ type SilkDeviceManager() =
         member this.MapPlatformScanCodeToHID var0 =
             mapSilkToHID var0
             
+        member this.MapHIDToPlatformScanCode (var0:uint32) =
+            mapHIDToSilk var0
         member this.GetDeviceValuesMap deviceContext  =    
             let silkCtxt = (deviceContext :?> SilkDeviceContext)
             silkCtxt.Values

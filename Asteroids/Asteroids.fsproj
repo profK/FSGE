@@ -17,11 +17,15 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Include="images\desktop.ini" />
+        <Content Include="images\ship_reg.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\AngelCodeText\AngelCodeText.fsproj" />
       <ProjectReference Include="..\Audio\Audio.fsproj" />
+      <ProjectReference Include="..\ConsoleLogger\ConsoleLogger.fsproj" />
       <ProjectReference Include="..\CSCoreAudio\CSCoreAudio.fsproj" />
       <ProjectReference Include="..\CSCoreExtensions\CSCoreExtensions.csproj" />
       <ProjectReference Include="..\Devices\Devices.fsproj" />
