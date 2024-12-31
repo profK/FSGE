@@ -36,10 +36,9 @@ type RockRec = {
 }
 
 let ROCK_PPS = 20.0f
-let ROCK_ROT_PPS = 0.005f
-let SHIP_PPS = 20.0f
-let SHIP_ROT_PPS = 0.005f
-let SHIP_ROT_INCR = 0.01f
+let ROCK_ROT_PPS = 0.0005f
+let SHIP_INCR = 01.0f
+let SHIP_ROT_PPS = 1.0f
 let mutable asteroidsList =List<RockRec>.Empty
         
 let random = System.Random()
@@ -82,8 +81,8 @@ let DrawRock window (images:Image list) rock =
     
 let UpdateShipPosition elapsedMS (ship:ShipRec) =
     let newPos = ship.pos + Vector2(
-                                   ship.velocity.X*elapsedMS*SHIP_PPS/1000.0f,
-                                   ship.velocity.Y*elapsedMS*SHIP_PPS/1000.0f)
+                                   ship.velocity.X*elapsedMS*SHIP_INCR/1000.0f,
+                                   ship.velocity.Y*elapsedMS*SHIP_INCR/1000.0f)
     let newRot = ship.rotation + (ship.rotVelocity*elapsedMS)
     {ship with  rotation=newRot ; pos=newPos}
     
@@ -105,20 +104,21 @@ let IsKeyPressed context hidKey =
     |> Option.defaultValue false
 
 
-let GetInput context ship:ShipRec=
-    if IsKeyPressed context Key.Right then
-        {ship with rotVelocity=ship.rotVelocity+SHIP_ROT_INCR}
-    elif IsKeyPressed context Key.Left then
-        {ship with rotVelocity=ship.rotVelocity-SHIP_ROT_INCR}
-    elif IsKeyPressed context Key.Up then
-        let angle = ship.rotation
-        let x = float32(Math.Sin(float angle))
-        let y = float32(Math.Cos(float angle))
-        {ship with
-              velocity=Vector2(ship.velocity.X+x*SHIP_PPS,
-                    ship.velocity.Y+y*SHIP_PPS)
-        }
-    else ship
+let GetInput context (ship:ShipRec) elapsedMS=
+    let rot =
+        if IsKeyPressed context Key.Right then
+            SHIP_ROT_PPS/1000f
+        elif IsKeyPressed context Key.Left then
+           -SHIP_ROT_PPS/1000f
+        else 0.0f
+    let vel =
+        if IsKeyPressed context Key.Up then
+            let angle = ship.rotation
+            let x = float32(Math.Sin(float angle))*(elapsedMS*SHIP_INCR/1000f)
+            let y = float32(Math.Cos(float angle))*(elapsedMS*SHIP_INCR/1000f)
+            Vector2(ship.velocity.X+x, ship.velocity.Y+y)
+        else ship.velocity           
+    {ship with velocity=vel; rotVelocity=rot}
 //execution starts here
 [<EntryPoint>]
 let main argv =
@@ -156,8 +156,8 @@ let main argv =
     while running do
         Window.DoEvents window
         let deltaTime = DateTime.Now - lastTime
-        let deltaMS = deltaTime.TotalMilliseconds
-        if deltaMS>100 then
+        let deltaMS = float32 deltaTime.TotalMilliseconds
+        if deltaMS>100f then
             lastTime <- DateTime.Now
             Window.Clear {R=0uy;G=0uy;B=0uy;A=255uy} window |> ignore
             asteroidsList <-
@@ -168,11 +168,12 @@ let main argv =
                     WrapRock window rock )  
             asteroidsList |> List.iter (fun rock ->
                 DrawRock window rockImages rock) |> ignore
-            shipRec<- GetInput deviceContext shipRec 
+            shipRec<- GetInput deviceContext shipRec deltaMS 
                       |> UpdateShipPosition (float32 deltaMS)
                       |> WrapShip window
                         
             Window.DrawImage shipImage (
+                Window.CreateRotation(shipRec.rotation) *
                 Window.CreateTranslation(Vector2(float32 shipRec.pos.X,float32 shipRec.pos.Y))) |> ignore
             Window.Display window |> ignore
             
