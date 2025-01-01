@@ -37,7 +37,7 @@ type RockRec = {
 
 let ROCK_PPS = 20.0f
 let ROCK_ROT_PPS = 0.0005f
-let SHIP_INCR = 01.0f
+let SHIP_INCR = 20.0f
 let SHIP_ROT_PPS = 1.0f
 let mutable asteroidsList =List<RockRec>.Empty
         
@@ -115,7 +115,7 @@ let GetInput context (ship:ShipRec) elapsedMS=
         if IsKeyPressed context Key.Up then
             let angle = ship.rotation
             let x = float32(Math.Sin(float angle))*(elapsedMS*SHIP_INCR/1000f)
-            let y = float32(Math.Cos(float angle))*(elapsedMS*SHIP_INCR/1000f)
+            let y = -float32(Math.Cos(float angle))*(elapsedMS*SHIP_INCR/1000f)
             Vector2(ship.velocity.X+x, ship.velocity.Y+y)
         else ship.velocity           
     {ship with velocity=vel; rotVelocity=rot}
