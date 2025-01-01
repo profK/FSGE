@@ -8,6 +8,7 @@ open Silk.NET.Input
 open FSharp.Collections
 open Silk.NET.Windowing
 open SilkGraphicsOGL.WindowGL
+open SilkScanCodeConversion
 
 type SilkDeviceContext(silkWindow:IWindow) =
     
@@ -91,7 +92,9 @@ type SilkDeviceContext(silkWindow:IWindow) =
                         | Some deviceNode ->
                             match deviceNode with
                             | KeyboardValue(keyList) ->
-                                let newList = keyList |> Array.append [|uint32 key|]
+                                let newList =
+                                        keyList
+                                        |> Array.append [|mapSilkToHID(uint32 key)|]
                                 Some(KeyboardValue(newList))
                             | _ ->
                                 failwith "Attempt to add key to non-keyboard list"
