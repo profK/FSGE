@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Rocks.fs" />
         <Compile Include="Program.fs"/>
         <Content Include="images\rock2.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

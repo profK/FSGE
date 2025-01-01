@@ -3,23 +3,20 @@
 open System
 open System.Numerics
 open AngelCodeText
+open Asteroids.Rocks
 open CSCoreAudio
 open Graphics2D
 open Devices
-open Input.HIDScanCodes
+
 open ManagerRegistry
 open Silk.NET.Input
 open SilkDevices
 open SilkGraphicsOGL
-open SilkDevices
 open ConsoleLogger
 
 
 //record types
-type RockSize =
-    | small = 0
-    | medium = 1
-    | large = 2
+
 type ShipRec = {
     pos: Vector2
     velocity: Vector2
@@ -27,57 +24,14 @@ type ShipRec = {
     rotVelocity: float32
 }
 
-type RockRec = {
-    pos: Vector2
-    velocity: Vector2
-    rotation: float32
-    rotVelocity: float32
-    size: RockSize
-}
 
-let ROCK_PPS = 20.0f
-let ROCK_ROT_PPS = 0.0005f
 let SHIP_INCR = 20.0f
 let SHIP_ROT_PPS = 1.0f
 let mutable asteroidsList =List<RockRec>.Empty
         
 let random = System.Random()
 
-let MakeRandomRock() =
-    {
-        size=RockSize.large
-        pos=Vector2(random.NextSingle()* 800.0f,
-                    random.NextSingle() * 600.0f)
-        velocity=Vector2(
-            random.NextSingle()*2.0f-1.0f * ROCK_PPS/2.0f,
-            random.NextSingle()*2.0f-1.0f * ROCK_PPS/2.0f)
-        rotation = (random.NextSingle()*2.0f-1.0f) * 2.0f * float32(Math.PI)
-        rotVelocity = (random.NextSingle()*2.0f-1.0f) * ROCK_ROT_PPS
-    }
-let UpdateRockPosition elapsedMS rock:RockRec =
-    let newPos = rock.pos +
-                 Vector2(rock.velocity.X*float32(elapsedMS*ROCK_PPS/1000.0f),
-                         rock.velocity.Y*float32(elapsedMS*ROCK_PPS/1000.0f))
-                   
-    let newRot = rock.rotation + (rock.rotVelocity*elapsedMS)
-    {rock with  rotation=newRot ; pos=newPos}
-    
-let WrapRock window rock =
-    if rock.pos.X > 800.0f then {rock with pos= Vector2(0.0f,rock.pos.Y)}  
-    elif rock.pos.X < 0.0f then
-        { rock with pos=Vector2(float32(Window.width window),rock.pos.Y)}
-    elif rock.pos.Y > 600.0f then
-        {rock with pos=Vector2(rock.pos.X, Y=0.0f)}
-    elif rock.pos.Y < 0.0f then
-        {rock with pos=Vector2(rock.pos.X, Y=600.0f)}
-    else rock
-let DrawRock window (images:Image list) rock =
-    let rockImage = images.[(0)] //t)rock.size]
-    let imageSize = rockImage.Size
-    let matrix =
-        Window.CreateRotation(float32 rock.rotation) *
-        Window.CreateTranslation(Vector2( rock.pos.X, rock.pos.Y))
-    Window.DrawImage rockImage matrix |> ignore
+
     
 let UpdateShipPosition elapsedMS (ship:ShipRec) =
     let newPos = ship.pos + Vector2(
