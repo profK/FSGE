@@ -10,7 +10,11 @@ open Graphics2D
 open Devices
 
 open ManagerRegistry
-open Silk.NET.Input
+
+//These are needed for the registeration of the plugins
+// In a real application, these would be loaded from a plugin directory
+// instead of being hardcoded
+
 open SilkDevices
 open SilkGraphicsOGL
 open ConsoleLogger

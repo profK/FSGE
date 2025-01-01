@@ -110,7 +110,9 @@ type SilkDeviceContext(silkWindow:IWindow) =
                         | Some deviceNode ->
                             match deviceNode with
                             | KeyboardValue(keyList) ->
-                                let newList = keyList |> Array.filter (fun k -> k <> uint32 key)
+                                let newList =
+                                        keyList
+                                        |> Array.filter (fun k -> k <> mapSilkToHID(uint32 key))
                                 Some(KeyboardValue(newList))
                             | _ ->
                                 failwith "Attempt to remove key from non-keyboard list"
