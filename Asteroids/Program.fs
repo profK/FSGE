@@ -54,8 +54,8 @@ let main argv =
             | Some context -> context
             | None -> failwith "No device context found"
     let rockImages = [0..2] |> List.map(fun i ->
-        Window.LoadImageFromPath $"images/rock{i}.png" window)
-    let shipImage = Window.LoadImageFromPath "images/ship_reg.png" window
+        Window.LoadImageFromPath $"images/rock{i}_result.png" window)
+    let shipImage = Window.LoadImageFromPath "images/ship_reg_result.png" window
     let mutable shipRec = {
         pos=Vector2(400.0f,300.0f)
         velocity=Vector2(0.0f,0.0f)
