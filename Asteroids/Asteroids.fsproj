@@ -8,6 +8,7 @@
     <ItemGroup>
         <Compile Include="Ship.fs" />
         <Compile Include="Rocks.fs" />
+        <Compile Include="GraphicsExtensions.fs" />
         <Compile Include="SimpleCollider.fs" />
         <Compile Include="Program.fs"/>
         <Content Include="images\desktop.ini" />
@@ -21,6 +22,9 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Include="images\rock0_result.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="images\explosion.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
