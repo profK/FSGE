@@ -5,26 +5,22 @@ open System.Numerics
 open Graphics2D
 
 
-type RockSize =
-    | small = 0
-    | medium = 1
-    | large = 2
 
 type RockRec = {
     pos: Vector2
     velocity: Vector2
     rotation: float32
     rotVelocity: float32
-    size: RockSize
+    image: Image
 }
 
 let ROCK_PPS = 20.0f
 let ROCK_ROT_PPS = 0.0005f
 let random = System.Random()
 
-let MakeRandomRock() =
+let MakeRandomRock image =
     {
-        size=RockSize.large
+        image=image
         pos=Vector2(random.NextSingle()* 800.0f,
                     random.NextSingle() * 600.0f)
         velocity=Vector2(

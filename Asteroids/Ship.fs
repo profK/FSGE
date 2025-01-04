@@ -12,6 +12,7 @@ type ShipRec = {
     velocity: Vector2
     rotation: float32
     rotVelocity: float32
+    image: Image
 }
 
 

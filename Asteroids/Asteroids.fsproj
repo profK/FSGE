@@ -8,6 +8,7 @@
     <ItemGroup>
         <Compile Include="Ship.fs" />
         <Compile Include="Rocks.fs" />
+        <Compile Include="SimpleCollider.fs" />
         <Compile Include="Program.fs"/>
         <Content Include="images\desktop.ini" />
         <Content Include="images\rock1_result.png">
