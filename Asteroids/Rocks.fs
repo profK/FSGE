@@ -12,6 +12,7 @@ type RockRec = {
     rotation: float32
     rotVelocity: float32
     image: Image
+    size: Size
 }
 
 let ROCK_PPS = 20.0f
@@ -21,6 +22,7 @@ let random = System.Random()
 let MakeRandomRock image =
     {
         image=image
+        size=image.Size
         pos=Vector2(random.NextSingle()* 800.0f,
                     random.NextSingle() * 600.0f)
         velocity=Vector2(

@@ -1,16 +1,18 @@
 ﻿// For more information see https://aka.ms/fsharp-console-apps
 
 open System
+open System.IO
 open System.Numerics
 open AngelCodeText
+open Asteroids.GraphicsExtensions
 open Asteroids.Rocks
 open Asteroids.Ship
 open Asteroids.SimpleCollider
-open CSCoreAudio
-open Graphics2D
+open FSGEAudio
 open Devices
-
+open Graphics2D
 open ManagerRegistry
+open CSCoreAudio
 
 //These are needed for the registeration of the plugins
 // In a real application, these would be loaded from a plugin directory
@@ -19,6 +21,8 @@ open ManagerRegistry
 open SilkDevices
 open SilkGraphicsOGL
 open ConsoleLogger
+
+
 
 
 //record types
@@ -43,10 +47,10 @@ let main argv =
     // registered automatically
     addManager(typeof<SilkGraphicsManager>)
     addManager(typeof<SilkDeviceManager>)
-    addManager(typeof<xUnitLogger.xUnitLogger>)
     addManager(typeof<AngelCodeTextRenderer>)
-    addManager(typeof<CSCorePlugin>)
     addManager(typeof<ConsoleLogger>)
+    addManager(typeof<CSCorePlugin>)
+
  
     //preloading the images
     let window = Window.create 800 600 "Asteroids"
@@ -65,12 +69,26 @@ let main argv =
         rotVelocity=0.0f
         image=shipImage
     }
+    let explosionImage = Window.LoadImageFromPath "images/explosion.png" window
+    let mutable explosionAnim = AnimatedImage.create explosionImage 64 64 10 1000.0
+    // load audio
+    let audioStream = new FileStream("audio/explosion.wav", FileMode.Open, FileAccess.Read)
+        // buffer sfx in memory
+    let memoryStream = new MemoryStream()
+    audioStream.CopyTo(memoryStream)
+    memoryStream.Position <- 0L // Reset the position to the beginning of the stream
+    audioStream.Close()
+    let sound = Audio.OpenSoundStream memoryStream AudioFileFormat.WAV
+    Audio.SetVolume 1.0f sound
+    //Audio.SetOutputDevice 0
+  
     let mutable running = true
     let mutable lastTime = DateTime.Now
     while running do
         Window.DoEvents window
         let deltaTime = DateTime.Now - lastTime
         let deltaMS = float32 deltaTime.TotalMilliseconds
+        explosionAnim <- AnimatedImage.update (float deltaMS) explosionAnim 
         if deltaMS>100f then
             lastTime <- DateTime.Now
             Window.Clear {R=0uy;G=0uy;B=0uy;A=255uy} window |> ignore
@@ -92,14 +110,17 @@ let main argv =
                     Some rock
                 else None)
             |> function
-               | Some _ -> printf "collided"
+               | Some _ -> Audio.Play sound |> ignore
                | None -> ()
             //draw on screen
             asteroidsList |> List.iter (fun rock ->
-                DrawRock window rockImages rock) |> ignore          
+                DrawRock window rockImages rock) |> ignore
+            AnimatedImage.update (float deltaMS) explosionAnim
+            AnimatedImage.draw (Window.CreateTranslation(Vector2(400.0f,300.0f))) explosionAnim
             Window.DrawImage shipImage (
                 Window.CreateRotation(shipRec.rotation) *
                 Window.CreateTranslation(Vector2(float32 shipRec.pos.X,float32 shipRec.pos.Y))) |> ignore
+            
             Window.Display window |> ignore
             
     0

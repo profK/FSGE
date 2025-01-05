@@ -27,6 +27,15 @@
         <Content Include="images\explosion.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <Content Include="audio\explosion.ogg">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="audio\explosion.wav">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="audio\racecar.wav">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -34,7 +43,6 @@
       <ProjectReference Include="..\Audio\Audio.fsproj" />
       <ProjectReference Include="..\ConsoleLogger\ConsoleLogger.fsproj" />
       <ProjectReference Include="..\CSCoreAudio\CSCoreAudio.fsproj" />
-      <ProjectReference Include="..\CSCoreExtensions\CSCoreExtensions.csproj" />
       <ProjectReference Include="..\Devices\Devices.fsproj" />
       <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj" />
       <ProjectReference Include="..\Logger\Logger.fsproj" />

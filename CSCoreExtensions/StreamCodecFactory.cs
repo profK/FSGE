@@ -1,4 +1,6 @@
-﻿using CSCore.Codecs;
+﻿// DO NOT directly refence this fromy your project
+// It will mess up audio loading
+using CSCore.Codecs;
 using CSCore.Codecs.AAC;
 using CSCore.Codecs.AIFF;
 using CSCore.Codecs.DDP;
@@ -19,7 +21,7 @@ namespace CSCore.Code.Extensions
 {
   
   /// <summary>
-  ///     Creates a codec that reads from the passed in memory stream
+  ///     Creates a codec that reads from the passed in memory  stream
   ///     
   /// </summary>
   public class StreamCodecFactory
