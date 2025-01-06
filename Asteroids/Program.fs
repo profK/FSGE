@@ -70,7 +70,7 @@ let main argv =
         image=shipImage
     }
     let explosionImage = Window.LoadImageFromPath "images/explosion.png" window
-    let mutable explosionAnim = AnimatedImage.create explosionImage 128 128 10 1000.0
+    let mutable explosionAnim = AnimatedImage.create explosionImage 128 128 10 100.0
     // load audio
     let audioStream = new FileStream("audio/explosion.wav", FileMode.Open, FileAccess.Read)
         // buffer sfx in memory
