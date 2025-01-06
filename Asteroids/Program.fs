@@ -1,4 +1,5 @@
 ﻿// For more information see https://aka.ms/fsharp-console-apps
+module Asteroids.Main
 
 open System
 open System.IO
@@ -63,8 +64,9 @@ let main argv =
     asteroidsList <- [0..3] |> List.map (fun _ -> MakeRandomRock(rockImages.[0]))
     let shipImage = Window.LoadImageFromPath "images/ship_reg_result.png" window
     let mutable shipRec = {
-        pos=Vector2(400.0f,300.0f)
-        velocity=Vector2(0.0f,0.0f)
+        collider = {pos=Vector2(400.0f,300.0f);velocity=Vector2(0.0f,0.0f)
+                    radius=float32 (max shipImage.Size.Height  shipImage.Size.Width)/2.0f
+                   }
         rotation=0.0f
         rotVelocity=0.0f
         image=shipImage
@@ -97,38 +99,41 @@ let main argv =
             asteroidsList <-
                 asteroidsList 
                 |> List.map (fun rock ->
-                    UpdateRockPosition (float32 deltaMS) rock )
-                |> List.map (fun rock ->
-                    WrapRock window rock )           
-            shipRec<- GetInput deviceContext shipRec deltaMS 
-                      |> UpdateShipPosition (float32 deltaMS)
-                      |> WrapShip window 
-                     
+                    {rock with collider =
+                                SimpleCollider.wrap_collider window
+                                    (SimpleCollider.update deltaMS rock.collider)})
+                   
+            shipRec <- GetInput deviceContext shipRec deltaMS 
+                       |> fun ship ->
+                              {ship with collider =
+                                            SimpleCollider.wrap_collider window
+                                                (SimpleCollider.update deltaMS ship.collider)}
              //check forcollisions
             if showShip then
                 asteroidsList
                 |> List.tryPick (fun rock ->
-                    if try_collide shipRec rock then
-                        Some rock
-                    else None)
+                    match SimpleCollider.try_collide shipRec.collider rock.collider with
+                        | Some _ -> Some rock
+                        | None -> None)
                 |> function
                    | Some _ ->
                        Audio.Play sound |> ignore
                        explosionAnim <- AnimatedImage.start explosionAnim
-                       showShip <- false
-                   
+                       showShip <- false      
                    | None -> ()
             //draw on screen
             asteroidsList |> List.iter (fun rock ->
-                DrawRock window rockImages rock)|>ignore 
+                Window.DrawImage rock.image (
+                    Window.CreateRotation(rock.rotation) *
+                    Window.CreateTranslation(Vector2(float32 rock.collider.pos.X,float32 rock.collider.pos.Y))) |> ignore)
             if showShip then
                 Window.DrawImage shipImage (
                     Window.CreateRotation(shipRec.rotation) *
-                    Window.CreateTranslation(Vector2(float32 shipRec.pos.X,float32 shipRec.pos.Y))) |> ignore
+                    Window.CreateTranslation(Vector2(float32 shipRec.collider.pos.X,float32 shipRec.collider.pos.Y))) |> ignore
             else
                if explosionAnim.IsPlaying then          
                    explosionAnim <- AnimatedImage.update (float deltaMS) explosionAnim
-                   AnimatedImage.draw (Window.CreateTranslation shipRec.pos) explosionAnim |> ignore
+                   AnimatedImage.draw (Window.CreateTranslation shipRec.collider.pos) explosionAnim |> ignore
                else
                    ()
             Window.Display window |> ignore
