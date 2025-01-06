@@ -44,7 +44,7 @@ module AnimatedImage =
                 let currentFrame = (image.CurrentFrame + 1) % image.FrameCount
                 if image.Loop || (currentFrame <> 0) then
                     let xpos = uint32 ((currentFrame * image.FrameWidth) % image.image.Size.Width)
-                    let ypos = uint32 ((currentFrame * image.FrameWidth) / image.image.Size.Width)  
+                    let ypos = uint32 (((currentFrame *image.FrameWidth) / image.image.Size.Width)*image.FrameHeight)
                     { image with
                         CurrentFrame = currentFrame
                         TimeSinceLastFrame = 0.0
