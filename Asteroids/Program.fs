@@ -70,7 +70,7 @@ let main argv =
         image=shipImage
     }
     let explosionImage = Window.LoadImageFromPath "images/explosion.png" window
-    let mutable explosionAnim = AnimatedImage.create explosionImage 128 128 10 1000.0
+    let mutable explosionAnim = AnimatedImage.create explosionImage 128 128 4 100.0
     // load audio
     let audioStream = new FileStream("audio/explosion.wav", FileMode.Open, FileAccess.Read)
         // buffer sfx in memory
@@ -89,7 +89,7 @@ let main argv =
         Window.DoEvents window
         let deltaTime = DateTime.Now - lastTime
         let deltaMS = float32 deltaTime.TotalMilliseconds
-        explosionAnim <- AnimatedImage.update (float deltaMS) explosionAnim 
+      
         if deltaMS>100f then
             lastTime <- DateTime.Now
             Window.Clear {R=0uy;G=0uy;B=0uy;A=255uy} window |> ignore
@@ -105,17 +105,19 @@ let main argv =
                       |> WrapShip window 
                      
              //check forcollisions
-            asteroidsList
-            |> List.tryPick (fun rock ->
-                if try_collide shipRec rock then
-                    Some rock
-                else None)
-            |> function
-               | Some _ ->
-                   Audio.Play sound |> ignore
-                   showShip <- false
+            if showShip then
+                asteroidsList
+                |> List.tryPick (fun rock ->
+                    if try_collide shipRec rock then
+                        Some rock
+                    else None)
+                |> function
+                   | Some _ ->
+                       Audio.Play sound |> ignore
+                       explosionAnim <- AnimatedImage.start explosionAnim
+                       showShip <- false
                    
-               | None -> ()
+                   | None -> ()
             //draw on screen
             asteroidsList |> List.iter (fun rock ->
                 DrawRock window rockImages rock)|>ignore 
@@ -124,8 +126,11 @@ let main argv =
                     Window.CreateRotation(shipRec.rotation) *
                     Window.CreateTranslation(Vector2(float32 shipRec.pos.X,float32 shipRec.pos.Y))) |> ignore
             else
-               AnimatedImage.update (float deltaMS) explosionAnim
-               AnimatedImage.draw (Window.CreateTranslation shipRec.pos) explosionAnim |> ignore
+               if explosionAnim.IsPlaying then          
+                   explosionAnim <- AnimatedImage.update (float deltaMS) explosionAnim
+                   AnimatedImage.draw (Window.CreateTranslation shipRec.pos) explosionAnim |> ignore
+               else
+                   ()
             Window.Display window |> ignore
             
     0
