@@ -23,10 +23,8 @@ open SilkDevices
 open SilkGraphicsOGL
 open ConsoleLogger
 
-
-
-
-//record types
+let ROCK_PPS = 0.1f
+let ROCK_ROT_PPS = 0.0005f
 
 
 let mutable asteroidsList =List<RockRec>.Empty
@@ -101,7 +99,7 @@ let main argv =
                 |> List.map (fun rock ->
                     {rock with collider =
                                 SimpleCollider.wrap_collider window
-                                    (SimpleCollider.update deltaMS rock.collider)})
+                                    (SimpleCollider.update (deltaMS*ROCK_PPS) rock.collider)})
                    
             shipRec <- GetInput deviceContext shipRec deltaMS 
                        |> fun ship ->

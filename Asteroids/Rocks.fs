@@ -14,23 +14,22 @@ type RockRec = {
     size: Size
 }
 
-let ROCK_PPS = 20.0f
-let ROCK_ROT_PPS = 0.0005f
+
 let random = System.Random()
 
-let MakeRandomRock image =
+let MakeRandomRock  image =
     {
         image=image
         size=image.Size
         collider = {pos=Vector2(random.NextSingle()* 800.0f,
                                      random.NextSingle() * 600.0f)
                     velocity=Vector2(
-                        random.NextSingle()*2.0f-1.0f * ROCK_PPS/2.0f,
-                        random.NextSingle()*2.0f-1.0f * ROCK_PPS/2.0f)
+                        random.NextSingle()*2.0f-1.0f,
+                        random.NextSingle()*2.0f-1.0f )
                     radius = float32 (max image.Size.Width image.Size.Height)/2.0f
         }
         rotation = (random.NextSingle()*2.0f-1.0f) * 2.0f * float32(Math.PI)
-        rotVelocity = (random.NextSingle()*2.0f-1.0f) * ROCK_ROT_PPS
+        rotVelocity = (random.NextSingle()*2.0f-1.0f) 
     }
 
 let DrawRock window (images:Image list) rock =

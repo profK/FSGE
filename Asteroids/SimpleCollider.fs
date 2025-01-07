@@ -21,11 +21,14 @@ module SimpleCollider =
     let wrap_collider window (collider: Collider) =
         let width = float32(Graphics2D.Window.width window)
         let height = float32(Graphics2D.Window.height window)
-        if collider.pos.X > width then {collider with pos= System.Numerics.Vector2(0.0f,collider.pos.Y)}  
-        elif collider.pos.X < 0.0f then
-            { collider with pos=System.Numerics.Vector2(width,collider.pos.Y)}
-        elif collider.pos.Y > height then
-            {collider with pos=System.Numerics.Vector2(collider.pos.X, Y=0.0f)}
-        elif collider.pos.Y < 0.0f then
-            {collider with pos=System.Numerics.Vector2(collider.pos.X, Y=height)}
-        else collider    
+        let newx = 
+            if collider.pos.X > width then 0.0f
+            else if collider.pos.X < 0.0f then width
+            else collider.pos.X
+        let newy =  
+            if collider.pos.Y > height then 0.0f
+            else if collider.pos.Y < 0.0f then height
+            else collider.pos.Y
+        
+        { collider with pos = System.Numerics.Vector2(newx,newy) }
+         
