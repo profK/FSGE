@@ -9,14 +9,12 @@ open Input.HIDScanCodes
 
 type ShipRec = {
     collider: SimpleCollider.Collider
-    rotation: float32
-    rotVelocity: float32
     image: Image
 }
 
 
 let SHIP_INCR = 0.0005f
-let SHIP_ROT_PPS = 1f
+let SHIP_ROT_PPS = 0.05f
 
 
     
@@ -33,18 +31,18 @@ let IsKeyPressed context hidKey =
 let GetInput context (ship:ShipRec) (elapsedMS:float32)=
     let rot =
         if IsKeyPressed context ScanCode.RightArrow then
-            ship.rotation+(SHIP_ROT_PPS * elapsedMS)
+            ship.collider.rotation+(SHIP_ROT_PPS * elapsedMS)
         elif IsKeyPressed context ScanCode.LeftArrow then
-           ship.rotation-(SHIP_ROT_PPS*elapsedMS)
-        else ship.rotation
+           ship.collider.rotation-(SHIP_ROT_PPS*elapsedMS)
+        else ship.collider.rotation
     let vel =
         if IsKeyPressed context ScanCode.UpArrow then
-            let angle = float ship.rotation
+            let angle = float ship.collider.rotation
             let x = (float32 (Math.Sin angle)) * elapsedMS * SHIP_INCR
             let y = -float32 (Math.Cos(angle))*elapsedMS*SHIP_INCR
             Vector2(ship.collider.velocity.X+x, ship.collider.velocity.Y+y)
         else ship.collider.velocity           
     {ship with
-        rotation = rot
-        collider =  {ship.collider with velocity=vel}
-    }
+        collider =
+            {ship.collider with velocity=vel;rotation=rot}}
+    

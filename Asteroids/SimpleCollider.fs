@@ -4,6 +4,8 @@ type Collider = {
         pos: System.Numerics.Vector2
         velocity: System.Numerics.Vector2
         radius: float32
+        rotation: float32
+        rotationalVelocity: float32
     }
 
 module SimpleCollider =
@@ -16,7 +18,8 @@ module SimpleCollider =
             None
     let update (dt: float32) (collider: Collider) =
         let newPos = collider.pos + collider.velocity*dt
-        { collider with pos = newPos }
+        let newRot = collider.rotation + collider.rotationalVelocity*dt
+        { collider with pos = newPos; rotation = newRot }
         
     let wrap_collider window (collider: Collider) =
         let width = float32(Graphics2D.Window.width window)

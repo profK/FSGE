@@ -65,11 +65,11 @@ let main argv =
     asteroidsList <- [0..3] |> List.map (fun _ -> MakeRandomRock(rockImages.[0]))
     let shipImage = Window.LoadImageFromPath "images/ship_reg_result.png" window
     let mutable shipRec = {
-        collider = {pos=Vector2(400.0f,300.0f);velocity=Vector2(0.0f,0.0f)
-                    radius=float32 (max shipImage.Size.Height  shipImage.Size.Width)/2.0f
+        collider = { pos=Vector2(400.0f,300.0f);velocity=Vector2(0.0f,0.0f)
+                     radius=float32 (max shipImage.Size.Height  shipImage.Size.Width)/2.0f
+                     rotation=0.0f
+                     rotationalVelocity = 0f
                    }
-        rotation=0.0f
-        rotVelocity=0.0f
         image=shipImage
     }
     let explosionImage = Window.LoadImageFromPath "images/explosion.png" window
@@ -126,11 +126,11 @@ let main argv =
             //draw on screen
             asteroidsList |> List.iter (fun rock ->
                 Window.DrawImage rock.image (
-                    Window.CreateRotation(rock.rotation) *
+                    Window.CreateRotation(rock.collider.rotation) *
                     Window.CreateTranslation(Vector2(float32 rock.collider.pos.X,float32 rock.collider.pos.Y))) |> ignore)
             if showShip then
                 Window.DrawImage shipImage (
-                    Window.CreateRotation(shipRec.rotation) *
+                    Window.CreateRotation(shipRec.collider.rotation) *
                     Window.CreateTranslation(Vector2(float32 shipRec.collider.pos.X,float32 shipRec.collider.pos.Y))) |> ignore
             else
                if explosionAnim.IsPlaying then          
