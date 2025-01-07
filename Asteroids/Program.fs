@@ -26,6 +26,9 @@ open ConsoleLogger
 let ROCK_PPS = 0.1f
 let ROCK_ROT_PPS = 0.0005f
 
+let SHIP_INCR = 20.0f
+let SHIP_ROT_PPS = 0.5f
+
 
 let mutable asteroidsList =List<RockRec>.Empty
         
@@ -113,6 +116,7 @@ let main argv =
                     match SimpleCollider.try_collide shipRec.collider rock.collider with
                         | Some _ -> Some rock
                         | None -> None)
+                //None // for debugging
                 |> function
                    | Some _ ->
                        Audio.Play sound |> ignore

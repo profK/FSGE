@@ -15,8 +15,8 @@ type ShipRec = {
 }
 
 
-let SHIP_INCR = 20.0f
-let SHIP_ROT_PPS = 1.0f
+let SHIP_INCR = 0.0005f
+let SHIP_ROT_PPS = 1f
 
 
     
@@ -30,21 +30,21 @@ let IsKeyPressed context hidKey =
     |> Option.defaultValue false
 
 
-let GetInput context (ship:ShipRec) elapsedMS=
+let GetInput context (ship:ShipRec) (elapsedMS:float32)=
     let rot =
         if IsKeyPressed context ScanCode.RightArrow then
-            SHIP_ROT_PPS/1000f
+            ship.rotation+(SHIP_ROT_PPS * elapsedMS)
         elif IsKeyPressed context ScanCode.LeftArrow then
-           -SHIP_ROT_PPS/1000f
-        else 0.0f
+           ship.rotation-(SHIP_ROT_PPS*elapsedMS)
+        else ship.rotation
     let vel =
         if IsKeyPressed context ScanCode.UpArrow then
-            let angle = ship.rotation
-            let x = float32(Math.Sin(float angle))*(elapsedMS*SHIP_INCR/1000f)
-            let y = -float32(Math.Cos(float angle))*(elapsedMS*SHIP_INCR/1000f)
+            let angle = float ship.rotation
+            let x = (float32 (Math.Sin angle)) * elapsedMS * SHIP_INCR
+            let y = -float32 (Math.Cos(angle))*elapsedMS*SHIP_INCR
             Vector2(ship.collider.velocity.X+x, ship.collider.velocity.Y+y)
         else ship.collider.velocity           
     {ship with
-        rotVelocity = rot
-        collider=  {ship.collider with velocity=vel}
+        rotation = rot
+        collider =  {ship.collider with velocity=vel}
     }
