@@ -1,17 +1,23 @@
 ﻿module Asteroids.Bullets
 
 open System
-module Bullets=
-    type Bullet = {
-        Position: System.Numerics.Vector2
-        Velocity: System.Numerics.Vector2
-        TimeToDie: DateTime
-    }
+open Graphics2D
+open Asteroids.InputExtensions
 
-    let createBullet position velocity timeToDie = {
-        Position = position
-        Velocity = velocity
-        TimeToDie = timeToDie
+type Bullet = {
+        Collider: SimpleCollider.Collider
+        TimeToDie: DateTime
+        Image:Image
     }
+module Bullets= 
+    let createBullet (image:Image) position velocity timeToDie = 
+        let rad = float32 (max image.Size.Width image.Size.Height)/2.0f
+        {
+            Collider= {pos=position; velocity=velocity; radius = rad}
+            TimeToDie = timeToDie
+            Image=image
+        }
+    
+    
     
     
