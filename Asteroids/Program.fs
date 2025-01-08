@@ -64,6 +64,7 @@ let main argv =
         Window.LoadImageFromPath $"images/rock{i}_result.png" window)
     asteroidsList <- [0..3] |> List.map (fun _ -> MakeRandomRock(rockImages.[0]))
     let shipImage = Window.LoadImageFromPath "images/ship_reg_result.png" window
+    let bulletImage = Window.LoadImageFromPath "images/bullet.png" window
     let mutable shipRec = {
         collider = {pos=Vector2(400.0f,300.0f);velocity=Vector2(0.0f,0.0f)
                     radius=float32 (max shipImage.Size.Height  shipImage.Size.Width)/2.0f
@@ -71,9 +72,12 @@ let main argv =
         rotation=0.0f
         rotVelocity=0.0f
         image=shipImage
+        bulletImage=bulletImage
+        bullets = [] 
     }
     let explosionImage = Window.LoadImageFromPath "images/explosion.png" window
     let mutable explosionAnim = AnimatedImage.create explosionImage 128 128 10 100.0
+    let bulletImage = Window.LoadImageFromPath "images/bullet.png" window
     // load audio
     let audioStream = new FileStream("audio/explosion.wav", FileMode.Open, FileAccess.Read)
         // buffer sfx in memory
@@ -108,7 +112,14 @@ let main argv =
                        |> fun ship ->
                               {ship with collider =
                                             SimpleCollider.wrap_collider window
-                                                (SimpleCollider.update deltaMS ship.collider)}
+                                                (SimpleCollider.update deltaMS ship.collider)
+                                         bullets =
+                                            ship.bullets
+                                            |> List.map (fun bullet ->
+                                                {bullet with
+                                                    Collider = SimpleCollider.wrap_collider window
+                                                              (SimpleCollider.update deltaMS bullet.Collider)})
+                                            }
              //check forcollisions
             if showShip then
                 asteroidsList
@@ -138,6 +149,9 @@ let main argv =
                    AnimatedImage.draw (Window.CreateTranslation shipRec.collider.pos) explosionAnim |> ignore
                else
                    ()
+            shipRec.bullets |> List.iter (fun bullet -> 
+                Window.DrawImage bulletImage (
+                    Window.CreateTranslation(Vector2(float32 bullet.Collider.pos.X,float32 bullet.Collider.pos.Y))) |> ignore)
             Window.Display window |> ignore
             
     0

@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="InputExtensions.fs" />
         <Compile Include="SimpleCollider.fs" />
         <Compile Include="Bullets.fs" />
         <Compile Include="Ship.fs" />
@@ -26,6 +27,9 @@
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Include="images\explosion.png">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="images\bullet.png">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Content Include="audio\explosion.ogg">
