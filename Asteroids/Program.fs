@@ -71,6 +71,7 @@ let main argv =
                      rotation=0.0f
                      rotationalVelocity = 0f
                    }
+        
         image=shipImage
         bulletImage=bulletImage
         bullets = [] 
@@ -119,7 +120,9 @@ let main argv =
                                                 {bullet with
                                                     Collider = SimpleCollider.wrap_collider window
                                                               (SimpleCollider.update deltaMS bullet.Collider)})
-                                            }
+                                            |> List.filter (fun bullet -> bullet.TimeToDie > DateTime.Now)
+                                            
+                              }                 
              //check forcollisions
             if showShip then
                 asteroidsList
