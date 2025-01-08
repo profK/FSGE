@@ -27,7 +27,10 @@ type SoundBuffer(stream,extension) =
         _soundOut.Dispose()
         
     member this.stop() =
-        _soundOut.Stop()  
+        _soundOut.Stop()
+        
+    member this.Rewind() =
+        stream.Position <- 0L
     
     interface SoundStream 
 
@@ -52,7 +55,11 @@ type CSCorePlugin()=
             | _ -> failwith "Invalid sound type"
             sound
             
-        member this.Rewind(var0) = failwith "todo"
+        member this.Rewind(var0) =
+            match var0 with
+            | :? SoundBuffer as sound -> sound.Rewind()
+            | _ -> failwith "Invalid sound type"
+            var0
         member this.SetOutputDevice(var0) = failwith "todo"
         member this.SetVolume vol sound =
             match sound with

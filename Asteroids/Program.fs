@@ -133,10 +133,24 @@ let main argv =
                 //None // for debugging
                 |> function
                    | Some _ ->
-                       Audio.Play sound |> ignore
+                       Audio.Rewind sound
+                       |> Audio.Play |> ignore
                        explosionAnim <- AnimatedImage.start explosionAnim
                        showShip <- false      
                    | None -> ()
+            shipRec.bullets
+            |> List.iter (fun bullet ->
+                asteroidsList
+                |> List.tryPick (fun rock ->
+                    match SimpleCollider.try_collide bullet.Collider rock.collider with
+                        | Some _ -> Some rock
+                        | None -> None)
+                |> function
+                   | Some rock ->
+                       Audio.Rewind sound
+                       |> Audio.Play  |> ignore 
+                       asteroidsList <- List.filter (fun r -> r <> rock) asteroidsList
+                   | None -> ())
             //draw on screen
             asteroidsList |> List.iter (fun rock ->
                 Window.DrawImage rock.image (
