@@ -23,8 +23,7 @@ open SilkDevices
 open SilkGraphicsOGL
 open ConsoleLogger
 
-let ROCK_PPS = 0.1f
-let ROCK_ROT_PPS = 0.0005f
+
 
 let SHIP_INCR = 20.0f
 let SHIP_ROT_PPS = 0.5f
