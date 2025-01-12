@@ -44,7 +44,7 @@ let GetInput context (ship:ShipRec) (elapsedMS:float32)=
                 let y = -float32 (Math.Cos(angle))  * ROCK_PPS
                 let bulletVel = Vector2(ship.collider.velocity.X+x, ship.collider.velocity.Y+y)
                 let bulletPos = ship.collider.pos + bulletVel
-                let bullet = Bullets.createBullet ship.bulletImage bulletPos bulletVel (DateTime.Now.AddSeconds(2.0))
+                let bullet = Bullets.createBullet ship.bulletImage bulletPos bulletVel (DateTime.Now.AddSeconds(3.0))
                 bullet::ship.bullets
             else
                 ship.bullets
