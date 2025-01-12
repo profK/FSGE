@@ -2,6 +2,7 @@ module Asteroids.Rocks
 
 open System
 open System.Numerics
+open Asteroids.Ship
 open Graphics2D
 
 let ROCK_PPS = 0.1f
@@ -15,13 +16,20 @@ type RockRec = {
 
 
 let random = System.Random()
+let rec GetNonConflictingPosition pos radius size =
+    let newPos = Vector2(random.NextSingle()* 800.0f,
+                         random.NextSingle() * 600.0f)
+    if Vector2.Distance(pos, newPos) < radius + (float32 (max size.Width size.Height)/2.0f) then
+        GetNonConflictingPosition pos radius size
+    else newPos
 
-let MakeRandomRock  image =
+let MakeRandomRock  image (shipRec: ShipRec) =
+    
     {
         image=image
         size=image.Size
-        collider = {pos=Vector2(random.NextSingle()* 800.0f,
-                                     random.NextSingle() * 600.0f)
+        
+        collider = {pos=GetNonConflictingPosition shipRec.collider.pos (shipRec.collider.radius*3f) image.Size
                     velocity=Vector2(
                         random.NextSingle()*2.0f-1.0f,
                         random.NextSingle()*2.0f-1.0f )

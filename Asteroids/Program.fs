@@ -59,9 +59,6 @@ let main argv =
             match  Devices.TryGetDeviceContext window with
             | Some context -> context
             | None -> failwith "No device context found"
-    let rockImages = [0..2] |> List.map(fun i ->
-        Window.LoadImageFromPath $"images/rock{i}_result.png" window)
-    asteroidsList <- [0..3] |> List.map (fun _ -> MakeRandomRock(rockImages.[0]))
     let shipImage = Window.LoadImageFromPath "images/ship_reg_result.png" window
     let bulletImage = Window.LoadImageFromPath "images/bullet.png" window
     let mutable shipRec = {
@@ -75,6 +72,10 @@ let main argv =
         bulletImage=bulletImage
         bullets = [] 
     }
+    let rockImages = [0..2] |> List.map(fun i ->
+        Window.LoadImageFromPath $"images/rock{i}_result.png" window)
+    asteroidsList <- [0..3] |> List.map (fun _ -> MakeRandomRock rockImages.[0] shipRec)
+    
     let explosionImage = Window.LoadImageFromPath "images/explosion.png" window
     let mutable explosionAnim = AnimatedImage.create explosionImage 128 128 10 100.0
     let bulletImage = Window.LoadImageFromPath "images/bullet.png" window
