@@ -148,7 +148,13 @@ let main argv =
                 |> function
                    | Some rock ->
                        Audio.Rewind sound
-                       |> Audio.Play  |> ignore 
+                       |> Audio.Play  |> ignore
+                       match rock.image with
+                       | image when image = rockImages.[0] ->
+                           let rockDir   = rock.collider.velocity
+                           let newRocks = MakeSubRocks rockImages.[1] rock
+                           asteroidsList <- newRocks @ asteroidsList
+                       | _ -> ()    
                        asteroidsList <- List.filter (fun r -> r <> rock) asteroidsList
                    | None -> ())
             //draw on screen

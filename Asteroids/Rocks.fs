@@ -39,6 +39,30 @@ let MakeRandomRock  image (shipRec: ShipRec) =
         }
        
     }
+    
+let MakeSubRocks (image:Image) (parent:RockRec) =
+    [
+        //{image=image
+        // size=image.Size
+         //collider={parent.collider with
+         //           pos=parent.collider.pos+image.Size*Vector2(-0.5f,-0.5f)
+         //           velocity=parent.collider.velocity*Vector2(-1f,-1.0f)}
+        //}
+        {image=image
+         size=image.Size
+         collider={parent.collider with
+                    pos=parent.collider.pos+
+                        Vector2(float32 image.Size.Width, float32 image.Size.Height)*Vector2(1f,-1f)
+                    velocity=parent.collider.velocity*Vector2(1f,-1.0f)}
+         }
+        {image=image
+         size=image.Size
+         collider={parent.collider with
+                    pos=parent.collider.pos+
+                        Vector2(float32 image.Size.Width, float32 image.Size.Height)*Vector2(-1f,1f)
+                    velocity=parent.collider.velocity*Vector2(-1f,1f)}
+         }
+    ]
 
 let DrawRock window (images:Image list) rock =
     let rockImage = images.[(0)] //t)rock.size]
