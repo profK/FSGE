@@ -2,8 +2,10 @@
 module Asteroids.Main
 
 open System
+open System.DirectoryServices.ActiveDirectory
 open System.IO
 open System.Numerics
+open System.Reflection
 open AngelCodeText
 open Asteroids.GraphicsExtensions
 open Asteroids.Rocks
@@ -40,17 +42,40 @@ let random = System.Random()
 [<EntryPoint>]
 let main argv =
    
-    
- 
     // Loading the PLugins
-    // We are doing it manually here, but in a real application
-    // The plugins woul be autoloaded from a plugin directory and
-    // registered automatically
-    addManager(typeof<SilkGraphicsManager>)
-    addManager(typeof<SilkDeviceManager>)
-    addManager(typeof<AngelCodeTextRenderer>)
-    addManager(typeof<ConsoleLogger>)
-    addManager(typeof<CSCorePlugin>)
+    // In this case we are looking for plugins linked to the game
+    // but it would also be  possible to load them at runtime from a
+    //plugin directory
+    
+    let rec recursiveAssemblyLoad (path:string) =
+        Directory.GetFiles(path, "*.dll")
+        |> Array.iter (fun file -> 
+            try
+                Assembly.LoadFrom(file)
+                |> ignore
+            with
+            | _ -> ())
+        Directory.GetDirectories(path)
+        |> Array.iter (fun dir -> recursiveAssemblyLoad dir)
+    
+    addManager typedefof<ConsoleLogger>
+    
+    recursiveAssemblyLoad "."
+    AppDomain.CurrentDomain.GetAssemblies()
+    |> Array.iter (fun a -> 
+        a.GetTypes()
+        |> Array.filter (fun t -> t.GetCustomAttributes(typeof<Manager>, true).Length > 0)
+        |> Array.iter (fun t ->
+            Console.WriteLine ("processing "+t.Name)
+            t.GetCustomAttributes(typeof<Manager>, true).[0] :?> Manager
+            |> function
+               | attr when attr.SupportedSystems.HasFlag supportedSystems.Windows ->
+                   ManagerRegistry.addManager(t)
+               | _ -> ()
+        )
+    )
+    
+       
 
  
     //preloading the images

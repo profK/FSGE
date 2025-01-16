@@ -41,6 +41,61 @@
         <Content Include="audio\racecar.wav">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <Content Include="plugins\SilkInput\SilkInput.xml" />
+        <Content Include="plugins\SilkInput\SilkInput.pdb" />
+        <Content Include="plugins\SilkInput\SilkInput.dll" />
+        <Content Include="plugins\SilkInput\SilkInput.deps.json" />
+        <Content Include="plugins\SilkInput\SilkGraphicsOGL.xml" />
+        <Content Include="plugins\SilkInput\SilkGraphicsOGL.pdb" />
+        <Content Include="plugins\SilkInput\SilkGraphicsOGL.dll" />
+        <Content Include="plugins\SilkInput\Logger.xml" />
+        <Content Include="plugins\SilkInput\Logger.pdb" />
+        <Content Include="plugins\SilkInput\Logger.dll" />
+        <Content Include="plugins\SilkInput\Graphics2D.xml" />
+        <Content Include="plugins\SilkInput\Graphics2D.pdb" />
+        <Content Include="plugins\SilkInput\Graphics2D.dll" />
+        <Content Include="plugins\SilkInput\Devices.xml" />
+        <Content Include="plugins\SilkInput\Devices.pdb" />
+        <Content Include="plugins\SilkInput\Devices.dll" />
+        <Content Include="plugins\SilkGraphicsOGL\SilkGraphicsOGL.xml" />
+        <Content Include="plugins\SilkGraphicsOGL\SilkGraphicsOGL.pdb" />
+        <Content Include="plugins\SilkGraphicsOGL\SilkGraphicsOGL.dll" />
+        <Content Include="plugins\SilkGraphicsOGL\SilkGraphicsOGL.deps.json" />
+        <Content Include="plugins\SilkGraphicsOGL\Graphics2D.xml" />
+        <Content Include="plugins\SilkGraphicsOGL\Graphics2D.pdb" />
+        <Content Include="plugins\SilkGraphicsOGL\Graphics2D.dll" />
+        <Content Include="plugins\SilkGraphicsOGL\Devices.xml" />
+        <Content Include="plugins\SilkGraphicsOGL\Devices.pdb" />
+        <Content Include="plugins\SilkGraphicsOGL\Devices.dll" />
+        <Content Include="plugins\CSCoreExtensions\CSCoreExtensions.pdb" />
+        <Content Include="plugins\CSCoreExtensions\CSCoreExtensions.dll" />
+        <Content Include="plugins\CSCoreExtensions\CSCoreExtensions.deps.json" />
+        <Content Include="plugins\CSCoreAudio\CSCoreAudio.xml" />
+        <Content Include="plugins\CSCoreAudio\CSCoreAudio.pdb" />
+        <Content Include="plugins\CSCoreAudio\CSCoreAudio.dll" />
+        <Content Include="plugins\CSCoreAudio\CSCoreAudio.deps.json" />
+        <Content Include="plugins\CSCoreAudio\Audio.xml" />
+        <Content Include="plugins\CSCoreAudio\Audio.pdb" />
+        <Content Include="plugins\CSCoreAudio\Audio.dll" />
+        <Content Include="plugins\ConsoleLogger\Logger.xml" />
+        <Content Include="plugins\ConsoleLogger\Logger.pdb" />
+        <Content Include="plugins\ConsoleLogger\Logger.dll" />
+        <Content Include="plugins\ConsoleLogger\ConsoleLogger.xml" />
+        <Content Include="plugins\ConsoleLogger\ConsoleLogger.pdb" />
+        <Content Include="plugins\ConsoleLogger\ConsoleLogger.dll" />
+        <Content Include="plugins\ConsoleLogger\ConsoleLogger.deps.json" />
+        <Content Include="plugins\Angelcode\AngelcodeFonts\Latin_0.png" />
+        <Content Include="plugins\Angelcode\AngelcodeFonts\Latin.fnt" />
+        <Content Include="plugins\Angelcode\Text.xml" />
+        <Content Include="plugins\Angelcode\Text.pdb" />
+        <Content Include="plugins\Angelcode\Text.dll" />
+        <Content Include="plugins\Angelcode\Graphics2D.xml" />
+        <Content Include="plugins\Angelcode\Graphics2D.pdb" />
+        <Content Include="plugins\Angelcode\Graphics2D.dll" />
+        <Content Include="plugins\Angelcode\AngelCodeText.xml" />
+        <Content Include="plugins\Angelcode\AngelCodeText.pdb" />
+        <Content Include="plugins\Angelcode\AngelCodeText.dll" />
+        <Content Include="plugins\Angelcode\AngelCodeText.deps.json" />
     </ItemGroup>
 
     <ItemGroup>
@@ -56,5 +111,11 @@
       <ProjectReference Include="..\Text\Text.fsproj" />
       <ProjectReference Include="..\xUnitLogger\xUnitLogger.fsproj" />
     </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="xcopy &quot;plugins&quot; &quot;$(OutDir)plugins&quot;  /E /I /H /Y" />
+    </Target>
+
+   
 
 </Project>
