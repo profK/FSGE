@@ -135,20 +135,23 @@ let main argv =
                                 SimpleCollider.wrap_collider window
                                     (SimpleCollider.update (deltaMS*ROCK_PPS) rock.collider)})
                    
-            shipRec <- GetInput deviceContext shipRec deltaMS 
-                       |> fun ship ->
-                              {ship with collider =
-                                            SimpleCollider.wrap_collider window
-                                                (SimpleCollider.update deltaMS ship.collider)
-                                         bullets =
-                                            ship.bullets
-                                            |> List.map (fun bullet ->
-                                                {bullet with
-                                                    Collider = SimpleCollider.wrap_collider window
-                                                              (SimpleCollider.update deltaMS bullet.Collider)})
-                                            |> List.filter (fun bullet -> bullet.TimeToDie > DateTime.Now)
-                                            
-                              }                 
+            shipRec <- if showShip then
+                           GetInput deviceContext shipRec deltaMS 
+                           |> fun ship ->
+                                  {ship with collider =
+                                                SimpleCollider.wrap_collider window
+                                                    (SimpleCollider.update deltaMS ship.collider)
+                                             bullets =
+                                                ship.bullets
+                                                |> List.map (fun bullet ->
+                                                    {bullet with
+                                                        Collider = SimpleCollider.wrap_collider window
+                                                                  (SimpleCollider.update deltaMS bullet.Collider)})
+                                                |> List.filter (fun bullet -> bullet.TimeToDie > DateTime.Now)
+                                                
+                                  }
+                        else
+                            shipRec          
              //check forcollisions
             match showShip with
             | true ->
@@ -163,6 +166,7 @@ let main argv =
                        Audio.Rewind sound
                        |> Audio.Play |> ignore
                        explosionAnim <- AnimatedImage.start explosionAnim
+                       shipRec <-{shipRec with bullets = []}
                        showShip <- false      
                    | None -> ()
             | false -> ()
