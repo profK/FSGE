@@ -98,7 +98,8 @@ let main argv =
         let deltaTime = DateTime.Now - lastTime
         let deltaMS = float32 deltaTime.TotalMilliseconds
       
-        if deltaMS>100f then
+        match deltaMS with
+        | d when d > 100.0f -> 
             lastTime <- DateTime.Now
             Window.Clear {R=0uy;G=0uy;B=0uy;A=255uy} window |> ignore
             // update positions
@@ -124,7 +125,8 @@ let main argv =
                                             
                               }                 
              //check forcollisions
-            if showShip then
+            match showShip with
+            | true ->
                 asteroidsList
                 |> List.tryPick (fun rock ->
                     match SimpleCollider.try_collide shipRec.collider rock.collider with
@@ -138,6 +140,7 @@ let main argv =
                        explosionAnim <- AnimatedImage.start explosionAnim
                        showShip <- false      
                    | None -> ()
+            | false -> ()
             shipRec.bullets
             |> List.iter (fun bullet ->
                 asteroidsList
@@ -162,19 +165,21 @@ let main argv =
                 Window.DrawImage rock.image (
                     Window.CreateRotation(rock.collider.rotation) *
                     Window.CreateTranslation(Vector2(float32 rock.collider.pos.X,float32 rock.collider.pos.Y))) |> ignore)
-            if showShip then
+            match showShip with
+            | true ->
                 Window.DrawImage shipImage (
                     Window.CreateRotation(shipRec.collider.rotation) *
                     Window.CreateTranslation(Vector2(float32 shipRec.collider.pos.X,float32 shipRec.collider.pos.Y))) |> ignore
-            else
-               if explosionAnim.IsPlaying then          
+            | false ->
+               match explosionAnim.IsPlaying with
+               | true ->
                    explosionAnim <- AnimatedImage.update (float deltaMS) explosionAnim
                    AnimatedImage.draw (Window.CreateTranslation shipRec.collider.pos) explosionAnim |> ignore
-               else
+               | false -> 
                    ()
             shipRec.bullets |> List.iter (fun bullet -> 
                 Window.DrawImage bulletImage (
                     Window.CreateTranslation(Vector2(float32 bullet.Collider.pos.X,float32 bullet.Collider.pos.Y))) |> ignore)
             Window.Display window |> ignore
-            
+        | _ -> ()
     0
