@@ -43,9 +43,8 @@ let random = System.Random()
 let main argv =
    
     // Loading the PLugins
-    // In this case we are looking for plugins linked to the game
-    // but it would also be  possible to load them at runtime from a
-    //plugin directory
+    // This is a recursive function that loads all the plugins in the
+    //specified directory and any sub directories
     
     let rec recursiveAssemblyLoad (path:string) =
         Directory.GetFiles(path, "*.dll")
@@ -58,9 +57,18 @@ let main argv =
         Directory.GetDirectories(path)
         |> Array.iter (fun dir -> recursiveAssemblyLoad dir)
     
+    //We need the logger before the other  plugins so we
+    //manually add it to the registry
     addManager typedefof<ConsoleLogger>
     
+    //Register the plugins with the manager registry
+    // This loads all assemblies found in the current directory
+    //or any subdirectories
     recursiveAssemblyLoad "."
+    
+    // Plugins all have the attribute "Manager"
+    // This searches the loaded assmblies for classes with the
+    // Manager attribute and adds them to the manager registry
     AppDomain.CurrentDomain.GetAssemblies()
     |> Array.iter (fun a -> 
         a.GetTypes()
@@ -74,18 +82,30 @@ let main argv =
                | _ -> ()
         )
     )
-    
-       
-
- 
-    //preloading the images
+   
+    //Game setup starts here
     let window = Window.create 800 600 "Asteroids"
+    
+    // Device contexets are Window system specific so
+    // this gets a DeviceContext for the opened window
     let deviceContext =
             match  Devices.TryGetDeviceContext window with
             | Some context -> context
             | None -> failwith "No device context found"
+            
+    //  This section loads all the images the game will need.
+    // There are three sizes of rocks named rock0_result, rock1_result,
+    // and rock2_result
     let shipImage = Window.LoadImageFromPath "images/ship_reg_result.png" window
     let bulletImage = Window.LoadImageFromPath "images/bullet.png" window
+    let explosionImage = Window.LoadImageFromPath "images/explosion.png" window
+    let bulletImage = Window.LoadImageFromPath "images/bullet.png" window
+    let rockImages = [0..2] |> List.map(fun i ->
+        Window.LoadImageFromPath $"images/rock{i}_result.png" window)
+    
+    // This creates the ship record that holds all the state of the
+    // spaceship.
+    // Note that shipRec is mutable so that it can be updated
     let mutable shipRec = {
         collider = { pos=Vector2(400.0f,300.0f);velocity=Vector2(0.0f,0.0f)
                      radius=float32 (max shipImage.Size.Height  shipImage.Size.Width)/2.0f
@@ -97,16 +117,20 @@ let main argv =
         bulletImage=bulletImage
         bullets = [] 
     }
-    let rockImages = [0..2] |> List.map(fun i ->
-        Window.LoadImageFromPath $"images/rock{i}_result.png" window)
-    asteroidsList <- [0..3] |> List.map (fun _ -> MakeRandomRock rockImages.[0] shipRec)
+ 
+    // This creates the initial list of asteroids
+    // see Rock.fs for the definition of RockRec0
+    //This list is also mutable so that it can be updated
+    let mutable asteroidsList =
+        [0..3] |> List.map (fun _ -> MakeRandomRock rockImages.[0] shipRec)
     
-    let explosionImage = Window.LoadImageFromPath "images/explosion.png" window
+    //This creates a record that holds the state of the explosion animation
+    //It is mutable so that it can be updated 
     let mutable explosionAnim = AnimatedImage.create explosionImage 128 128 10 100.0
-    let bulletImage = Window.LoadImageFromPath "images/bullet.png" window
+    
     // load audio
     let audioStream = new FileStream("audio/explosion.wav", FileMode.Open, FileAccess.Read)
-        // buffer sfx in memory
+    // buffer sfx in memory
     let memoryStream = new MemoryStream()
     audioStream.CopyTo(memoryStream)
     memoryStream.Position <- 0L // Reset the position to the beginning of the stream
