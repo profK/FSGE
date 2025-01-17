@@ -131,35 +131,65 @@ let main argv =
     // load audio
     let audioStream = new FileStream("audio/explosion.wav", FileMode.Open, FileAccess.Read)
     // buffer sfx in memory
+    // The FSGE audio API plays audio from streams
+    // In order to preload the audio, we need to copy the stream from a file stream
+    // to a memory stream.
+    //Preloaded audio reduces the latency of starting the sound
     let memoryStream = new MemoryStream()
     audioStream.CopyTo(memoryStream)
     memoryStream.Position <- 0L // Reset the position to the beginning of the stream
     audioStream.Close()
     let sound = Audio.OpenSoundStream memoryStream AudioFileFormat.WAV
     Audio.SetVolume 1.0f sound
-    //Audio.SetOutputDevice 0
+
   
+    // These are mutables that track the state of the game
     let mutable running = true
     let mutable lastTime = DateTime.Now
     let mutable showShip = true
+    
+    // Usually recursion makes more sense in F# then while loops
+    // When it comes to long running loops like this one,however, recursion
+    // can cause stack overflows. In this case, it is better to use
+    // a while loop
     while running do
+        // This call to DoEvents is necessary to update controller states
+        // and keep the window responsive
         Window.DoEvents window
+        
+        // Find the time in MS siece last frame
         let deltaTime = DateTime.Now - lastTime
         let deltaMS = float32 deltaTime.TotalMilliseconds
       
+        // When the time since the last frame is greater than 100ms
+        // we update the game state and draw the screen
         match deltaMS with
-        | d when d > 100.0f -> 
+        | d when d > 100.0f ->
+            // this sets last time to now so we can measure the time
+            // until the next frame
             lastTime <- DateTime.Now
+            // clear the screen
             Window.Clear {R=0uy;G=0uy;B=0uy;A=255uy} window |> ignore
-            // update positions
+            // update  of asteroids
+            // as position is held in the Collider record e need to create
+            // a new asteroid record for each asteroid with its collider
+            // updated to the new position
             asteroidsList <-
                 asteroidsList 
                 |> List.map (fun rock ->
                     {rock with collider =
                                 SimpleCollider.wrap_collider window
                                     (SimpleCollider.update (deltaMS*ROCK_PPS) rock.collider)})
-                   
-            shipRec <- if showShip then
+            // Update of the player's ship position
+            // Ship only participates in the game if showShip is true
+            // This prevents the ship from moving or shooting when it is
+            // not onscreen     
+            shipRec <- match showShip with
+                        | true ->
+                           // GetInput is a function in Ship.fs that reads the input
+                           // and updates the ship appropriately
+                           // as bullets are held in the ship record we need to
+                           // update them as well. This happens in the GetInput function
                            GetInput deviceContext shipRec deltaMS 
                            |> fun ship ->
                                   {ship with collider =
@@ -174,9 +204,10 @@ let main argv =
                                                 |> List.filter (fun bullet -> bullet.TimeToDie > DateTime.Now)
                                                 
                                   }
-                        else
-                            shipRec          
-             //check forcollisions
+                        | false -> shipRec
+       
+             //check for ship collision with asteroids
+            // again, collision only happens if showShip is true
             match showShip with
             | true ->
                 asteroidsList
@@ -184,16 +215,17 @@ let main argv =
                     match SimpleCollider.try_collide shipRec.collider rock.collider with
                         | Some _ -> Some rock
                         | None -> None)
-                //None // for debugging
                 |> function
                    | Some _ ->
                        Audio.Rewind sound
                        |> Audio.Play |> ignore
                        explosionAnim <- AnimatedImage.start explosionAnim
-                       shipRec <-{shipRec with bullets = []}
+                       shipRec <-{shipRec with bullets = []} // clear bullets
                        showShip <- false      
                    | None -> ()
             | false -> ()
+            
+            //check for bullet collision with asteroids
             shipRec.bullets
             |> List.iter (fun bullet ->
                 asteroidsList
@@ -213,11 +245,14 @@ let main argv =
                        | _ -> ()    
                        asteroidsList <- List.filter (fun r -> r <> rock) asteroidsList
                    | None -> ())
-            //draw on screen
+            
+            //draw the asteroids on screen
             asteroidsList |> List.iter (fun rock ->
                 Window.DrawImage rock.image (
                     Window.CreateRotation(rock.collider.rotation) *
                     Window.CreateTranslation(Vector2(float32 rock.collider.pos.X,float32 rock.collider.pos.Y))) |> ignore)
+            // if the ship is on screen, draw it 
+            // otherwise draw the ship explosion animation
             match showShip with
             | true ->
                 Window.DrawImage shipImage (
@@ -230,6 +265,8 @@ let main argv =
                    AnimatedImage.draw (Window.CreateTranslation shipRec.collider.pos) explosionAnim |> ignore
                | false -> 
                    ()
+                   
+            // draw the bullets       
             shipRec.bullets |> List.iter (fun bullet -> 
                 Window.DrawImage bulletImage (
                     Window.CreateTranslation(Vector2(float32 bullet.Collider.pos.X,float32 bullet.Collider.pos.Y))) |> ignore)
