@@ -4,9 +4,7 @@ open CSCore.Codecs
 open FSGEAudio
 open ManagerRegistry
 open CSCore
-open CSCore.Codecs;
-open CSCore.CoreAudioAPI;
-open CSCore.SoundOut;
+
 
 //This file is a simple implementation of the Audio interface using CSCore
 //CSCore is a .NET audio library that provides a simple interface for playing audio
@@ -39,7 +37,6 @@ type SoundBuffer(stream,extension) =
     // 0 is silent, 1 is full volume
     member this.SetVolume(vol:float32) =
         _soundOut.Volume <- vol
-        ()
         
     // This method returns true if the sound is currently playing
     // otherwise it returns false
@@ -70,7 +67,7 @@ type SoundBuffer(stream,extension) =
 // It uses Wasapi as its audio rendering layer.
 // WasApi is a Windows API for audio rendering so this
 // plugin will only work on Windows
-[<Manager("Silk Audio WasApi", supportedSystems.Windows )>]
+[<Manager("CSCore Audio WasApi", supportedSystems.Windows )>]
 type CSCorePlugin()=
     // this is the implementation of the IAudioManager interface
     interface IAudioManager with
