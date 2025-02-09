@@ -1,4 +1,5 @@
-﻿module SilkGraphicsOGL.WindowGL
+﻿
+module SilkGraphicsOGL.WindowGL
 
 open System
 open System.IO
