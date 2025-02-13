@@ -1,4 +1,9 @@
-﻿module SilkGraphicsOGL.WindowGL
+﻿// This file implements the Window
+// and Image interfaces for the SilkGraphicsOGL library
+
+
+
+module SilkGraphicsOGL.WindowGL
 
 open System
 open System.IO
@@ -13,6 +18,9 @@ open Graphics2D
 open StbImageSharp
 open Xunit
 
+// These set a callback for OpenGL debug messages that prints them
+// to the console
+
 let MessageCallback (source:GLEnum) (cbtype:GLEnum) (id:int) (severity:GLEnum) (length:int)
         (message:nativeint) (userParam:nativeint) =
     let msg = Marshal.PtrToStringAnsi message
@@ -21,12 +29,15 @@ let MessageCallback (source:GLEnum) (cbtype:GLEnum) (id:int) (severity:GLEnum) (
 let messageCB:DebugProc = new DebugProc(MessageCallback)        
 
 
+// This is a type that represents a window on the screen
+// It implements the Window interface from the Graphics2D library
 type SilkWindow(silkWindow:IWindow) =
-    // What comes below is ugly because OpenGL is a big stateful mess and
-    // things need to be done in the right order
-    // Function to convert a Matrix4x4from screen coordinates to normalized coordinates
-   
-  
+    // What comes below is ugly because OpenGL is a big stateful mess
+    // and things need to be done in the right order
+    // This is why we have a class that wraps the window
+    // and the OpenGL context
+    
+    // This is an internal biding to OpenGL context
     let _gl =
         silkWindow.Initialize()
         silkWindow.CreateOpenGL()
@@ -34,23 +45,36 @@ type SilkWindow(silkWindow:IWindow) =
        // silkWindow.Initialize()
 
         _gl.Enable GLEnum.DebugOutput
+        // This is the callback that prints the debug messages
+        // to the console
+        // The IntPtr.Zero.ToPointer() is a hack to get a null pointer
         _gl.DebugMessageCallback( MessageCallback, IntPtr.Zero.ToPointer() )
+        // This sets the drawing mode to blend
+        // and sets the blending function
         _gl.Enable(GLEnum.Blend)
         _gl.BlendFunc(GLEnum.SrcAlpha , GLEnum.OneMinusSrcAlpha);
-  
+    //This sets a binding to the default shader program
+    //provided by the ShadersGLSL module
     let defaultShader = (Shader.getDefaultShaderProgram _gl)
-            
+         
+    // This makes this an implementation of the Window opaque
+    // interface        
     interface Window
     
+    // Ths provides read-only access to the OpenGL context by
+    // other classes
     member val GL = _gl with get
+    // This provides read-only access to the default shader program
+    // by other classes
     member val DefaultShaderProgram = defaultShader with get
     
-   
-        
-// Calculate scaling factors
 
-    
+    // This provides access to the underlying IWindow provided
+    // by the Silk.NET library
     member this.SilkWindow = silkWindow
+    
+     // Function to convert a Matrix4x4from screen coordinates to normalized
+    // coordinates
     member this.ScreenToNormalizedMatrix (matrix:Matrix4x4) =
         let width = float32 silkWindow.Size.X
         let height = float32 silkWindow.Size.Y
@@ -59,22 +83,28 @@ type SilkWindow(silkWindow:IWindow) =
         Matrix4x4.CreateScale(2f/width,
                              -2f/height, 1f) *
         Matrix4x4.CreateTranslation(-1f,1f,0f)
-        
-        
-        
-           
-        // Calculate scaling factors
-       
+
+    //This function sets the background color of the window
+    //It takes a Graphics2D.Color object as an argument
+    //and fills the window with that color when the Clear method is called
     member this.SetBackgroundColor (color:Graphics2D.Color) =
         let syscolor = System.Drawing.Color.FromArgb(int color.A,int color.R,int color.G,int color.B)
         _gl.ClearColor(syscolor)
+    //This function clears the window
     member this.Clear() =
         _gl.Clear(ClearBufferMask.ColorBufferBit)
-     member this.Display() =
+    //This function swaps the buffers
+    //This is necessary because OpenGL uses double buffering
+    member this.Display() =
         let ctxt = silkWindow.GLContext
         ctxt.SwapBuffers()
 
-
+// This is a function that loads a texture from a stream
+// It returns a tuple with the texture id and the image information
+// The texture id is an integer that is used to refer to the texture
+// in OpenGL calls
+//  This function is at the top level because it is used by the
+// SilkImage class
 let loadTexture stream (silkWindow:SilkWindow) =
         let texture = silkWindow.GL.GenTexture()
         silkWindow.GL.ActiveTexture(TextureUnit.Texture0)
@@ -84,6 +114,8 @@ let loadTexture stream (silkWindow:SilkWindow) =
         //silkWindow.GL.TexParameterI(GLEnum.Texture2D, GLEnum.TextureMagFilter, GLEnum.Nearest);
         let image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha)
         use ptrv  = fixed image.Data
+        // This is a hack to get a void pointer from a native pointer
+        // This is necessary because the OpenGL function expects a void pointer
         let ptrv' = NativeInterop.NativePtr.toVoidPtr ptrv
         silkWindow.GL.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, uint32 image.Width,
                                     uint32 image.Height, 0,
@@ -91,14 +123,21 @@ let loadTexture stream (silkWindow:SilkWindow) =
         silkWindow.GL.GenerateMipmap(GLEnum.Texture2D)
         silkWindow.GL.BindTexture(TextureTarget.Texture2D, 0u)
         (texture,image)
+// The API uses Matrix4x4 from System.Numerics to represent transformations
+// but OpenGL uses a float32 array in column-major order
+// This function converts a Matrix4x4 to a float32 array in column-major order
 let matrix4x4ToOpenGLArray (matrix: Matrix4x4) : float32[] =
         [|
             matrix.M11; matrix.M12; matrix.M13; matrix.M14
             matrix.M21; matrix.M22; matrix.M23; matrix.M24
             matrix.M31; matrix.M23; matrix.M33; matrix.M34
             matrix.M41; matrix.M42; matrix.M43; matrix.M44
-        |]        
+        |]
+// This is a class that represents an image in Silk OGL
+// It implements the Image interface from the Graphics2D library
 type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOpt:Size option,silkWindow:SilkWindow) =
+    //The next to lets are used to define the position and size of the subtextur
+    //If they are not provided the subtexture is the whole texture
     let subTexPos =
         match subTexPosOpt with
         | Some pos -> pos
@@ -107,7 +146,10 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
         match subTexSizeOpt with
         | Some size -> size
         | None -> {Width =textureInfo.Width; Height =textureInfo.Height}
-    // open gl information
+    // What comes next sets up the OpenGL buffers
+    // this is ugly because OpenGL is a big stateful mess
+    // and things need to be done in the right order
+    // See the OpenGL docs for more information
     let positionLoc = 0u
     //open gl buffers
     let _vao = silkWindow.GL.GenVertexArray()
@@ -135,6 +177,7 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
             1u; 2u; 3u
         |]
     
+    //This is a do block to set up the OpenGL buffers
     do
         silkWindow.GL.BindTexture(TextureTarget.Texture2D, image)
         silkWindow.GL.BindVertexArray(_vao)
@@ -163,7 +206,8 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
         // when we leave the do block vertices and indices becomes unpinned
     member val Window = silkWindow with get  
  
-    //Secondary constructor to create a new SilkImage from a file path
+    //Secondary constructors to create a new SilkImage from a file path
+    // or input stream
     new(stream:Stream, silkWindow:SilkWindow) =
         let (image,texture) = loadTexture stream silkWindow
         SilkImage(image, texture, None, None, silkWindow)
@@ -171,6 +215,7 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
         let stream = new FileStream(path, FileMode.Open, FileAccess.Read)
         SilkImage(stream, silkWindow)
    
+    //This is the Draw method that draws the image on the screen
     member this.Draw (matrix:Matrix4x4) tint =
         silkWindow.GL.UseProgram(silkWindow.DefaultShaderProgram)
         silkWindow.GL.BindVertexArray(_vao)
@@ -194,10 +239,13 @@ type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOp
         silkWindow.GL.DrawElements(PrimitiveType.Triangles, uint32 indices.Length, DrawElementsType.UnsignedInt,
                                   IntPtr.Zero.ToPointer())
         
+    //This is a method to create a subimage from an existing image
     member this.CreateSubImage x y width height =
         SilkImage(image, textureInfo, Some(Vector2(float32 x, float32 y)),
               Some({Width=width;Height=height}), silkWindow)
 
+    // this implelemnts the Image interface which has
+    // one method that returns the size of the image
     interface Image with
         member this.Size =  {Width=textureInfo.Width; Height=textureInfo.Height}
 
