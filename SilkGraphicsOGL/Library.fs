@@ -1,19 +1,12 @@
 ﻿namespace SilkGraphicsOGL
 #nowarn "9"    
 
-
-open System.Numerics
-open System.Threading
-open Graphics2D.Window
 open ManagerRegistry
-open Microsoft.FSharp.Core.LanguagePrimitives.IntrinsicFunctions
 open Silk.NET.OpenGL
 open Silk.NET.Windowing
 open Silk.NET.Maths
 open Graphics2D
 open SilkGraphicsOGL.WindowGL
-
-
 
 [<Manager("Silk Graphics", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]
 type SilkGraphicsManager() =
@@ -28,8 +21,6 @@ type SilkGraphicsManager() =
             options.Title <- title
             options.Size <- Vector2D(800, 600)
             let window = Silk.NET.Windowing.Window.Create(options)
-
-            
             SilkWindow(window)
         member this.CloseWindow window =
             window :?> SilkWindow |> _.SilkWindow.Close()

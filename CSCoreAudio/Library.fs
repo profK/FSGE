@@ -4,9 +4,7 @@ open CSCore.Codecs
 open FSGEAudio
 open ManagerRegistry
 open CSCore
-open CSCore.Codecs;
-open CSCore.CoreAudioAPI;
-open CSCore.SoundOut;
+
 
 type SoundBuffer(stream,extension) =
    
