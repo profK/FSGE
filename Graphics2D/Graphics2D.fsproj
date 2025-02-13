@@ -11,7 +11,6 @@
 
     <ItemGroup>
         <PackageReference Include="FSFramework" Version="1.0.0-preview-1"/>
-        <PackageReference Include="xunit" Version="2.8.1"/>
     </ItemGroup>
 
 </Project>

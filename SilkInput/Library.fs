@@ -8,7 +8,7 @@ open Silk.NET.Windowing
 open SilkDevices
 open SilkGraphicsOGL.WindowGL
 open SilkScanCodeConversion
-open Xunit.Sdk
+
 
 
             
