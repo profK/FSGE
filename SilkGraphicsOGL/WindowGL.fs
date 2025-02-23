@@ -136,7 +136,7 @@ let matrix4x4ToOpenGLArray (matrix: Matrix4x4) : float32[] =
 // This is a class that represents an image in Silk OGL
 // It implements the Image interface from the Graphics2D library
 type SilkImage(image:uint32, textureInfo:ImageResult, subTexPosOpt, subTexSizeOpt:Size option,silkWindow:SilkWindow) =
-    //The next to lets are used to define the position and size of the subtextur
+    //The next two lets are used to define the position and size of the subtextur
     //If they are not provided the subtexture is the whole texture
     let subTexPos =
         match subTexPosOpt with
