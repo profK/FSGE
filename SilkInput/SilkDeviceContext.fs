@@ -3,11 +3,9 @@
 open System
 open System.Text.RegularExpressions
 open Devices
-open Logger
 open Silk.NET.Input
 open FSharp.Collections
 open Silk.NET.Windowing
-open SilkGraphicsOGL.WindowGL
 open SilkScanCodeConversion
 
 type SilkDeviceContext(silkWindow:IWindow) =
@@ -180,7 +178,6 @@ type SilkDeviceContext(silkWindow:IWindow) =
             _values <-_values.Change(yname,fun v -> Some (AxisValue (float pos.Y)))
         )
     let scanDevices() =
-        Logger.logMessage("Scanning devices")
         let mouseNodes =
             silkInputContext.Mice
             |> Seq.map (fun (mouse:IMouse) ->
@@ -213,8 +210,7 @@ type SilkDeviceContext(silkWindow:IWindow) =
                                 ctlr.Triggers
                                 |> makeTriggerNodeList name
             
-                            let children = [ctlrButtons;ctlrThumbsticks;ctlrTriggers] |>Seq.concat
-                           
+                            let children = [ctlrButtons;ctlrThumbsticks;ctlrTriggers] |>Seq.concat        
                             {Name=name;Type=Collection;Children=Some children; Path=name})
         controllerNodes
         |> Seq.iteri (fun i ctlr ->
@@ -241,12 +237,11 @@ type SilkDeviceContext(silkWindow:IWindow) =
                        let name = joystick.Path
                        addJoystickCallbacks (silkInputContext.Joysticks[i]) name
                     )    
-        Logger.logMessage($"Scanning {silkInputContext.Keyboards.Count} keyboards")    
+ 
         let keyboardNodes =
             silkInputContext.Keyboards
             |> Seq.mapi (fun i (kb:IKeyboard) ->
                                 let name = $"Keyboard{i}"
-                                Logger.logMessage($"found keyboard {name}")
                                 {Name=name;Type=DeviceType.Keyboard;Children=None;Path=name})
         // This ugly thing is to force evaluation because Seq.mapi is a lazy evaluator
         // but we need to force the side effects because we are dealing with a stateful input library           

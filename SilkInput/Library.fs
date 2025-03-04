@@ -3,14 +3,9 @@
 open System
 open Devices
 open ManagerRegistry
-open Silk.NET.Input
-open Silk.NET.Windowing
 open SilkDevices
 open SilkGraphicsOGL.WindowGL
 open SilkScanCodeConversion
-open Xunit.Sdk
-
-
             
 [<Manager("Silk Input", supportedSystems.Windows ||| supportedSystems.Mac ||| supportedSystems.Linux)>]            
 type SilkDeviceManager() =
