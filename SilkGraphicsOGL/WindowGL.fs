@@ -16,7 +16,7 @@ open Silk.NET.OpenGL
 open Silk.NET.Windowing
 open Graphics2D
 open StbImageSharp
-open Xunit
+
 
 // These set a callback for OpenGL debug messages that prints them
 // to the console
