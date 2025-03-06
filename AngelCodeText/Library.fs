@@ -60,9 +60,12 @@ and AngelCodeText(text: string, font: AngelCodeFont) =
                 let charImage = Window.CreateSubImage acImage (uint32 rectPos.X) (uint32 rectPos.Y)
                                     (uint32 rectSz.Width) (uint32 rectSz.Height)
                 let kern = font.GetKern(lastChar, char)
+                //let kern = 0f;
                 let newX = pos.X + (float32 acChar.Width) + kern
-                let xlateXform = Window.CreateTranslation (Vector2(pos.X,  pos.Y+float32 acChar.YOffset))
-                let totalXform = xlateXform * xform
+                let xlateXform = Window.CreateTranslation (
+                    Vector2(pos.X+float32 acChar.Width/2f+float32 acChar.XOffset,
+                            pos.Y+float32 acChar.Height/2f+float32 acChar.YOffset))
+                let totalXform = xform * xlateXform
                 Window.DrawTintedImage charImage totalXform color
                 (Vector2(newX, pos.Y), char)
             ) (Vector2(0f,0f),'\n')

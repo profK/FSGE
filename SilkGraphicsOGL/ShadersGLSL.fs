@@ -30,7 +30,7 @@ out vec2 frag_texCoords;
 void main()
 {
     gl_Position = xformMatrix * vec4(aPosition, 1.0);
-    // Assigin the texture coordinates without any modification to be recived in the fragment
+    // Assign the texture coordinates without any modification to be recived in the fragment
     frag_texCoords = aTextureCoord;
 }"
 
