@@ -32,8 +32,6 @@ type SilkGraphicsManager() =
             options.Title <- title
             options.Size <- Vector2D(800, 600)
             let window = Silk.NET.Windowing.Window.Create(options)
-
-            
             SilkWindow(window)
         member this.CloseWindow window =
             window :?> SilkWindow |> _.SilkWindow.Close()
