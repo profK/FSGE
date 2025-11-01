@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="AxisStateCollector.fs" />
+        <Compile Include="Library.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\RawInputLight\RawInputLight\RawInputLight.csproj" />
+      <ProjectReference Include="..\TDE3ManagerInterfaces\TDE3ManagerInterfaces.fsproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Remove="FSharp.Core" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="rd ..\TwoDEngine3\Plugins\$(ProjectName)  /S; xcopy bin\$(Configuration) ..\TwoDEngine3\Plugins\$(ProjectName) /E/H/I;" />
+    </Target>
+
+</Project>
