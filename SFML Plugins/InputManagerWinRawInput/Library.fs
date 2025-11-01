@@ -11,15 +11,43 @@ open Windows.Win32.Devices.HumanInterfaceDevice
 open Windows.Win32.Foundation
 open DeviceValueCollector
  
+type DeviceContext =
+    {
+        rawInput: RawInput
+    }
+    interface Devices.DeviceContext
 
- 
+let MouseNode  (devInfo:DeviceInfo, parentPath:string) =
+           {
+               Name = devInfo.Names.Product
+               Type = DeviceType.Mouse
+               Children = None
+               Path = parentPath + "." + devInfo.Names.devPath
+           }
+           
+let KeyboardDeviceNode (devInfo:DeviceInfo, parentPath:string) =
+           {
+               Name = devInfo.Names.Product
+               Type = DeviceType.Keyboard
+               Children = None
+               Path = parentPath + "." + devInfo.Names.devPath
+           }
+let JoystickDeviceNode (devInfo:DeviceInfo, parentPath:string) =
+           {
+               Name = devInfo.Names.Product
+               Type = DeviceType.Joystick
+               Children = None
+               Path = parentPath + "." + devInfo.Names.devPath
+           }
+           
+
 
 [<Manager("Input interface for windows Raw Input",
           supportedSystems.Windows )>]
 type InputManagerWinRawInput() as this =
-       let mutable rawInput: RawInput option = None
+       let mutable context: DeviceContext option = None
        let mutable oldStateMap = Map.empty
-       let  axisStateCollector = DeviceValueCollector()
+       let axisStateCollector = DeviceValueCollector()
            
        let doKbEvent (devh:HANDLE) (asc:uint16) (keystate:KeyState):unit =
             let devInfo:Nullable<DeviceInfo> = NativeAPI.GetDeviceInfo(devh)
@@ -33,8 +61,8 @@ type InputManagerWinRawInput() as this =
         try 
             let devInfo:Nullable<DeviceInfo> = NativeAPI.GetDeviceInfo(devh)
             if devInfo.HasValue then
-                axisStateCollector.DeltaAnalogAxis(devInfo.Value.Names.Product+".deltaX", dx) |> ignore
-                axisStateCollector.DeltaAnalogAxis(devInfo.Value.Names.Product+".deltaY", dx) |> ignore
+                axisStateCollector.SetAnalogAxis(devInfo.Value.Names.Product+".deltaX", dx) |> ignore
+                axisStateCollector.SetAnalogAxis(devInfo.Value.Names.Product+".deltaY", dx) |> ignore
                 [0..3]
                 |> Seq.iter (fun (buttonNum:int) ->
                         let bitVal:UInt32 = uint32 1<<<(buttonNum*2)
@@ -48,7 +76,7 @@ type InputManagerWinRawInput() as this =
                                            buttonNum.ToString(),false) |> ignore
                     )
                 if (buttons &&& 0x0400ul ) = 0x0400ul then
-                    axisStateCollector.DeltaAnalogAxis(
+                    axisStateCollector.SetAnalogAxis(
                             devInfo.Value.Names.Product+ ".deltaWheel",
                                     dWheel)
                     |> ignore
@@ -88,56 +116,80 @@ type InputManagerWinRawInput() as this =
                         |> ignore       
                     )
        let messagePump():unit =
-           NativeAPI.OpenWindow()
-           |> fun wrapper ->
-               rawInput <- Some(RawInput(wrapper))
-               rawInput.Value.add_KeyStateChangeEvent (
-                    Action<HANDLE,uint16, KeyState>(doKbEvent))
-               rawInput.Value.add_MouseStateChangeEvent(
-                   Action<HANDLE,int,int,UInt32,int>(doMouseEvent))
-               rawInput.Value.add_ButtonDownEvent(
-                   Action<HANDLE, UInt32, bool[]>(doButtonDownEvent))
-               rawInput.Value.add_AxisEvent(
-                   Action<HANDLE,uint32[], uint32[]>(doAxisChangeEvent))
-               NativeAPI.MessagePump(wrapper)
+           let wrapper = NativeAPI.OpenWindow()
+           let rawInput = RawInput(wrapper)
+           context <- Some { rawInput = rawInput }
+           rawInput.add_KeyStateChangeEvent (
+                Action<HANDLE,uint16, KeyState>(doKbEvent))
+           rawInput.add_MouseStateChangeEvent(
+               Action<HANDLE,int,int,UInt32,int>(doMouseEvent))
+           rawInput.add_ButtonDownEvent(
+               Action<HANDLE, UInt32, bool[]>(doButtonDownEvent))
+           rawInput.add_AxisEvent(
+               Action<HANDLE,uint32[], uint32[]>(doAxisChangeEvent))
+           NativeAPI.MessagePump(wrapper)
        let messagePumpThread =
            Thread(ThreadStart(messagePump))
  
        do messagePumpThread.Start()
        
-       member val RawInput = rawInput with get
+       //member val RawInput = rawInput with get
        member val PumpThread = messagePumpThread with get
        
-       interface InputDeviceInterface with
-           member this.Controllers() =
-               NativeAPI.RefreshDeviceInfo()
-               NativeAPI.LastError
-               |> function
-                   |0u ->
-                       NativeAPI.GetDevices()
-                       |> Array.fold(fun state (devInfo:DeviceInfo) ->
-                               // Console.WriteLine(devInfo.Names.Product+":"+
-                                //                  devInfo.DeviceCaps.Usage.ToString())
-                                let usage:HIDDesktopUsages =
-                                    Microsoft.FSharp.Core.LanguagePrimitives.
-                                        EnumOfValue<uint, HIDDesktopUsages>(
-                                            ((uint devInfo.DeviceCaps.UsagePage)<<<16)|||
-                                             uint devInfo.DeviceCaps.Usage)
-                                match usage  with
-                                | HIDDesktopUsages.GenericDesktopMouse ->
-                                    MouseDeviceNode(devInfo):>DeviceNode :: state
-                                | HIDDesktopUsages.GenericDesktopKeyboard ->
-                                    KeyboardDeviceNode(devInfo):>DeviceNode :: state
-                                | HIDDesktopUsages.GenericDesktopJoystick ->
-                                    JoystickDeviceNode(devInfo):>DeviceNode :: state
-                                | _ -> state
-                           ) List.Empty
-                        |> Some
-                   | _  ->
-                       printfn $"Error code in input: {NativeAPI.LastError} "
-                       None
+       interface IDeviceManager with
+            member this.tryGetDeviceContext window : Devices.DeviceContext option =
+                match context with
+                | Some ctx -> Some (ctx :> Devices.DeviceContext)
+                | None -> None
+                
+            member this.PollDevices context : unit =
+                () // polling is done in the message pump thread
+            member this.tryGetDeviceValue context string : DeviceValue option =
+                let stateMap = axisStateCollector.GetState()
+                match stateMap.TryFind string with
+                | Some value -> Some value
+                | None -> None
+            member this.GetDeviceTree context : DeviceNode seq =
+                    match this.Controllers() with
+                    | Some devices -> devices
+                    | None -> Seq.empty
+               
+            member this.MapPlatformScanCodeToHID incode : uint32 =
+                // In this case its the identity function
+                incode
+            member this.MapHIDToPlatformScanCode incode : uint32 =
+                // In this case its the identity function
+                incode
+            member this.GetDeviceValuesMap context : Map<string,DeviceValue> =
+                axisStateCollector.GetState()
+            member this.CloseDeviceContext context : unit =
+                () // nothing to close
+           
+       member this.Controllers() =
+           NativeAPI.RefreshDeviceInfo()
           
-           member this.PollState() = 
-               axisStateCollector.GetState()
+           NativeAPI.GetDevices()
+           |> Array.fold(fun state (devInfo:DeviceInfo) ->
+                   // Console.WriteLine(devInfo.Names.Product+":"+
+                    //                  devInfo.DeviceCaps.Usage.ToString())
+                    let usage:HIDDesktopUsages =
+                        Microsoft.FSharp.Core.LanguagePrimitives.
+                            EnumOfValue<uint, HIDDesktopUsages>(
+                                ((uint devInfo.DeviceCaps.UsagePage)<<<16)|||
+                                 uint devInfo.DeviceCaps.Usage)
+                    match usage  with
+                    | HIDDesktopUsages.GenericDesktopMouse ->
+                        MouseNode(devInfo,""):: state
+                    | HIDDesktopUsages.GenericDesktopKeyboard ->
+                        KeyboardDeviceNode(devInfo,""):: state
+                    | HIDDesktopUsages.GenericDesktopJoystick ->
+                        JoystickDeviceNode(devInfo,""):: state
+                    | _ -> state
+               ) List.Empty
+            |> Some
+              
+      
+       member this.PollState() = 
+           axisStateCollector.GetState()
               
            
