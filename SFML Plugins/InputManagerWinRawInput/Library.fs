@@ -6,113 +6,20 @@ open System.Collections.Generic
 open System.Threading
 open ManagerRegistry
 open RawInputLight
-open TDE3ManagerInterfaces.InputDevices
-open TwoDEngine3.ManagerInterfaces.InputManager
+open Devices
 open Windows.Win32.Devices.HumanInterfaceDevice
 open Windows.Win32.Foundation
-open AxisStateCollector
+open DeviceValueCollector
  
 
  
-type AxisNode(parent:Node,name) =
-        interface Node with
-            member val Name:string = name with get
-            member val Parent: Node option = Some(parent) with get
-            member this.Path:string=parent.Path+"."+name 
-            member val Value= Axis(Analog) // value is ignored
-            
-type ButtonNode(parent:Node,name) =
-     interface Node with
-        member val Name:string = name with get
-        member val Parent: Node option = Some(parent) with get
-        member this.Path:string=parent.Path+"."+name 
-        member val Value= Axis(Digital) // value is ignored
-                
-type MouseNode(devInfo:DeviceInfo) as this=
-    let name = devInfo.Names.Product
-    
-    interface Node with
-        member val Name:string = name with get
-        member val Parent: Node option = None with get
-        member this.Path:string=name 
-        member val Value= Children(
-                [AxisNode(this,"deltaX");AxisNode(this,"deltaY");AxisNode(this,"deltaWheel")
-                 ButtonNode(this,"button0");ButtonNode(this,"button1");ButtonNode(this,"button2")
-                 ButtonNode(this,"button3")]
-            ) with get
-        
-type KeyboardNode(devInfo:DeviceInfo) as this =
-    let name = devInfo.Names.Product
-    
-    interface Node with
-        member val Name:string = name with get
-        member val Parent: Node option = None with get
-        member this.Path:string=name
-        member val Value= Axis(Keyboard)
-            
-type JoystickNode(devInfo:DeviceInfo) as this =
-    let MakeUsage(usage) =
-         Microsoft.FSharp.Core.LanguagePrimitives.
-            EnumOfValue<uint, HIDDesktopUsages>(uint usage)
-    let MakeButtonNodes (buttonCaps:HIDP_BUTTON_CAPS array) =
-        buttonCaps
-        |> Array.fold(fun state (buttonCap:HIDP_BUTTON_CAPS) ->
-            
-            match buttonCap.IsRange.Value with
-            | 0uy -> //FALSE
-                let name = MakeUsage(
-                    (uint32 buttonCap.UsagePage<<<16) |||
-                    (uint32 buttonCap.Anonymous.NotRange.Usage))
-                ButtonNode(this, name.ToString()):> Node ::state // false
-            | _ -> // TRUE
-                [buttonCap.Anonymous.Range.UsageMin..buttonCap.Anonymous.Range.UsageMax]
-                |> List.fold(fun state usageNum ->
-                        let name = MakeUsage(
-                            (uint32 buttonCap.UsagePage<<<16) ||| uint32 usageNum)
-                        ButtonNode(this,name.ToString()):>Node ::state
-                    ) state
-            ) List.Empty
-        
-    let MakeValueNodes (valueCaps:HIDP_VALUE_CAPS array) =
-        valueCaps
-        |> Array.fold(fun state (valueCap:HIDP_VALUE_CAPS) ->
-            match valueCap.IsRange.Value with
-            | 0uy -> //FALSE
-                let name = MakeUsage(
-                    (uint32 valueCap.UsagePage<<<16) |||
-                    (uint32 valueCap.Anonymous.NotRange.Usage))
-                AxisNode(this, name.ToString()):> Node ::state // false
-            | _ -> // TRUE
-                [valueCap.Anonymous.Range.UsageMin..valueCap.Anonymous.Range.UsageMax]
-                |> List.fold(fun state usageNum ->
-                        let name = MakeUsage(
-                            (uint32 valueCap.UsagePage<<<16) ||| uint32 usageNum)
-                        AxisNode(this,name.ToString()):>Node ::state
-                    ) state
-            ) List.Empty
-        
-    let name = devInfo.Names.Product
-    
-    interface Node with
-        member val Name:string = name with get
-        member val Parent: Node option = None with get
-        member this.Path:string=name 
-        member val Value= Children(
-            [
-                devInfo.ButtonCaps
-                |> MakeButtonNodes
-                devInfo.ValueCaps
-                |> MakeValueNodes
-            ]
-            |> List.concat
-            )
 
 [<Manager("Input interface for windows Raw Input",
           supportedSystems.Windows )>]
 type InputManagerWinRawInput() as this =
        let mutable rawInput: RawInput option = None
        let mutable oldStateMap = Map.empty
-       let  axisStateCollector = AxisStateCollector()
+       let  axisStateCollector = DeviceValueCollector()
            
        let doKbEvent (devh:HANDLE) (asc:uint16) (keystate:KeyState):unit =
             let devInfo:Nullable<DeviceInfo> = NativeAPI.GetDeviceInfo(devh)
@@ -218,11 +125,11 @@ type InputManagerWinRawInput() as this =
                                              uint devInfo.DeviceCaps.Usage)
                                 match usage  with
                                 | HIDDesktopUsages.GenericDesktopMouse ->
-                                    MouseNode(devInfo):>Node :: state
+                                    MouseDeviceNode(devInfo):>DeviceNode :: state
                                 | HIDDesktopUsages.GenericDesktopKeyboard ->
-                                    KeyboardNode(devInfo):>Node :: state
+                                    KeyboardDeviceNode(devInfo):>DeviceNode :: state
                                 | HIDDesktopUsages.GenericDesktopJoystick ->
-                                    JoystickNode(devInfo):>Node :: state
+                                    JoystickDeviceNode(devInfo):>DeviceNode :: state
                                 | _ -> state
                            ) List.Empty
                         |> Some
