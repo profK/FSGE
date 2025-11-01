@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 
@@ -101,13 +100,8 @@
     <ItemGroup>
       <ProjectReference Include="..\AngelCodeText\AngelCodeText.fsproj" />
       <ProjectReference Include="..\Audio\Audio.fsproj" />
-      <ProjectReference Include="..\ConsoleLogger\ConsoleLogger.fsproj" />
-      <ProjectReference Include="..\CSCoreAudio\CSCoreAudio.fsproj" />
       <ProjectReference Include="..\Devices\Devices.fsproj" />
       <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj" />
-      <ProjectReference Include="..\Logger\Logger.fsproj" />
-      <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj" />
-      <ProjectReference Include="..\SilkInput\SilkInput.fsproj" />
       <ProjectReference Include="..\Text\Text.fsproj" />
       <ProjectReference Include="..\xUnitLogger\xUnitLogger.fsproj" />
     </ItemGroup>

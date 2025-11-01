@@ -2,7 +2,7 @@
 module Asteroids.Main
 
 open System
-open System.DirectoryServices.ActiveDirectory
+//open System.DirectoryServices.ActiveDirectory
 open System.IO
 open System.Numerics
 open System.Reflection
@@ -15,16 +15,11 @@ open FSGEAudio
 open Devices
 open Graphics2D
 open ManagerRegistry
-open CSCoreAudio
+
 
 //These are needed for the registeration of the plugins
 // In a real application, these would be loaded from a plugin directory
 // instead of being hardcoded
-
-open SilkDevices
-open SilkGraphicsOGL
-open ConsoleLogger
-
 
 
 let SHIP_INCR = 20.0f
@@ -39,7 +34,7 @@ let random = System.Random()
     
 
 //execution starts here
-[<EntryPoint>]
+//[<EntryPoint>]
 let main argv =
    
     // Loading the PLugins
@@ -59,7 +54,7 @@ let main argv =
     
     //We need the logger before the other  plugins so we
     //manually add it to the registry
-    addManager typedefof<ConsoleLogger>
+   
     
     //Register the plugins with the manager registry
     // This loads all assemblies found in the current directory
@@ -122,7 +117,7 @@ let main argv =
     // see Rock.fs for the definition of RockRec0
     //This list is also mutable so that it can be updated
     let mutable asteroidsList =
-        [0..3] |> List.map (fun _ -> MakeRandomRock rockImages.[0] shipRec)
+        [0..3] |> List.map (fun _ -> Rocks.MakeRandomRock rockImages.[0] shipRec)
     
     //This creates a record that holds the state of the explosion animation
     //It is mutable so that it can be updated 
@@ -140,7 +135,7 @@ let main argv =
     memoryStream.Position <- 0L // Reset the position to the beginning of the stream
     audioStream.Close()
     let sound = Audio.OpenSoundStream memoryStream AudioFileFormat.WAV
-    Audio.SetVolume 1.0f sound
+    Audio.SetVolume 1.0f sound |> ignore
 
   
     // These are mutables that track the state of the game
@@ -177,10 +172,10 @@ let main argv =
             asteroidsList <-
                 asteroidsList 
                 |> List.map (fun rock ->
-                    {rock with collider =
-                                SimpleCollider.wrap_collider window
-                                    (SimpleCollider.update (deltaMS*ROCK_PPS) rock.collider)})
-            // Update of the player's ship position
+                    {rock with collider =                            
+                                    SimpleCollider.update (deltaMS*ROCK_PPS) rock.collider
+                                    |> SimpleCollider.wrap_collider window})
+                                    // Update of the player's ship position
             // Ship only participates in the game if showShip is true
             // This prevents the ship from moving or shooting when it is
             // not onscreen     
@@ -190,17 +185,19 @@ let main argv =
                            // and updates the ship appropriately
                            // as bullets are held in the ship record we need to
                            // update them as well. This happens in the GetInput function
-                           GetInput deviceContext shipRec deltaMS 
+                           Ship.GetInput deviceContext shipRec deltaMS 
                            |> fun ship ->
                                   {ship with collider =
-                                                SimpleCollider.wrap_collider window
-                                                    (SimpleCollider.update deltaMS ship.collider)
+                                                SimpleCollider.update deltaMS ship.collider
+                                                |>SimpleCollider.wrap_collider window 
+                                                    
                                              bullets =
                                                 ship.bullets
                                                 |> List.map (fun bullet ->
                                                     {bullet with
-                                                        Collider = SimpleCollider.wrap_collider window
-                                                                  (SimpleCollider.update deltaMS bullet.Collider)})
+                                                            Collider =
+                                                                SimpleCollider.update deltaMS bullet.Collider
+                                                                |>SimpleCollider.wrap_collider window })
                                                 |> List.filter (fun bullet -> bullet.TimeToDie > DateTime.Now)
                                                 
                                   }
@@ -240,24 +237,28 @@ let main argv =
                        match rock.image with
                        | image when image = rockImages.[0] ->
                            let rockDir   = rock.collider.velocity
-                           let newRocks = MakeSubRocks rockImages.[1] rock
+                           let newRocks = Rocks.MakeSubRocks rockImages.[1] rock
                            asteroidsList <- newRocks @ asteroidsList
                        | _ -> ()    
                        asteroidsList <- List.filter (fun r -> r <> rock) asteroidsList
                    | None -> ())
             
             //draw the asteroids on screen
-            asteroidsList |> List.iter (fun rock ->
-                Window.DrawImage rock.image (
-                    Window.CreateRotation(rock.collider.rotation) *
-                    Window.CreateTranslation(Vector2(float32 rock.collider.pos.X,float32 rock.collider.pos.Y))) |> ignore)
+            asteroidsList
+            |> List.iter (
+                    fun rock ->
+                        Window.CreateRotation(rock.collider.rotation) *
+                        Window.CreateTranslation(Vector2(float32 rock.collider.pos.X,
+                                                         float32 rock.collider.pos.Y))
+                        |> Window.DrawImage rock.image |> ignore)
             // if the ship is on screen, draw it 
             // otherwise draw the ship explosion animation
             match showShip with
             | true ->
-                Window.DrawImage shipImage (
                     Window.CreateRotation(shipRec.collider.rotation) *
-                    Window.CreateTranslation(Vector2(float32 shipRec.collider.pos.X,float32 shipRec.collider.pos.Y))) |> ignore
+                    Window.CreateTranslation(Vector2(float32 shipRec.collider.pos.X,
+                                                     float32 shipRec.collider.pos.Y))
+                    |> Window.DrawImage shipRec.image |> ignore
             | false ->
                match explosionAnim.IsPlaying with
                | true ->
@@ -267,9 +268,11 @@ let main argv =
                    ()
                    
             // draw the bullets       
-            shipRec.bullets |> List.iter (fun bullet -> 
-                Window.DrawImage bulletImage (
-                    Window.CreateTranslation(Vector2(float32 bullet.Collider.pos.X,float32 bullet.Collider.pos.Y))) |> ignore)
+            shipRec.bullets
+            |> List.iter (fun bullet -> 
+                    Window.CreateTranslation(Vector2(float32 bullet.Collider.pos.X,
+                                                     float32 bullet.Collider.pos.Y))
+                    |> Window.DrawImage bulletImage |> ignore)
             Window.Display window |> ignore
         | _ -> ()
     0
