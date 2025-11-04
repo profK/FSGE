@@ -250,7 +250,7 @@ let main argv =
                         Window.CreateRotation(rock.collider.rotation) *
                         Window.CreateTranslation(Vector2(float32 rock.collider.pos.X,
                                                          float32 rock.collider.pos.Y))
-                        |> Window.DrawImage rock.image |> ignore)
+                        |> Window.DrawTintedImage rock.image |> ignore)
             // if the ship is on screen, draw it 
             // otherwise draw the ship explosion animation
             match showShip with
@@ -258,7 +258,7 @@ let main argv =
                     Window.CreateRotation(shipRec.collider.rotation) *
                     Window.CreateTranslation(Vector2(float32 shipRec.collider.pos.X,
                                                      float32 shipRec.collider.pos.Y))
-                    |> Window.DrawImage shipRec.image |> ignore
+                    |> Window.DrawTintedImage shipRec.image |> ignore
             | false ->
                match explosionAnim.IsPlaying with
                | true ->
@@ -272,7 +272,7 @@ let main argv =
             |> List.iter (fun bullet -> 
                     Window.CreateTranslation(Vector2(float32 bullet.Collider.pos.X,
                                                      float32 bullet.Collider.pos.Y))
-                    |> Window.DrawImage bulletImage |> ignore)
+                    |> Window.DrawTintedImage bulletImage |> ignore)
             Window.Display window |> ignore
         | _ -> ()
     0

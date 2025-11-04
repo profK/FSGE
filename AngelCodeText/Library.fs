@@ -66,7 +66,8 @@ and AngelCodeText(text: string, font: AngelCodeFont) =
                     Vector2(pos.X+float32 acChar.Width/2f+float32 acChar.XOffset,
                             pos.Y+float32 acChar.Height/2f+float32 acChar.YOffset))
                 let totalXform = xform * xlateXform
-                Window.DrawTintedImage charImage totalXform color
+                let copt = Some color
+                Window.DrawTintedImage charImage totalXform copt |> ignore
                 (Vector2(newX, pos.Y), char)
             ) (Vector2(0f,0f),'\n')
         |> ignore

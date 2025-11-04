@@ -72,7 +72,8 @@ type IGraphicsManager =
     // it applies the passed transform matrix which represents translation
     // and rotation about z axis.
     // Color is a tint to apply to the image
-    abstract member DrawImage : Matrix4x4->Image-> Color-> Window
+    abstract member DrawImage : Matrix4x4->Image-> Color option-> Window
+   
     // This fills the window with a color, clearing the previous frame
     abstract member Clear : Color ->  Window -> Window
     // Drawing is double buffered to prevent tearing.
@@ -178,11 +179,9 @@ module Window =
     // It takes a matrix, an image and a window object as arguments
     // It returns the window object to support railroad style chaining
         
-    let DrawTintedImage image  Matrix4x4 tint = 
-        _graphicsManager.DrawImage Matrix4x4 image tint
+    let DrawTintedImage image  transform (tint:Color option) =
+        _graphicsManager.DrawImage transform image tint
         
-    let DrawImage image  Matrix4x4  = 
-        _graphicsManager.DrawImage Matrix4x4 image {R=255uy;G=255uy;B=255uy;A=255uy}
     // This is a function that clears a window
     // It takes a color and a window object as arguments
     // It returns the window object to support railroad style chaining    

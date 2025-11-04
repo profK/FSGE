@@ -70,4 +70,4 @@ let DrawRock window (images:Image list) rock =
     let matrix =
         Window.CreateRotation(float32 rock.collider.rotation) *
         Window.CreateTranslation(Vector2( rock.collider.pos.X, rock.collider.pos.Y))
-    Window.DrawImage rockImage matrix |> ignore
+    Window.DrawTintedImage rockImage matrix None |> ignore

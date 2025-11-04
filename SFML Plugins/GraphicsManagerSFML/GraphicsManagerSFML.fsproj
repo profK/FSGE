@@ -10,10 +10,12 @@
     </ItemGroup>
 
     <ItemGroup>
-    
+      <PackageReference Include="FSFramework" Version="2.0.1" />
+      <PackageReference Include="SFML.Net" Version="2.5.1" />
+    </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="SFML.Net" Version="2.5.1" />
+      <ProjectReference Include="..\..\Graphics2D\Graphics2D.fsproj" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

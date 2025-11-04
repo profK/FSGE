@@ -69,5 +69,5 @@ module AnimatedImage =
             }
 
     let draw matrix (anim: AnimatedImage)=
-        Window.DrawImage anim.SubImage matrix
+        Window.DrawTintedImage anim.SubImage matrix None
         

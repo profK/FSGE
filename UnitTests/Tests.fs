@@ -64,7 +64,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         Window.Clear {A=0xFFuy;R=0uy;G=0uy;B=0xFFuy} window
         let xform = Window.CreateRotation(float32 Math.PI/4f) *
                     Window.CreateTranslation(Vector2(400f,300f) )           
-        Window.DrawTintedImage image xform {A=0xFFuy;R=0xFFuy;G=0uy;B=0uy}
+        Window.DrawTintedImage image xform (Some {A=0xFFuy;R=0xFFuy;G=0uy;B=0uy})
 
         let xform2 = Window.CreateTranslation (Vector2(400.0f,300.0f))
         let subImage = Window.CreateSubImage image 50u 50u 100u 100u
