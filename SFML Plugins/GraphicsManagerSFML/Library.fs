@@ -20,21 +20,26 @@ type SFRenderStates = SFML.Graphics.RenderStates
 type SFColor = SFML.Graphics.Color
     
 
-type ImageSFML(tex:SFTexture,rect) =
-    member val sprite = new SFSprite(tex,rect) with get
+type ImageSFML( tex:SFTexture,optrect:IntRect option , window:WindowSFML) =
+  
+    let rect =
+        match optrect with
+        |Some r -> r
+        |None ->  IntRect(0,0,int tex.Size.X,int tex.Size.Y)
+    member val sprite = new SFSprite(tex,rect)
+       
+       
+    member val window =window with get
     
-    new(tex) =
-        ImageSFML(tex,IntRect(
-            Vector2i(0,0),
-            Vector2i(int(tex.Size.X),int(tex.Size.Y))))
+ 
     interface Image with
         member this.Size:Graphics2D.Size =
             {Width = int32 this.sprite.TextureRect.Width; Height = int32 this.sprite.TextureRect.Height}
   //TODO: less than optimal subimage creation, only cuts from whole texture
-    static member CreateSubImage (tex:SFTexture) (x:int32) (y:int32) (width:int32) (height:int32) : Graphics2D.Image =
-        ImageSFML(tex,IntRect(
+    static member CreateSubImage (tex:SFTexture) (x:int32) (y:int32) (width:int32) (height:int32) (window:WindowSFML) : Graphics2D.Image =
+        ImageSFML(tex,Some(IntRect(
             Vector2i(int(x),int y),
-            Vector2i(int(width),int(height)))) :> Graphics2D.Image       
+            Vector2i(int(width),int(height)))),window) :> Graphics2D.Image       
 
        
         
@@ -44,49 +49,13 @@ and WindowSFML(mode:SFVideoMode, name,gm:IGraphicsManager) =
     member val GraphicsManager = gm with get
     member val SFMLWindow = sfmlWindow with get
 
-    member val Size = 
+    member val Size:Graphics2D.Size = 
         {Width = int32 sfmlWindow.Size.X; Height = int32 sfmlWindow.Size.Y} with get
     interface Window with
-        (*member this.Start(startFunc) =
-            startFunc this
-        override this.Start() =
-            ()
-        override this.DrawImage (xform:Matrix4x4) (image:Image) =
-            Transform trans = TransformSFML.fromMatrix4x4 xform
-            let state = SFRenderStates(xform)
-            let sprite = (image:?>ImageSFML).sprite
-            sfmlWindow.Draw(sprite,state) 
-            ()
-        override this.IdentityTransform =
-            TransformSFML(SFTransform.Identity)
-        override this.LoadImage(stream:Stream) = 
-            ImageSFML(new SFTexture(stream))
-        override this.RotationTransform(degrees) =
-            let xform = SFTransform.Identity
-            xform.Rotate(degrees)
-            TransformSFML(xform)
-        override this.ScaleTransform(x:float32) (y:float32) =
-            let xform = SFTransform.Identity
-            xform.Scale(x,y)
-            TransformSFML(xform)
-        override this.ScreenSize =
-            Vector2(
-                float32(SFVideoMode.DesktopMode.Width),
-                float32(SFVideoMode.DesktopMode.Height))
-        override this.TranslationTransform(x) (y) =
-            let xform = SFTransform.Identity
-            xform.Translate(x,y)
-            TransformSFML(xform)
-
-        override this.Clear(color) =
-            sfmlWindow.Clear (SFColor(color.R,color.G,color.B,color.A))
-            ()
-        override this.Close() = sfmlWindow.Close()
-        override this.Show() = sfmlWindow.Display()
-        override this.IsOpen() = sfmlWindow.IsOpen*)
+        
  
 [<Manager("Graphics interface for SFML", supportedSystems.Windows, [||], 0)>]
-type GraphicsManagerSFML(sfmlWindow) =
+type GraphicsManagerSFML() =
     interface IGraphicsManager with
         override this.CreateWindow width height name  =
                 //TODO add video mode tp IGraphicsManaa
@@ -127,33 +96,45 @@ type GraphicsManagerSFML(sfmlWindow) =
             window
         override this.LoadImageFromStream stream window =
             let tex = new SFTexture(stream)
-            ImageSFML(tex) :> Graphics2D.Image
+            ImageSFML(tex,None,window :?> WindowSFML) :> Graphics2D.Image
         override this.LoadImageFromPath path window =
             let tex = new SFTexture(path)
-            ImageSFML(tex) :> Graphics2D.Image
+            ImageSFML(tex,None, window :?> WindowSFML) :> Graphics2D.Image
         
         override this.CreateSubImage image x y width height =
+            let parent  =  image :?> ImageSFML
             ImageSFML.CreateSubImage
-                (image :?> ImageSFML).sprite.Texture
-                (int32 x) (int32 y) (int32 width) (int32 height)
+               parent.sprite.Texture
+               (int32 x) (int32 y) (int32 width) (int32 height)
+               parent.window
+                
         
         override this.DrawImage matrix image coloropt =
-            let sprite = (image :?> ImageSFML).sprite
+            let imageSF =  (image :?> ImageSFML)
+            let sprite =imageSF.sprite
+            let window = imageSF.window
             sprite.Color <-
                 match coloropt with
                 | Some color ->
                     SFColor(color.R,color.G,color.B,color.A)                  
                 | None ->
-                    SFColor.White 
+                    SFColor.White
             let transform = SFTransform(
                         float32 matrix.M11, float32 matrix.M12, float32 matrix.M14,
                         float32 matrix.M21, float32 matrix.M22, float32 matrix.M24,
                         float32 matrix.M41, float32 matrix.M42, float32 matrix.M44)
+            // this doesnt account for sub images yet TODO
+            let ox =   -(int32 sprite.Texture.Size.X/2)
+            let oy =   -(int32 sprite.Texture.Size.Y/2)
+            let objcenter = SFTransform.Identity
+            objcenter.Translate(float32 ox,float32 oy)
+            let screencenter = SFTransform.Identity
+            screencenter.Translate(float32 (window.Size.Width/2), float32 (window.Size.Height/2 ))
+            let state = RenderStates(screencenter * transform * objcenter)
+            let sfmlWindow =window.SFMLWindow
+            sfmlWindow.Draw(sprite,state)
+            imageSF.window
 
-            let state = RenderStates(transform)
-            let windowSFML = (image :?> WindowSFML).SFMLWindow
-            windowSFML.Draw(sprite,state)
-            image :?> Window
    
     // This fills the window with a color, clearing the previous frame
         override this.Clear color window =

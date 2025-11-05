@@ -13,10 +13,10 @@ open Input
 open Input.HIDScanCodes
 open Logger
 open ManagerRegistry
-open SilkGraphicsOGL
+open GraphicsManagerSFML
 open Xunit
 open Xunit.Abstractions
-open SilkDevices
+open  InputManagerWinRawInput
 open xUnitLogger
 open Graphics2D
 open FSGEText
@@ -27,13 +27,13 @@ open CSCoreAudio
 
 type GraphicsManagerTestsFixture() =
     do
-        addManager(typeof<SilkGraphicsManager>)
-        addManager(typeof<SilkDeviceManager>)
+        addManager(typeof<GraphicsManagerSFML>)
+        addManager(typeof<InputManagerWinRawInput>)
         addManager(typeof<xUnitLogger.xUnitLogger>)
         addManager(typeof<AngelCodeTextRenderer>)
         addManager(typeof<CSCorePlugin>)
        
-type GraphicsManagerTests(output:ITestOutputHelper ) =
+type public GraphicsManagerTests(output:ITestOutputHelper ) =
     let ITestOutputHelper = output
     let logger =
         match getManager<ILogger>() with
@@ -42,7 +42,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         
     interface IClassFixture<GraphicsManagerTestsFixture>
     
-    [<Fact>]
+     [<Fact>]
     member _.testGraphicsManager() =
         let graphicsManagerOpt = getManager<IGraphicsManager>()
         match graphicsManagerOpt with
@@ -62,17 +62,14 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         let window = Window.create 800 600 "Test Window"
         let image = Window.LoadImageFromPath "NGTL_tex.png" window
         Window.Clear {A=0xFFuy;R=0uy;G=0uy;B=0xFFuy} window
-        let xform = Window.CreateRotation(float32 Math.PI/4f) *
-                    Window.CreateTranslation(Vector2(400f,300f) )           
+        let xform = Window.CreateRotation(float32 Math.PI/4f)
         Window.DrawTintedImage image xform (Some {A=0xFFuy;R=0xFFuy;G=0uy;B=0uy})
-
         let xform2 = Window.CreateTranslation (Vector2(400.0f,300.0f))
         let subImage = Window.CreateSubImage image 50u 50u 100u 100u
         //Window.DrawImage subImage xform2
         Window.Display window
         Thread.Sleep(5000)
         Window.close window
-       
         Assert.True(true)
     [<Fact>]
     member _.testTextDrawing() =
@@ -157,7 +154,7 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
         output.WriteLine "Devices:"
         deviceList |>  this.recursivePrintDevices ""
         Window.close window    
-  
+
     [<Fact>]
     member this.testKbValues() =
         let window = Window.create 800 600 "Test Window"
@@ -187,44 +184,10 @@ type GraphicsManagerTests(output:ITestOutputHelper ) =
      
         Devices.CloseDeviceContext deviceContext
         Window.close window
-   
 
-    [<Fact>]
-    member this.testAllValues() =
-        let window = Window.create 800 600 "Test Window"
-        let deviceContext =
-            match  Devices.TryGetDeviceContext window with
-            | Some context -> context
-            | None -> failwith "No device context found"
-        let deviceList = Devices.GetDeviceTree deviceContext //todo make this unecessary
-        let mutable lastValueMap = Map.empty    
-        let mutable exit = false
-        while not exit do
-            Window.DoEvents window    
-            let valueMap = Devices.GetDeviceValuesMap deviceContext
-            output.WriteLine("Value count: "+valueMap.Count.ToString())
-            valueMap |> Map.toArray
-            |> Array.filter (fun (k,v) ->
-                not (lastValueMap.ContainsKey k) || (lastValueMap.[k] = v))   
-            |>Array.iter (fun kv -> output.WriteLine($"{fst kv}: {snd kv}"))
-            lastValueMap <- valueMap
-            exit <- if valueMap.ContainsKey "Keyboard0" then
-                        let value = valueMap.["Keyboard0"]
-                        match value with
-                        | KeyboardValue(value) ->
-                            let keyCodes:ScanCode array =
-                                value
-                                |> Array.map (fun v -> Devices.MapPlatformScanCodeToHID v)
-                                |> Array.map (fun v -> enum<ScanCode> (int32 v))
-                            Array.contains ScanCode.Escape keyCodes
-                        | _ -> false
-                    else
-                        //output.WriteLine "Warning Keyboard0 not detechhhhted"
-                        false
-            Thread.Sleep(1000)
-        Devices.CloseDeviceContext deviceContext
-        Window.close window
-   
+
+    
+
 
     [<Fact>]
     member this.testSound() =

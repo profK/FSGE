@@ -56,12 +56,14 @@
     <ItemGroup>
         <ProjectReference Include="..\AngelCodeText\AngelCodeText.fsproj" />
         <ProjectReference Include="..\Audio\Audio.fsproj" />
+        <ProjectReference Include="..\ConsoleLogger\ConsoleLogger.fsproj" />
         <ProjectReference Include="..\CSCoreAudio\CSCoreAudio.fsproj" />
-        <ProjectReference Include="..\Graphics2D\Graphics2D.fsproj"/>
-        <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj"/>
-        <ProjectReference Include="..\SilkInput\SilkInput.fsproj"/>
+        <ProjectReference Include="..\Devices\Devices.fsproj" />
+        <ProjectReference Include="..\SFML Plugins\GraphicsManagerSFML\GraphicsManagerSFML.fsproj" />
+        <ProjectReference Include="..\SFML Plugins\InputManagerWinRawInput\InputManagerWinRawInput.fsproj" />
         <ProjectReference Include="..\Text\Text.fsproj" />
         <ProjectReference Include="..\xUnitLogger\xUnitLogger.fsproj" />
+        
     </ItemGroup>
 
 </Project>

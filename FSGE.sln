@@ -32,9 +32,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ConsoleLogger", "ConsoleLog
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Silk Asteroids", "Silk Asteroids\Silk Asteroids.fsproj", "{71425E4C-D9A5-4A38-8A61-838359835E28}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SFML Plugins", "SFML Plugins\SFML Plugins.fsproj", "{F4217003-2619-43E1-BC76-18C4A5657723}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SFML Plugins", "SFML Plugins", "{A7E6F67E-7D4F-4D11-AE6C-82FCFDCB0360}"
+
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SFMLPlugins", "SFMLPlugins", "{A7E6F67E-7D4F-4D11-AE6C-82FCFDCB0360}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "InputManagerWinRawInput", "SFML Plugins\InputManagerWinRawInput\InputManagerWinRawInput.fsproj", "{2B960274-013A-4A8E-8113-91FB24F1E531}"
 EndProject

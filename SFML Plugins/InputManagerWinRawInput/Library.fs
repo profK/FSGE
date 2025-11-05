@@ -115,6 +115,7 @@ type InputManagerWinRawInput() as this =
                             name,float values[index])
                         |> ignore       
                     )
+       let startedEvent = new ManualResetEvent(false)
        let messagePump():unit =
            let wrapper = NativeAPI.OpenWindow()
            let rawInput = RawInput(wrapper)
@@ -127,11 +128,14 @@ type InputManagerWinRawInput() as this =
                Action<HANDLE, UInt32, bool[]>(doButtonDownEvent))
            rawInput.add_AxisEvent(
                Action<HANDLE,uint32[], uint32[]>(doAxisChangeEvent))
+           startedEvent.Set()
            NativeAPI.MessagePump(wrapper)
        let messagePumpThread =
            Thread(ThreadStart(messagePump))
  
-       do messagePumpThread.Start()
+       do
+           messagePumpThread.Start()
+           startedEvent.WaitOne() |> ignore
        
        //member val RawInput = rawInput with get
        member val PumpThread = messagePumpThread with get
