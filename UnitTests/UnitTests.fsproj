@@ -59,8 +59,8 @@
         <ProjectReference Include="..\ConsoleLogger\ConsoleLogger.fsproj" />
         <ProjectReference Include="..\CSCoreAudio\CSCoreAudio.fsproj" />
         <ProjectReference Include="..\Devices\Devices.fsproj" />
-        <ProjectReference Include="..\SFML Plugins\GraphicsManagerSFML\GraphicsManagerSFML.fsproj" />
-        <ProjectReference Include="..\SFML Plugins\InputManagerWinRawInput\InputManagerWinRawInput.fsproj" />
+        <ProjectReference Include="..\SilkGraphicsOGL\SilkGraphicsOGL.fsproj" />
+        <ProjectReference Include="..\SilkInput\SilkInput.fsproj" />
         <ProjectReference Include="..\Text\Text.fsproj" />
         <ProjectReference Include="..\xUnitLogger\xUnitLogger.fsproj" />
         

@@ -247,18 +247,18 @@ let main argv =
             asteroidsList
             |> List.iter (
                     fun rock ->
-                        Window.CreateRotation(rock.collider.rotation) *
-                        Window.CreateTranslation(Vector2(float32 rock.collider.pos.X,
+                        let xform =Window.CreateRotation(rock.collider.rotation) *
+                                    Window.CreateTranslation(Vector2(float32 rock.collider.pos.X,
                                                          float32 rock.collider.pos.Y))
-                        |> Window.DrawTintedImage rock.image |> ignore)
+                        Window.DrawTintedImage rock.image xform None |> ignore)
             // if the ship is on screen, draw it 
             // otherwise draw the ship explosion animation
             match showShip with
             | true ->
-                    Window.CreateRotation(shipRec.collider.rotation) *
-                    Window.CreateTranslation(Vector2(float32 shipRec.collider.pos.X,
-                                                     float32 shipRec.collider.pos.Y))
-                    |> Window.DrawTintedImage shipRec.image |> ignore
+                    let xform = Window.CreateRotation(shipRec.collider.rotation) *
+                                Window.CreateTranslation(Vector2(float32 shipRec.collider.pos.X,
+                                                         float32 shipRec.collider.pos.Y))
+                    Window.DrawTintedImage shipRec.image xform None |> ignore
             | false ->
                match explosionAnim.IsPlaying with
                | true ->
@@ -270,9 +270,9 @@ let main argv =
             // draw the bullets       
             shipRec.bullets
             |> List.iter (fun bullet -> 
-                    Window.CreateTranslation(Vector2(float32 bullet.Collider.pos.X,
-                                                     float32 bullet.Collider.pos.Y))
-                    |> Window.DrawTintedImage bulletImage |> ignore)
+                    let xform = Window.CreateTranslation(Vector2(float32 bullet.Collider.pos.X,
+                                                            float32 bullet.Collider.pos.Y))
+                    Window.DrawTintedImage bulletImage xform None |> ignore)
             Window.Display window |> ignore
         | _ -> ()
     0

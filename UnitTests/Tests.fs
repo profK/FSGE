@@ -13,10 +13,11 @@ open Input
 open Input.HIDScanCodes
 open Logger
 open ManagerRegistry
-open GraphicsManagerSFML
+open Silk
+open SilkGraphicsOGL
 open Xunit
 open Xunit.Abstractions
-open  InputManagerWinRawInput
+open SilkDevices
 open xUnitLogger
 open Graphics2D
 open FSGEText
@@ -27,8 +28,8 @@ open CSCoreAudio
 
 type GraphicsManagerTestsFixture() =
     do
-        addManager(typeof<GraphicsManagerSFML>)
-        addManager(typeof<InputManagerWinRawInput>)
+        addManager(typeof<SilkGraphicsManager>)
+        addManager(typeof<SilkDeviceManager>)
         addManager(typeof<xUnitLogger.xUnitLogger>)
         addManager(typeof<AngelCodeTextRenderer>)
         addManager(typeof<CSCorePlugin>)
@@ -63,7 +64,9 @@ type public GraphicsManagerTests(output:ITestOutputHelper ) =
         let image = Window.LoadImageFromPath "NGTL_tex.png" window
         Window.Clear {A=0xFFuy;R=0uy;G=0uy;B=0xFFuy} window
         let xform = Window.CreateRotation(float32 Math.PI/4f)
-        Window.DrawTintedImage image xform (Some {A=0xFFuy;R=0xFFuy;G=0uy;B=0uy})
+        let center = Window.CreateTranslation(Vector2(float32 400.0,float32 300.0))
+        
+        Window.DrawTintedImage image (xform*center) (Some {A=0xFFuy;R=0xFFuy;G=0uy;B=0uy})
         let xform2 = Window.CreateTranslation (Vector2(400.0f,300.0f))
         let subImage = Window.CreateSubImage image 50u 50u 100u 100u
         //Window.DrawImage subImage xform2
